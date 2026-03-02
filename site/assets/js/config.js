@@ -22,7 +22,7 @@ export const CONFIG = {
   // Submissions from anyone not listed here are hidden unless you manually
   // tick the Approved checkbox in column F of the Google Sheet.
   approvedEmails: [
-    // 'stephan.meighenberger@gmail.com',
+    'stephan.meighenberger@gmail.com',
     // 'alice@example.com',
     // 'bob@example.com',
   ],
