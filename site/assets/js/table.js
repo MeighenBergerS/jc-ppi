@@ -40,12 +40,13 @@ export function buildTable(papers, metaMap = new Map()) {
     const tdName = tr.insertCell();
     tdName.textContent = (paper[COL.name] || "").trim() || "—";
 
-    // Column 2 — Paper (title, authors, abstract, badge row)
+    // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
     _appendText(tdPaper, meta.title,    "paper-title");
     _appendText(tdPaper, meta.authors,  "paper-comment");
     _appendText(tdPaper, meta.abstract, "paper-abstract");
     tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], meta));
+    _appendKeywordPills(tdPaper, meta);
 
     // Column 3 — Reason for suggestion
     const tdComment = tr.insertCell();
@@ -59,6 +60,28 @@ export function buildTable(papers, metaMap = new Map()) {
 
 
 // ── Helpers ───────────────────────────────────────────────────
+
+/** Appends keyword and category pills to a cell, if available. */
+function _appendKeywordPills(parent, meta) {
+  const cats     = meta.categories ?? [];
+  const keywords = meta.keywords   ?? [];
+  if (!cats.length && !keywords.length) return;
+  const container = document.createElement("div");
+  container.className = "keyword-pills";
+  cats.forEach(label => {
+    const span = document.createElement("span");
+    span.className   = "kpill kpill--cat";
+    span.textContent = label;
+    container.appendChild(span);
+  });
+  keywords.forEach(kw => {
+    const span = document.createElement("span");
+    span.className   = "kpill kpill--topic";
+    span.textContent = kw;
+    container.appendChild(span);
+  });
+  parent.appendChild(container);
+}
 
 /** Appends a <div class=className> with text, only if text is non-empty. */
 function _appendText(parent, text, className) {

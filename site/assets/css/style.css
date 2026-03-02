@@ -426,8 +426,62 @@ main.prose {
   margin-left: 0.5rem;
 }
 
-.archive-week .papers-table {
+.archive-week-content .papers-table {
   border-top: 1px solid var(--border);
+}
+
+/* ── Keyword pills ──────────────────────────────────────── */
+
+.keyword-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.kpill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.18em 0.55em;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.kpill--cat {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid #b2dfdb;
+}
+
+.kpill--topic {
+  background: #ede7f6;
+  color: var(--accent-sec);
+  border: 1px solid #d1c4e9;
+}
+
+/* ── Archive search ──────────────────────────────────────── */
+
+.archive-search-wrap {
+  margin-bottom: 1.25rem;
+}
+
+#archive-search {
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#archive-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(27,158,119,0.15);
 }
 
 /* ── Loading ─────────────────────────────────────────────── */
