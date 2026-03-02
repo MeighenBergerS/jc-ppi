@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archive — Iowa Particles &amp; Plots Journal Club</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-text">
+        <span class="site-tag">jc-ppi</span>
+        <h1>Iowa Particles &amp; Plots<br>Journal Club</h1>
+        <p class="tagline">From arXiv to argument — every week.</p>
+      </div>
+    </div>
+    <nav>
+      <a href="./index.html">This Week</a>
+      <a href="./archive.html" class="active">Archive</a>
+      <a href="#" id="submit-link" target="_blank" rel="noopener">Submit a Paper ↗</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="week-header">
+      <h2>Past Discussions</h2>
+      <p class="week-label">All submissions from previous weeks, newest first.</p>
+    </section>
+
+    <div id="papers-container">
+      <div class="loading">Loading archive…</div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Iowa Particles &amp; Plots Journal Club &mdash; <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a></p>
+  </footer>
+
+  <script src="./assets/js/papers.js"></script>
+  <script>
+    initPage("archive");
+  </script>
+
+</body>
+</html>
