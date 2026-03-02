@@ -66,10 +66,7 @@ const CONFIG = {
 
   // Add member emails here — their submissions appear automatically.
   // Anyone not listed needs to be manually approved in the sheet.
-  approvedEmails: [
-    'alice@example.com',
-    'bob@example.com',
-  ],
+  approvedEmails: ['alice@example.com', 'bob@example.com'],
 };
 ```
 
