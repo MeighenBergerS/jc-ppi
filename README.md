@@ -11,11 +11,6 @@ A minimal static website for the journal club. Members submit paper suggestions 
 ## Table of contents
 
 - [How it works](#how-it-works)
-- [One-time setup](#one-time-setup)
-  - [Step 1 — Create the Google Sheet](#step-1--create-the-google-sheet)
-  - [Step 2 — Create the Google Form](#step-2--create-the-google-form)
-  - [Step 3 — Publish the sheet as CSV](#step-3--publish-the-sheet-as-csv)
-  - [Step 4 — Configure the site](#step-4--configure-the-site)
 - [Weekly workflow](#weekly-workflow)
 - [Local preview](#local-preview)
 - [File structure](#file-structure)
@@ -29,6 +24,7 @@ A minimal static website for the journal club. Members submit paper suggestions 
   - [Citation counts as a rough guide](#citation-counts-as-a-rough-guide)
   - [Paper not showing on INSPIRE?](#paper-not-showing-on-inspire)
 - [Contributing](docs/CONTRIBUTING.md)
+- [Deploying your own instance](#deploying-your-own-instance)
 
 ---
 
@@ -45,63 +41,6 @@ Site fetches CSV on page load → renders "This Week" or archive
 ```
 
 Papers submitted during the current Monday–Sunday window appear on the **This Week** page. After Sunday they roll automatically into the **Archive**.
-
----
-
-## One-time setup
-
-### Step 1 — Create the Google Sheet
-
-1. Go to [sheets.google.com](https://sheets.google.com) and create a new blank spreadsheet.
-2. Name it something like **jc-ppi submissions**.
-3. Leave it empty for now — Google Forms will populate it.
-
-### Step 2 — Create the Google Form
-
-1. Go to [forms.google.com](https://forms.google.com) and create a new form.
-2. Title it e.g. **Iowa Particles & Plots — Paper Submission**.
-3. Add the following questions **in this exact order**:
-
-   | # | Question text | Type |
-   |---|---|---|
-   | 1 | Your name | Short answer |
-   | 2 | arXiv ID or URL (e.g. 2301.12345) | Short answer |
-   | 3 | Why are you suggesting this? (optional) | Paragraph |
-
-   > **That's it — only 3 fields.** The site fetches the paper title and
-   > authors automatically from the arXiv API using the ID, so submitters
-   > never have to type the title.
-
-   > **Important:** Do not change the order later — the site maps columns by position, not by name.
-
-4. Click the **Responses** tab → click the green Sheets icon **"Link to Sheets"** → **Create a new spreadsheet** (or link to the one from Step 1). Google will create a sheet with a **Timestamp** column (A) followed by your three questions (B–D).
-
-5. Click **Publish** (top right) → click the **link icon** in the dialog that appears → copy the URL. This is your `formUrl`.
-
-### Step 3 — Publish the sheet as CSV
-
-1. Open the linked Google Sheet.
-2. Click **File → Share → Publish to web**.
-3. In the first dropdown choose **Sheet1** (the sheet holding responses). In the second dropdown choose **Comma-separated values (.csv)**.
-4. Click **Publish** and confirm.
-5. Copy the URL that appears — it looks like:
-   ```
-   https://docs.google.com/spreadsheets/d/LONG_ID_HERE/pub?gid=0&single=true&output=csv
-   ```
-   Keep this URL; you will paste it into the site config next.
-
-### Step 4 — Configure the site
-
-Open `assets/js/config.js` and fill in the two placeholders near the top:
-
-```js
-const CONFIG = {
-  sheetCsvUrl: "https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=0&single=true&output=csv",
-  formUrl:     "https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform",
-};
-```
-
-Commit and push. The site is now fully functional.
 
 ---
 
@@ -141,6 +80,7 @@ assets/
     app.js             ← Page renderers and entry point
 docs/
   CONTRIBUTING.md      ← How to suggest a paper / contribute to the site
+  SETUP.md             ← Full setup guide for deploying your own instance
 .github/workflows/
   deploy-pages.yml     ← Deploys to GitHub Pages (only on site-file changes)
   check-links.yml      ← Monthly check that URLs are still reachable
@@ -239,3 +179,10 @@ INSPIRE typically indexes new arXiv papers within **1–3 days** of posting.
 If the site shows the warning *"Not yet indexed on iNSPIRE-HEP"*, the paper
 was submitted very recently — the arXiv link still works and you can read it
 immediately. The INSPIRE record will appear within a few days.
+
+---
+
+## Deploying your own instance
+
+Want to run this site for your own journal club? See **[docs/SETUP.md](docs/SETUP.md)**
+for the step-by-step guide covering Google Forms, Google Sheets, and GitHub Pages configuration.
