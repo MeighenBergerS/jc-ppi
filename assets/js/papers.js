@@ -157,54 +157,44 @@ function stripVersion(id) {
 
 async function fetchArxivMetadata(ids) {
   const meta = new Map();
-  const cleanIds = ids.map(normalizeArxivId).filter(Boolean);
+  const cleanIds = ids.map(id => stripVersion(normalizeArxivId(id))).filter(Boolean);
   if (cleanIds.length === 0) return meta;
 
-  // arXiv Atom API — batch request, no auth required
-  const url = `https://export.arxiv.org/api/query?id_list=${cleanIds.join(",")}&max_results=${cleanIds.length}`;
+  // INSPIRE-HEP REST API — supports browser CORS (their own SPA uses it),
+  // no auth required, looks up directly by arXiv ID.
+  // We fire one request per paper in parallel; typical JC lists are small
+  // so this is fine and simpler than batching via search queries.
+  const requests = cleanIds.map(id =>
+    fetch(`https://inspirehep.net/api/arxiv/${id}?fields=titles,authors,abstracts,citation_count`)
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+  );
 
-  try {
-    const res  = await fetch(url);
-    const text = await res.text();
-    console.debug("[arXiv] raw response (first 500 chars):", text.slice(0, 500));
+  const results = await Promise.all(requests);
+  console.debug("[INSPIRE] raw results:", results);
 
-    // Parse as text/xml — getElementsByTagName() is namespace-agnostic
-    // and works reliably on the arXiv Atom feed across all browsers,
-    // unlike querySelectorAll() which fails on namespace-qualified XML.
-    const xml  = new DOMParser().parseFromString(text, "text/xml");
+  results.forEach((data, i) => {
+    const id = cleanIds[i];
+    if (!data?.metadata) {
+      console.debug("[INSPIRE] no metadata for", id);
+      return;
+    }
+    const m = data.metadata;
 
-    const getText = (el, tag) =>
-      (el.getElementsByTagName(tag)[0]?.textContent || "").trim();
+    const title    = m.titles?.[0]?.title?.trim() ?? "";
+    const abstract = m.abstracts?.[0]?.value?.trim() ?? "";
+    const allAuthors = m.authors ?? [];
+    const authors  = allAuthors
+      .slice(0, 4)
+      .map(a => a.full_name)
+      .join(", ") + (allAuthors.length > 4 ? " et al." : "");
+    const citations = m.citation_count ?? null;
 
-    const entries = [...xml.getElementsByTagName("entry")];
-    console.debug("[arXiv] entries found:", entries.length);
+    console.debug("[INSPIRE] parsed →", { id, title, authors, abstractLen: abstract.length, citations });
+    meta.set(id, { title, authors, abstract, citations });
+  });
 
-    entries.forEach(entry => {
-      // The API returns versioned IDs (e.g. http://arxiv.org/abs/2301.12345v2).
-      // Strip the version so it matches what users submit.
-      const rawId    = getText(entry, "id");
-      const id       = stripVersion(normalizeArxivId(rawId));
-      const title    = getText(entry, "title").replace(/\s+/g, " ");
-      const abstract = getText(entry, "summary").replace(/\s+/g, " ");
-
-      const allAuthors = entry.getElementsByTagName("author");
-      const authors = [...allAuthors]
-        .map(a => getText(a, "name"))
-        .filter(Boolean)
-        .slice(0, 4);
-      const authorStr = authors.length
-        ? authors.join(", ") + (allAuthors.length > 4 ? " et al." : "")
-        : "";
-
-      console.debug("[arXiv] parsed entry →", { rawId, id, title, authorStr, abstractLen: abstract.length });
-      if (id) meta.set(id, { title, authors: authorStr, abstract });
-    });
-
-    console.debug("[arXiv] meta map keys:", [...meta.keys()]);
-  } catch (err) {
-    console.error("[arXiv] fetch/parse failed:", err);
-  }
-
+  console.debug("[INSPIRE] meta map keys:", [...meta.keys()]);
   return meta;
 }
 
@@ -261,10 +251,16 @@ function buildTable(papers, metaMap = new Map()) {
       abstractDiv.textContent = meta.abstract;
       tdPaper.appendChild(abstractDiv);
     }
-    const badge = arxivLink(paper[COL.arxivId]);
-    badge.style.marginTop = (meta.title || meta.authors) ? "0.35rem" : "0";
-    badge.style.display   = "inline-block";
-    tdPaper.appendChild(badge);
+    const badgeRow = document.createElement("div");
+    badgeRow.style.cssText = "margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;";
+    badgeRow.appendChild(arxivLink(paper[COL.arxivId]));
+    if (meta.citations != null) {
+      const citeSpan = document.createElement("span");
+      citeSpan.className = "cite-count";
+      citeSpan.textContent = `${meta.citations.toLocaleString()} citation${meta.citations !== 1 ? "s" : ""}`;
+      badgeRow.appendChild(citeSpan);
+    }
+    tdPaper.appendChild(badgeRow);
 
     // Comment / reason
     const tdComment = tr.insertCell();
