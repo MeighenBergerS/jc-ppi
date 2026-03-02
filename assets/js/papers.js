@@ -147,6 +147,14 @@ function arxivLink(raw) {
  * batched API call. Returns a Map of { id → { title, authors } }.
  * Falls back gracefully if the API is unavailable.
  */
+/**
+ * Strips the version suffix from an arXiv ID, e.g. "2301.12345v2" → "2301.12345".
+ * Used to unify the API response IDs with user-submitted IDs.
+ */
+function stripVersion(id) {
+  return (id || "").replace(/v\d+$/i, "");
+}
+
 async function fetchArxivMetadata(ids) {
   const meta = new Map();
   const cleanIds = ids.map(normalizeArxivId).filter(Boolean);
@@ -159,23 +167,27 @@ async function fetchArxivMetadata(ids) {
     const res  = await fetch(url);
     const text = await res.text();
     const xml  = new DOMParser().parseFromString(text, "application/xml");
-    const ns   = "http://www.w3.org/2005/Atom";
 
     xml.querySelectorAll("entry").forEach(entry => {
-      // arXiv IDs in the API response include a version suffix (e.g. v2);
-      // strip it for matching.
-      const rawId = (entry.querySelector("id")?.textContent || "").trim();
-      const id    = normalizeArxivId(rawId);
-      const title = (entry.querySelector("title")?.textContent || "").trim().replace(/\s+/g, " ");
-      const authors = [...entry.querySelectorAll("author > name")]
-        .map(n => n.textContent.trim())
-        .slice(0, 3);   // show up to 3 authors
-      const authorStr = authors.length ? authors.join(", ") + (entry.querySelectorAll("author").length > 3 ? " et al." : "") : "";
+      // The API returns versioned IDs (e.g. http://arxiv.org/abs/2301.12345v2).
+      // Strip the version so it matches what users submit.
+      const rawId   = (entry.querySelector("id")?.textContent || "").trim();
+      const id      = stripVersion(normalizeArxivId(rawId));
+      const title   = (entry.querySelector("title")?.textContent || "").trim().replace(/\s+/g, " ");
+      const abstract = (entry.querySelector("summary")?.textContent || "").trim().replace(/\s+/g, " ");
+      const allAuthors = entry.querySelectorAll("author");
+      const authors = [...allAuthors]
+        .map(n => n.querySelector("name")?.textContent.trim())
+        .filter(Boolean)
+        .slice(0, 4);
+      const authorStr = authors.length
+        ? authors.join(", ") + (allAuthors.length > 4 ? " et al." : "")
+        : "";
 
-      if (id) meta.set(id, { title, authors: authorStr });
+      if (id) meta.set(id, { title, authors: authorStr, abstract });
     });
   } catch (_) {
-    // Network error — table will fall back to showing just the ID
+    // Network error — table will fall back to showing just the arXiv ID
   }
 
   return meta;
@@ -206,7 +218,7 @@ function buildTable(papers, metaMap = new Map()) {
   const tbody = table.createTBody();
   papers.forEach(paper => {
     const tr = tbody.insertRow();
-    const id = normalizeArxivId(paper[COL.arxivId]);
+    const id = stripVersion(normalizeArxivId(paper[COL.arxivId]));
     const meta = metaMap.get(id) || {};
 
     // Name
@@ -226,6 +238,12 @@ function buildTable(papers, metaMap = new Map()) {
       authorsDiv.className = "paper-comment";
       authorsDiv.textContent = meta.authors;
       tdPaper.appendChild(authorsDiv);
+    }
+    if (meta.abstract) {
+      const abstractDiv = document.createElement("div");
+      abstractDiv.className = "paper-abstract";
+      abstractDiv.textContent = meta.abstract;
+      tdPaper.appendChild(abstractDiv);
     }
     const badge = arxivLink(paper[COL.arxivId]);
     badge.style.marginTop = (meta.title || meta.authors) ? "0.35rem" : "0";
