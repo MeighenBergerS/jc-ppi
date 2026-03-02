@@ -1,0 +1,56 @@
+name: Check links
+
+on:
+  schedule:
+    # Run on the first day of every month at 08:00 UTC
+    - cron: "0 8 1 * *"
+  workflow_dispatch: # allow manual runs
+
+jobs:
+  check-links:
+    name: Verify public URLs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Google Sheet CSV is publicly accessible
+        run: |
+          # Extract the CSV URL from config.js
+          CSV_URL=$(grep -oP "(?<=sheetCsvUrl:\s')[^']+" assets/js/config.js || \
+                    grep -oP '(?<=sheetCsvUrl:\s")[^"]+' assets/js/config.js)
+
+          if [ -z "$CSV_URL" ]; then
+            echo "::error::Could not extract sheetCsvUrl from assets/js/config.js"
+            exit 1
+          fi
+
+          echo "Checking: $CSV_URL"
+          HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+            --max-time 30 --location "$CSV_URL")
+
+          echo "HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Google Sheet CSV returned HTTP $HTTP_STATUS."
+            echo "::error::The sheet may no longer be published to the web."
+            echo "::error::Go to File → Share → Publish to web in Google Sheets and re-publish."
+            exit 1
+          fi
+
+          echo "OK — Google Sheet CSV is publicly accessible."
+
+      - name: Check site pages are reachable
+        run: |
+          BASE="https://meighenbergers.github.io/jc-ppi"
+          for PATH in "/" "/archive.html"; do
+            URL="${BASE}${PATH}"
+            HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+              --max-time 30 --location "$URL")
+            echo "$URL → HTTP $HTTP_STATUS"
+            if [ "$HTTP_STATUS" -ne 200 ]; then
+              echo "::error::$URL returned HTTP $HTTP_STATUS"
+              exit 1
+            fi
+          done
+          echo "OK — all site pages reachable."

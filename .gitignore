@@ -1,0 +1,23 @@
+# ── OS files ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# ── Editor / IDE ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+
+# ── Local dev server artefacts ────────────────────────────
+# (if you ever add a build step or local tooling)
+node_modules/
+npm-debug.log*
+yarn-error.log
+.env
+.env.local
+dist/
