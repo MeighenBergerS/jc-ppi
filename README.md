@@ -39,11 +39,13 @@ A minimal static website for the journal club. Members submit paper suggestions 
 ```
 Member fills out Google Form
         ↓
-Response auto-appends to Google Sheet (with timestamp)
+Response appends to private Google Sheet (includes email)
         ↓
-Sheet is published as a public CSV URL
+Apps Script checks email → ticks Approved if known member
         ↓
-Site fetches CSV on page load → renders "This Week" or archive
+Public sheet tab mirrors all columns except email
+        ↓
+Site fetches Public tab as CSV → shows only approved rows
 ```
 
 Papers submitted during the current Monday–Sunday window appear on the **This Week** page. After Sunday they roll automatically into the **Archive**.
@@ -52,11 +54,11 @@ Papers submitted during the current Monday–Sunday window appear on the **This 
 
 ## Weekly workflow
 
-For **members on the approved-email list**: submit a paper via the form — it appears on the site automatically.
+For **members in the approved list**: submit a paper via the form — it appears on the site automatically (the Apps Script ticks the Approved checkbox instantly).
 
-For **anyone not on the list**: their submission is held until you open the Google Sheet and tick the **Approved** checkbox in column F for that row. Changes are reflected on the site within about a minute.
+For **anyone not in the list**: their submission is held until you open the private Google Sheet and manually tick the **Approved** checkbox in column F for that row. Changes are reflected on the site within about a minute.
 
-To add a recurring member to the allowlist permanently, add their email to `approvedEmails` in `site/assets/js/config.js`.
+To add a recurring member permanently, add their email to the `APPROVED` array in the Google Sheets Apps Script (Extensions → Apps Script).
 
 ---
 
