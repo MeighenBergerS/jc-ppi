@@ -7,9 +7,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "*.html"
-      - "assets/**"
-      - ".nojekyll"
+      - "site/*.html"
+      - "site/assets/**"
+      - "site/.nojekyll"
   workflow_dispatch: # allow manual deploys from the Actions tab
 
 permissions:
@@ -40,8 +40,8 @@ jobs:
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the whole repository root — GitHub Pages serves from here
-          path: "."
+          # Upload only the site/ subfolder — GitHub Pages serves from here
+          path: "site"
 
       - name: Deploy
         id: deployment

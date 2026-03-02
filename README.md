@@ -57,7 +57,7 @@ The only optional manual action is deleting spam rows directly in the Google She
 Any static file server works:
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --directory site
 # open http://localhost:8000
 ```
 
@@ -68,17 +68,18 @@ python -m http.server 8000
 ## File structure
 
 ```
-index.html             ← This Week page
-archive.html           ← Past submissions grouped by week
-resources.html         ← arXiv & INSPIRE-HEP guide for members
-assets/
-  css/style.css        ← All styling
-  js/
-    config.js          ← ✏️  Your Google URLs live here (only file to edit)
-    utils.js           ← Week math, CSV parser, arXiv ID helpers
-    inspire.js         ← INSPIRE-HEP API fetcher
-    table.js           ← DOM table builder
-    app.js             ← Page renderers and entry point
+site/                  ← everything GitHub Pages serves
+  index.html           ← This Week page
+  archive.html         ← Past submissions grouped by week
+  resources.html       ← arXiv & INSPIRE-HEP guide for members
+  assets/
+    css/style.css      ← All styling
+    js/
+      config.js        ← ✏️  Your Google URLs live here (only file to edit)
+      utils.js         ← Week math, CSV parser, arXiv ID helpers
+      inspire.js       ← INSPIRE-HEP API fetcher
+      table.js         ← DOM table builder
+      app.js           ← Page renderers and entry point
 docs/
   CONTRIBUTING.md      ← How to suggest a paper / contribute to the site
   SETUP.md             ← Full setup guide for deploying your own instance

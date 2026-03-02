@@ -18,11 +18,11 @@ jobs:
       - name: Check Google Sheet CSV is publicly accessible
         run: |
           # Extract the CSV URL from config.js
-          CSV_URL=$(grep -oP "(?<=sheetCsvUrl:\s')[^']+" assets/js/config.js || \
-                    grep -oP '(?<=sheetCsvUrl:\s")[^"]+' assets/js/config.js)
+          CSV_URL=$(grep -oP "(?<=sheetCsvUrl:\s')[^']+" site/assets/js/config.js || \
+                    grep -oP '(?<=sheetCsvUrl:\s")[^"]+' site/assets/js/config.js)
 
           if [ -z "$CSV_URL" ]; then
-            echo "::error::Could not extract sheetCsvUrl from assets/js/config.js"
+            echo "::error::Could not extract sheetCsvUrl from site/assets/js/config.js"
             exit 1
           fi
 

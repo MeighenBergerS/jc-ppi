@@ -45,7 +45,7 @@ The site is a static GitHub Pages site. All source files are in this repository.
 No build step is required. Any static file server works for local development:
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --directory site
 # open http://localhost:8000
 ```
 
@@ -53,14 +53,15 @@ python -m http.server 8000
 
 | File | What it does |
 |---|---|
-| `assets/js/config.js` | Google Sheet and Form URLs — **only file needed for initial setup** |
-| `assets/js/utils.js` | Week math, CSV parser, arXiv ID helpers |
-| `assets/js/inspire.js` | INSPIRE-HEP API client |
-| `assets/js/table.js` | DOM table builder |
-| `assets/js/app.js` | Page renderers and entry point |
-| `assets/css/style.css` | All styling |
-| `index.html` | This Week page |
-| `archive.html` | Archive page |
+| `site/assets/js/config.js` | Google Sheet and Form URLs — **only file needed for initial setup** |
+| `site/assets/js/utils.js` | Week math, CSV parser, arXiv ID helpers |
+| `site/assets/js/inspire.js` | INSPIRE-HEP API client |
+| `site/assets/js/table.js` | DOM table builder |
+| `site/assets/js/app.js` | Page renderers and entry point |
+| `site/assets/css/style.css` | All styling |
+| `site/index.html` | This Week page |
+| `site/archive.html` | Archive page |
+| `site/resources.html` | arXiv & INSPIRE-HEP guide |
 
 ### Making changes
 

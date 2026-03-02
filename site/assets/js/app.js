@@ -115,7 +115,7 @@ async function init() {
   if (!CONFIG.sheetCsvUrl || CONFIG.sheetCsvUrl === "PASTE_YOUR_SHEET_CSV_URL_HERE") {
     container.innerHTML = `<div class="error">
       ⚠️ <strong>Not configured yet.</strong>
-      Open <code>assets/js/config.js</code> and fill in
+      Open <code>site/assets/js/config.js</code> and fill in
       <code>sheetCsvUrl</code> and <code>formUrl</code>.
       See the README for instructions.
     </div>`;

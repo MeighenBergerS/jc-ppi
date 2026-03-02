@@ -53,7 +53,7 @@ jc-ppi journal club site on GitHub Pages.
 
 ## Step 4 — Configure the site
 
-Open `assets/js/config.js` and fill in the two placeholders near the top:
+Open `site/assets/js/config.js` and fill in the two placeholders near the top:
 
 ```js
 const CONFIG = {
