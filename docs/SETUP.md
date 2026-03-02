@@ -31,9 +31,13 @@ jc-ppi journal club site on GitHub Pages.
 
    > **Important:** Do not change the order later — the site maps columns by position, not by name.
 
-4. Click the **Responses** tab → click the green Sheets icon **"Link to Sheets"** → **Create a new spreadsheet** (or link to the one from Step 1). Google will create a sheet with a **Timestamp** column (A) followed by your three questions (B–D).
+4. Click the **Responses** tab → click the green Sheets icon **"Link to Sheets"** → **Create a new spreadsheet** (or link to the one from Step 1). Google will create a sheet with a **Timestamp** column (A), an **Email Address** column (B, because you enabled sign-in collection), followed by your three questions (C–E).
 
-5. Click **Publish** (top right) → click the **link icon** in the dialog that appears → copy the URL. This is your `formUrl`.
+   > **Important:** Do not change the order later — the site maps columns by position, not by name.
+
+5. **Add an Approved column.** In the sheet, click the header of column F and type `Approved`. Then select the cells below it and add checkboxes via **Insert → Checkbox**. Ticking a box sets it to `TRUE`, which lets you manually approve submissions from anyone not on the email allowlist.
+
+6. Click **Publish** (top right) → click the **link icon** in the dialog that appears → copy the URL. This is your `formUrl`.
 
 ---
 
@@ -53,12 +57,19 @@ jc-ppi journal club site on GitHub Pages.
 
 ## Step 4 — Configure the site
 
-Open `site/assets/js/config.js` and fill in the two placeholders near the top:
+Open `site/assets/js/config.js` and fill in the placeholders:
 
 ```js
 const CONFIG = {
   sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=0&single=true&output=csv',
   formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
+
+  // Add member emails here — their submissions appear automatically.
+  // Anyone not listed needs to be manually approved in the sheet.
+  approvedEmails: [
+    'alice@example.com',
+    'bob@example.com',
+  ],
 };
 ```
 

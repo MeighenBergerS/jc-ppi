@@ -52,9 +52,11 @@ Papers submitted during the current Monday–Sunday window appear on the **This 
 
 ## Weekly workflow
 
-**Nothing.** Members submit papers via the form link on the site. Papers appear automatically under "This Week" and roll to the Archive after Sunday midnight (based on the visitor's local time).
+For **members on the approved-email list**: submit a paper via the form — it appears on the site automatically.
 
-The only optional manual action is deleting spam rows directly in the Google Sheet — changes are reflected on the site within about a minute.
+For **anyone not on the list**: their submission is held until you open the Google Sheet and tick the **Approved** checkbox in column F for that row. Changes are reflected on the site within about a minute.
+
+To add a recurring member to the allowlist permanently, add their email to `approvedEmails` in `site/assets/js/config.js`.
 
 ---
 

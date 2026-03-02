@@ -15,16 +15,33 @@ export const CONFIG = {
   // Share link for the Google Form (the URL you give to members).
   // Publish → link icon → copy URL.
   formUrl: 'https://forms.gle/j88TQiKnpScU9xY28',
+
+  // ── APPROVED SUBMITTERS ──────────────────────────────────
+  // Submissions from these email addresses appear on the site automatically.
+  // Emails are matched case-insensitively.
+  // Submissions from anyone not listed here are hidden unless you manually
+  // tick the Approved checkbox in column F of the Google Sheet.
+  approvedEmails: [
+    // 'stephan.meighenberger@gmail.com',
+    // 'alice@example.com',
+    // 'bob@example.com',
+  ],
 };
 
 // ── SHEET COLUMN MAP ────────────────────────────────────────
 // Column 0 is the Timestamp Google adds automatically.
 // Columns 1–3 correspond to your three form questions in order.
-// Do not change these unless you reorder the form questions.
+// Column 4 is Email Address (collected by Google when sign-in is required).
+// Column 5 is the Approved checkbox added manually in the sheet.
+// Do not change these unless you reorder the sheet columns.
 
 export const COL = {
   timestamp: 0,
   name: 1,
   arxivId: 2,
   comment: 3,
+  email: 4,
+  // Manually added column F in the sheet: a checkbox (TRUE/FALSE).
+  // Tick this to approve a one-off submission from an unlisted email.
+  approved: 5,
 };
