@@ -166,6 +166,8 @@ async function fetchArxivMetadata(ids) {
   try {
     const res  = await fetch(url);
     const text = await res.text();
+    console.debug("[arXiv] raw response (first 500 chars):", text.slice(0, 500));
+
     // Parse as text/xml — getElementsByTagName() is namespace-agnostic
     // and works reliably on the arXiv Atom feed across all browsers,
     // unlike querySelectorAll() which fails on namespace-qualified XML.
@@ -174,7 +176,10 @@ async function fetchArxivMetadata(ids) {
     const getText = (el, tag) =>
       (el.getElementsByTagName(tag)[0]?.textContent || "").trim();
 
-    [...xml.getElementsByTagName("entry")].forEach(entry => {
+    const entries = [...xml.getElementsByTagName("entry")];
+    console.debug("[arXiv] entries found:", entries.length);
+
+    entries.forEach(entry => {
       // The API returns versioned IDs (e.g. http://arxiv.org/abs/2301.12345v2).
       // Strip the version so it matches what users submit.
       const rawId    = getText(entry, "id");
@@ -191,10 +196,13 @@ async function fetchArxivMetadata(ids) {
         ? authors.join(", ") + (allAuthors.length > 4 ? " et al." : "")
         : "";
 
+      console.debug("[arXiv] parsed entry →", { rawId, id, title, authorStr, abstractLen: abstract.length });
       if (id) meta.set(id, { title, authors: authorStr, abstract });
     });
-  } catch (_) {
-    // Network error — table will fall back to showing just the arXiv ID
+
+    console.debug("[arXiv] meta map keys:", [...meta.keys()]);
+  } catch (err) {
+    console.error("[arXiv] fetch/parse failed:", err);
   }
 
   return meta;
@@ -227,6 +235,7 @@ function buildTable(papers, metaMap = new Map()) {
     const tr = tbody.insertRow();
     const id = stripVersion(normalizeArxivId(paper[COL.arxivId]));
     const meta = metaMap.get(id) || {};
+    console.debug("[table] row:", { raw: paper[COL.arxivId], id, metaFound: !!meta.title });
 
     // Name
     const tdName = tr.insertCell();
