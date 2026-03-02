@@ -166,18 +166,25 @@ async function fetchArxivMetadata(ids) {
   try {
     const res  = await fetch(url);
     const text = await res.text();
-    const xml  = new DOMParser().parseFromString(text, "application/xml");
+    // Parse as text/xml — getElementsByTagName() is namespace-agnostic
+    // and works reliably on the arXiv Atom feed across all browsers,
+    // unlike querySelectorAll() which fails on namespace-qualified XML.
+    const xml  = new DOMParser().parseFromString(text, "text/xml");
 
-    xml.querySelectorAll("entry").forEach(entry => {
+    const getText = (el, tag) =>
+      (el.getElementsByTagName(tag)[0]?.textContent || "").trim();
+
+    [...xml.getElementsByTagName("entry")].forEach(entry => {
       // The API returns versioned IDs (e.g. http://arxiv.org/abs/2301.12345v2).
       // Strip the version so it matches what users submit.
-      const rawId   = (entry.querySelector("id")?.textContent || "").trim();
-      const id      = stripVersion(normalizeArxivId(rawId));
-      const title   = (entry.querySelector("title")?.textContent || "").trim().replace(/\s+/g, " ");
-      const abstract = (entry.querySelector("summary")?.textContent || "").trim().replace(/\s+/g, " ");
-      const allAuthors = entry.querySelectorAll("author");
+      const rawId    = getText(entry, "id");
+      const id       = stripVersion(normalizeArxivId(rawId));
+      const title    = getText(entry, "title").replace(/\s+/g, " ");
+      const abstract = getText(entry, "summary").replace(/\s+/g, " ");
+
+      const allAuthors = entry.getElementsByTagName("author");
       const authors = [...allAuthors]
-        .map(n => n.querySelector("name")?.textContent.trim())
+        .map(a => getText(a, "name"))
         .filter(Boolean)
         .slice(0, 4);
       const authorStr = authors.length
