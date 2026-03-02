@@ -8,6 +8,30 @@ A minimal static website for the journal club. Members submit paper suggestions 
 
 ---
 
+## Table of contents
+
+- [How it works](#how-it-works)
+- [One-time setup](#one-time-setup)
+  - [Step 1 — Create the Google Sheet](#step-1--create-the-google-sheet)
+  - [Step 2 — Create the Google Form](#step-2--create-the-google-form)
+  - [Step 3 — Publish the sheet as CSV](#step-3--publish-the-sheet-as-csv)
+  - [Step 4 — Configure the site](#step-4--configure-the-site)
+- [Weekly workflow](#weekly-workflow)
+- [Local preview](#local-preview)
+- [File structure](#file-structure)
+- [Guide to arXiv](#guide-to-arxiv)
+  - [Finding a paper](#finding-a-paper)
+  - [The arXiv ID](#the-arxiv-id)
+  - [Reading the abstract page](#reading-the-abstract-page)
+- [Guide to iNSPIRE-HEP](#guide-to-inspire-hep)
+  - [What the site shows from INSPIRE](#what-the-site-shows-from-inspire)
+  - [The INSPIRE record page](#the-inspire-record-page)
+  - [Citation counts as a rough guide](#citation-counts-as-a-rough-guide)
+  - [Paper not showing on INSPIRE?](#paper-not-showing-on-inspire)
+- [Contributing](docs/CONTRIBUTING.md)
+
+---
+
 ## How it works
 
 ```
@@ -68,7 +92,7 @@ Papers submitted during the current Monday–Sunday window appear on the **This 
 
 ### Step 4 — Configure the site
 
-Open `assets/js/papers.js` and fill in the two placeholders near the top:
+Open `assets/js/config.js` and fill in the two placeholders near the top:
 
 ```js
 const CONFIG = {
@@ -115,6 +139,11 @@ assets/
     inspire.js         ← INSPIRE-HEP API fetcher
     table.js           ← DOM table builder
     app.js             ← Page renderers and entry point
+docs/
+  CONTRIBUTING.md      ← How to suggest a paper / contribute to the site
+.github/workflows/
+  deploy-pages.yml     ← Deploys to GitHub Pages (only on site-file changes)
+  check-links.yml      ← Monthly check that URLs are still reachable
 README.md
 ```
 

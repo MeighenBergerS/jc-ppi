@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+# Only re-deploy when files that actually affect the site change.
+# Pure repo documentation (docs/, README.md, etc.) and
+# non-site tooling changes do not trigger a deployment.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "archive.html"
+      - "assets/**"
+      - ".nojekyll"
+  workflow_dispatch: # allow manual deploys from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; skip queued runs but don't cancel in-progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy site
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the whole repository root — GitHub Pages serves from here
+          path: "."
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

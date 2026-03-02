@@ -10,7 +10,7 @@ and how to contribute to the website itself.
 The easiest way to contribute is to suggest a paper for an upcoming meeting.
 
 1. **Find a paper** you'd like the group to discuss. Papers are usually found
-   on [arXiv](https://arxiv.org) — see the [arXiv guide in the README](README.md#guide-to-arxiv)
+   on [arXiv](https://arxiv.org) — see the [arXiv guide in the README](../README.md#guide-to-arxiv)
    if you're new to it.
 
 2. **Submit it** using the link on the [journal club website](https://meighenbergers.github.io/jc-ppi/).
@@ -68,4 +68,4 @@ python -m http.server 8000
 2. Make your changes locally and test with `python -m http.server 8000`.
 3. Open a pull request against `main`.
 
-The site deploys automatically via GitHub Pages on every push to `main`.
+The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
