@@ -502,6 +502,123 @@ main.prose {
   font-size: 0.9rem;
 }
 
+/* ── Stats page ─────────────────────────────────────────── */
+
+.stat-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.stat-kpi {
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+}
+
+.stat-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.stat-kpi-value--sm {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-top: 0.1rem;
+}
+
+.stat-kpi-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  font-weight: 600;
+}
+
+.stat-section {
+  margin-bottom: 2.5rem;
+}
+
+.stat-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.stat-empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 14ch 1fr 3.5ch;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bar-label {
+  font-size: 0.85rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.bar-track {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  height: 1.1rem;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.bar-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .bar-row {
+    grid-template-columns: 10ch 1fr 3ch;
+    gap: 0.5rem;
+  }
+
+  .stat-kpi-value { font-size: 1.3rem; }
+}
+
 /* ── Footer ──────────────────────────────────────────────── */
 
 footer {

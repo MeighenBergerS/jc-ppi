@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iowa Particles &amp; Plots Journal Club</title>
+  <title>Stats — Iowa Particles &amp; Plots Journal Club</title>
   <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 <body>
@@ -17,9 +17,9 @@
       </div>
     </div>
     <nav>
-      <a href="./index.html" class="active">This Week</a>
+      <a href="./index.html">This Week</a>
       <a href="./archive.html">Archive</a>
-      <a href="./stats.html">Stats</a>
+      <a href="./stats.html" class="active">Stats</a>
       <a href="./resources.html">Resources</a>
       <a href="#" id="submit-link" target="_blank" rel="noopener">Submit a Paper ↗</a>
     </nav>
@@ -27,17 +27,12 @@
 
   <main>
     <section class="week-header">
-      <h2>Papers for Discussion</h2>
-      <p class="week-label" id="week-label">Loading…</p>
+      <h2>Statistics</h2>
+      <p class="week-label" id="stats-subtitle">Loading…</p>
     </section>
 
-    <div id="papers-container">
-      <div class="loading">Fetching this week's papers…</div>
-    </div>
-
-    <div class="submit-cta" id="submit-cta" style="display:none">
-      <p>Have a paper you'd like to discuss?</p>
-      <a href="#" id="submit-cta-link" target="_blank" rel="noopener" class="btn">Submit a Paper ↗</a>
+    <div id="stats-container">
+      <div class="loading">Crunching numbers…</div>
     </div>
   </main>
 
@@ -45,7 +40,7 @@
     <p>Iowa Particles &amp; Plots Journal Club &mdash; <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a></p>
   </footer>
 
-  <script type="module" src="./assets/js/app.js"></script>
+  <script type="module" src="./assets/js/stats.js"></script>
 
 </body>
 </html>
