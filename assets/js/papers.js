@@ -191,7 +191,12 @@ async function fetchArxivMetadata(ids) {
     const citations = m.citation_count ?? null;
 
     console.debug("[INSPIRE] parsed →", { id, title, authors, abstractLen: abstract.length, citations });
-    meta.set(id, { title, authors, abstract, citations });
+    meta.set(id, { title, authors, abstract, citations, inspireId: data.id });
+  });
+
+  // Mark any IDs that got no result so the table can show a warning
+  cleanIds.forEach(id => {
+    if (!meta.has(id)) meta.set(id, { notFound: true });
   });
 
   console.debug("[INSPIRE] meta map keys:", [...meta.keys()]);
@@ -254,6 +259,15 @@ function buildTable(papers, metaMap = new Map()) {
     const badgeRow = document.createElement("div");
     badgeRow.style.cssText = "margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;";
     badgeRow.appendChild(arxivLink(paper[COL.arxivId]));
+    if (meta.inspireId) {
+      const inspireA = document.createElement("a");
+      inspireA.href = `https://inspirehep.net/literature/${meta.inspireId}`;
+      inspireA.textContent = "iNSPIRE-HEP";
+      inspireA.className = "inspire-link";
+      inspireA.target = "_blank";
+      inspireA.rel = "noopener";
+      badgeRow.appendChild(inspireA);
+    }
     if (meta.citations != null) {
       const citeSpan = document.createElement("span");
       citeSpan.className = "cite-count";
@@ -261,6 +275,12 @@ function buildTable(papers, metaMap = new Map()) {
       badgeRow.appendChild(citeSpan);
     }
     tdPaper.appendChild(badgeRow);
+    if (meta.notFound) {
+      const warn = document.createElement("div");
+      warn.className = "inspire-not-found";
+      warn.textContent = "⚠ Not yet indexed on iNSPIRE-HEP — title and abstract unavailable";
+      tdPaper.appendChild(warn);
+    }
 
     // Comment / reason
     const tdComment = tr.insertCell();
