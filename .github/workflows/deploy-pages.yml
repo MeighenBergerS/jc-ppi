@@ -7,8 +7,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "index.html"
-      - "archive.html"
+      - "*.html"
       - "assets/**"
       - ".nojekyll"
   workflow_dispatch: # allow manual deploys from the Actions tab

@@ -70,6 +70,7 @@ python -m http.server 8000
 ```
 index.html             ← This Week page
 archive.html           ← Past submissions grouped by week
+resources.html         ← arXiv & INSPIRE-HEP guide for members
 assets/
   css/style.css        ← All styling
   js/

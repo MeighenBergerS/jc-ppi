@@ -238,6 +238,100 @@ main {
   margin-top: 0.2rem;
 }
 
+/* ── Resources page ─────────────────────────────────────── */
+
+main.prose {
+  max-width: 720px;
+}
+
+.res-section {
+  margin-bottom: 3rem;
+}
+
+.res-section h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--accent-dim);
+  margin-bottom: 1rem;
+}
+
+.res-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.4rem 0 0.5rem;
+  color: var(--text);
+}
+
+.res-section p {
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+
+.res-section a {
+  color: var(--accent);
+}
+
+.res-section ul,
+.category-list {
+  margin: 0.4rem 0 0.75rem 1.4rem;
+  color: var(--text);
+}
+
+.res-section li {
+  margin-bottom: 0.3rem;
+}
+
+.res-section code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.88em;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+}
+
+.res-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.res-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+.res-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.res-table tr:last-child td {
+  border-bottom: none;
+}
+
+.res-callout {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1.1rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid var(--accent-btn);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: #78350f;
+  line-height: 1.6;
+}
+
 /* ── Empty state ─────────────────────────────────────────── */
 
 .empty-state {
