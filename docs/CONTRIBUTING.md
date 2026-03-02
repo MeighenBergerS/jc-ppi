@@ -70,3 +70,10 @@ python -m http.server 8000 --directory site
 3. Open a pull request against `main`.
 
 The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
+
+---
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant Code of Conduct](../CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold it.

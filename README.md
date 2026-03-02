@@ -29,6 +29,7 @@ A minimal static website for the journal club. Members submit paper suggestions 
   - [Citation counts as a rough guide](#citation-counts-as-a-rough-guide)
   - [Paper not showing on INSPIRE?](#paper-not-showing-on-inspire)
 - [Contributing](docs/CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Deploying your own instance](#deploying-your-own-instance)
 
 ---
