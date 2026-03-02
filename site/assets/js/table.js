@@ -6,8 +6,8 @@
    the page.
    ============================================================ */
 
-import { COL } from "./config.js";
-import { normalizeArxivId, stripVersion, arxivLink } from "./utils.js";
+import { COL } from './config.js';
+import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -17,66 +17,65 @@ import { normalizeArxivId, stripVersion, arxivLink } from "./utils.js";
  * @returns {HTMLTableElement}
  */
 export function buildTable(papers, metaMap = new Map()) {
-  const table  = document.createElement("table");
-  table.className = "papers-table";
+  const table = document.createElement('table');
+  table.className = 'papers-table';
 
   // ── Header ──────────────────────────────────────────────
   const thead = table.createTHead();
-  const hRow  = thead.insertRow();
-  ["Submitted by", "Paper", "Why they suggest it"].forEach(label => {
-    const th = document.createElement("th");
+  const hRow = thead.insertRow();
+  ['Submitted by', 'Paper', 'Why they suggest it'].forEach((label) => {
+    const th = document.createElement('th');
     th.textContent = label;
     hRow.appendChild(th);
   });
 
   // ── Body ─────────────────────────────────────────────────
   const tbody = table.createTBody();
-  papers.forEach(paper => {
-    const tr   = tbody.insertRow();
-    const id   = stripVersion(normalizeArxivId(paper[COL.arxivId]));
+  papers.forEach((paper) => {
+    const tr = tbody.insertRow();
+    const id = stripVersion(normalizeArxivId(paper[COL.arxivId]));
     const meta = metaMap.get(id) || {};
 
     // Column 1 — Submitter name
     const tdName = tr.insertCell();
-    tdName.textContent = (paper[COL.name] || "").trim() || "—";
+    tdName.textContent = (paper[COL.name] || '').trim() || '—';
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
-    _appendText(tdPaper, meta.title,    "paper-title");
-    _appendText(tdPaper, meta.authors,  "paper-comment");
-    _appendText(tdPaper, meta.abstract, "paper-abstract");
+    _appendText(tdPaper, meta.title, 'paper-title');
+    _appendText(tdPaper, meta.authors, 'paper-comment');
+    _appendText(tdPaper, meta.abstract, 'paper-abstract');
     tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], meta));
     _appendKeywordPills(tdPaper, meta);
 
     // Column 3 — Reason for suggestion
     const tdComment = tr.insertCell();
-    const comment = (paper[COL.comment] || "").trim();
-    tdComment.textContent = comment || "—";
-    if (!comment) tdComment.style.color = "var(--muted)";
+    const comment = (paper[COL.comment] || '').trim();
+    tdComment.textContent = comment || '—';
+    if (!comment) tdComment.style.color = 'var(--muted)';
   });
 
   return table;
 }
 
-
 // ── Helpers ───────────────────────────────────────────────────
 
 /** Appends keyword and category pills to a cell, if available. */
 function _appendKeywordPills(parent, meta) {
-  const cats     = meta.categories ?? [];
-  const keywords = meta.keywords   ?? [];
+  const cats = meta.categories ?? [];
+  const keywords = meta.keywords ?? [];
   if (!cats.length && !keywords.length) return;
-  const container = document.createElement("div");
-  container.className = "keyword-pills";
-  cats.forEach(label => {
-    const span = document.createElement("span");
-    span.className   = "kpill kpill--cat";
+  const container = document.createElement('div');
+  container.className = 'keyword-pills';
+  cats.forEach((label) => {
+    const span = document.createElement('span');
+    span.className = 'kpill kpill--cat';
     span.textContent = label;
     container.appendChild(span);
   });
-  keywords.forEach(kw => {
-    const span = document.createElement("span");
-    span.className   = "kpill kpill--topic";
+  keywords.forEach((kw) => {
+    const span = document.createElement('span');
+    span.className = 'kpill kpill--topic';
     span.textContent = kw;
     container.appendChild(span);
   });
@@ -86,8 +85,8 @@ function _appendKeywordPills(parent, meta) {
 /** Appends a <div class=className> with text, only if text is non-empty. */
 function _appendText(parent, text, className) {
   if (!text) return;
-  const div = document.createElement("div");
-  div.className   = className;
+  const div = document.createElement('div');
+  div.className = className;
   div.textContent = text;
   parent.appendChild(div);
 }
@@ -97,36 +96,37 @@ function _appendText(parent, text, className) {
  * optional citation count, optional not-found warning.
  */
 function _buildBadgeRow(rawArxivId, meta) {
-  const row = document.createElement("div");
-  row.style.cssText = "margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;";
+  const row = document.createElement('div');
+  row.style.cssText =
+    'margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;';
 
   // arXiv badge (always present)
   row.appendChild(arxivLink(rawArxivId));
 
   // INSPIRE-HEP link (only when indexed)
   if (meta.inspireId) {
-    const a = document.createElement("a");
-    a.href        = `https://inspirehep.net/literature/${meta.inspireId}`;
-    a.textContent = "iNSPIRE-HEP";
-    a.className   = "inspire-link";
-    a.target      = "_blank";
-    a.rel         = "noopener";
+    const a = document.createElement('a');
+    a.href = `https://inspirehep.net/literature/${meta.inspireId}`;
+    a.textContent = 'iNSPIRE-HEP';
+    a.className = 'inspire-link';
+    a.target = '_blank';
+    a.rel = 'noopener';
     row.appendChild(a);
   }
 
   // Citation count
   if (meta.citations != null) {
-    const span = document.createElement("span");
-    span.className   = "cite-count";
-    span.textContent = `${meta.citations.toLocaleString()} citation${meta.citations !== 1 ? "s" : ""}`;
+    const span = document.createElement('span');
+    span.className = 'cite-count';
+    span.textContent = `${meta.citations.toLocaleString()} citation${meta.citations !== 1 ? 's' : ''}`;
     row.appendChild(span);
   }
 
   // Not-yet-indexed warning
   if (meta.notFound) {
-    const warn = document.createElement("div");
-    warn.className   = "inspire-not-found";
-    warn.textContent = "⚠ Not yet indexed on iNSPIRE-HEP — title and abstract unavailable";
+    const warn = document.createElement('div');
+    warn.className = 'inspire-not-found';
+    warn.textContent = '⚠ Not yet indexed on iNSPIRE-HEP — title and abstract unavailable';
     row.appendChild(warn);
   }
 

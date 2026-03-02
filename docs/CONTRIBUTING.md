@@ -16,10 +16,10 @@ The easiest way to contribute is to suggest a paper for an upcoming meeting.
 2. **Submit it** using the link on the [journal club website](https://meighenbergers.github.io/jc-ppi/).
    You'll be asked for:
 
-   | Field | What to enter |
-   |---|---|
-   | **Your name** | Your first name, or however you'd like to be listed |
-   | **arXiv ID or URL** | e.g. `2301.12345` or `https://arxiv.org/abs/2301.12345` |
+   | Field                            | What to enter                                                              |
+   | -------------------------------- | -------------------------------------------------------------------------- |
+   | **Your name**                    | Your first name, or however you'd like to be listed                        |
+   | **arXiv ID or URL**              | e.g. `2301.12345` or `https://arxiv.org/abs/2301.12345`                    |
    | **Why are you suggesting this?** | A sentence or two is great. "General interest" is a perfectly fine answer. |
 
 3. Your submission will appear automatically on the website under **This Week**.
@@ -51,17 +51,17 @@ python -m http.server 8000 --directory site
 
 ### File map
 
-| File | What it does |
-|---|---|
-| `site/assets/js/config.js` | Google Sheet and Form URLs — **only file needed for initial setup** |
-| `site/assets/js/utils.js` | Week math, CSV parser, arXiv ID helpers |
-| `site/assets/js/inspire.js` | INSPIRE-HEP API client |
-| `site/assets/js/table.js` | DOM table builder |
-| `site/assets/js/app.js` | Page renderers and entry point |
-| `site/assets/css/style.css` | All styling |
-| `site/index.html` | This Week page |
-| `site/archive.html` | Archive page |
-| `site/resources.html` | arXiv & INSPIRE-HEP guide |
+| File                        | What it does                                                        |
+| --------------------------- | ------------------------------------------------------------------- |
+| `site/assets/js/config.js`  | Google Sheet and Form URLs — **only file needed for initial setup** |
+| `site/assets/js/utils.js`   | Week math, CSV parser, arXiv ID helpers                             |
+| `site/assets/js/inspire.js` | INSPIRE-HEP API client                                              |
+| `site/assets/js/table.js`   | DOM table builder                                                   |
+| `site/assets/js/app.js`     | Page renderers and entry point                                      |
+| `site/assets/css/style.css` | All styling                                                         |
+| `site/index.html`           | This Week page                                                      |
+| `site/archive.html`         | Archive page                                                        |
+| `site/resources.html`       | arXiv & INSPIRE-HEP guide                                           |
 
 ### Making changes
 

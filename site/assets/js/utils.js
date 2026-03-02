@@ -10,8 +10,8 @@
  */
 export function weekStart(date) {
   const d = new Date(date);
-  const day = d.getDay();                       // 0=Sun … 6=Sat
-  const diffToMonday = (day === 0) ? -6 : 1 - day;
+  const day = d.getDay(); // 0=Sun … 6=Sat
+  const diffToMonday = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + diffToMonday);
   d.setHours(0, 0, 0, 0);
   return d;
@@ -29,10 +29,9 @@ export function currentWeekStart() {
 export function fmtWeekRange(monday) {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
-  const opts = { month: "short", day: "numeric" };
-  return `${monday.toLocaleDateString("en-US", opts)} – ${sunday.toLocaleDateString("en-US", { ...opts, year: "numeric" })}`;
+  const opts = { month: 'short', day: 'numeric' };
+  return `${monday.toLocaleDateString('en-US', opts)} – ${sunday.toLocaleDateString('en-US', { ...opts, year: 'numeric' })}`;
 }
-
 
 // ── CSV PARSER ───────────────────────────────────────────────
 
@@ -43,37 +42,55 @@ export function fmtWeekRange(monday) {
  */
 export function parseCsv(text) {
   const rows = [];
-  let row = [], field = "", inQuotes = false;
+  let row = [],
+    field = '',
+    inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
-    const ch   = text[i];
+    const ch = text[i];
     const next = text[i + 1];
 
     if (inQuotes) {
-      if (ch === '"' && next === '"') { field += '"'; i++; }  // escaped quote
-      else if (ch === '"')            { inQuotes = false; }   // closing quote
-      else                            { field += ch; }
+      if (ch === '"' && next === '"') {
+        field += '"';
+        i++;
+      } // escaped quote
+      else if (ch === '"') {
+        inQuotes = false;
+      } // closing quote
+      else {
+        field += ch;
+      }
     } else {
-      if      (ch === '"')  { inQuotes = true; }
-      else if (ch === ',')  { row.push(field); field = ""; }
-      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        row.push(field);
+        field = '';
+      } else if (ch === '\n' || (ch === '\r' && next === '\n')) {
         if (ch === '\r') i++;
-        row.push(field); field = "";
-        rows.push(row);  row = [];
+        row.push(field);
+        field = '';
+        rows.push(row);
+        row = [];
       } else if (ch === '\r') {
-        row.push(field); field = "";
-        rows.push(row);  row = [];
+        row.push(field);
+        field = '';
+        rows.push(row);
+        row = [];
       } else {
         field += ch;
       }
     }
   }
   // Flush trailing field/row
-  if (field || row.length) { row.push(field); rows.push(row); }
+  if (field || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
 
   return rows;
 }
-
 
 // ── ARXIV ID HELPERS ─────────────────────────────────────────
 
@@ -82,7 +99,7 @@ export function parseCsv(text) {
  * e.g. "https://arxiv.org/abs/2301.12345v2" → "2301.12345v2"
  */
 export function normalizeArxivId(raw) {
-  const trimmed = (raw || "").trim();
+  const trimmed = (raw || '').trim();
   const match = trimmed.match(/(\d{4}\.\d{4,5}(v\d+)?|[a-z\-]+\/\d{7})/i);
   return match ? match[0] : trimmed;
 }
@@ -92,7 +109,7 @@ export function normalizeArxivId(raw) {
  * e.g. "2301.12345v2" → "2301.12345"
  */
 export function stripVersion(id) {
-  return (id || "").replace(/v\d+$/i, "");
+  return (id || '').replace(/v\d+$/i, '');
 }
 
 /**
@@ -101,12 +118,12 @@ export function stripVersion(id) {
  */
 export function arxivLink(raw) {
   const id = normalizeArxivId(raw);
-  if (!id) return document.createTextNode("—");
-  const a = document.createElement("a");
-  a.href      = `https://arxiv.org/abs/${id}`;
+  if (!id) return document.createTextNode('—');
+  const a = document.createElement('a');
+  a.href = `https://arxiv.org/abs/${id}`;
   a.textContent = id;
-  a.className = "arxiv-link";
-  a.target    = "_blank";
-  a.rel       = "noopener";
+  a.className = 'arxiv-link';
+  a.target = '_blank';
+  a.rel = 'noopener';
   return a;
 }

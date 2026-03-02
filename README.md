@@ -1,6 +1,11 @@
 # jc-ppi — Iowa Particles & Plots Journal Club
 
-> *From arXiv to argument — every week.*
+> _From arXiv to argument — every week._
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Site](https://img.shields.io/badge/site-live-brightgreen)](https://meighenbergers.github.io/jc-ppi/)
+[![Deploy](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/deploy-pages.yml)
+[![Lint](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/lint.yml/badge.svg)](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/lint.yml)
 
 Live site: **https://meighenbergers.github.io/jc-ppi/**
 
@@ -94,7 +99,7 @@ README.md
 ## Guide to arXiv
 
 [arXiv](https://arxiv.org) is a free, open-access repository where physicists
-post papers *before* (and sometimes instead of) formal journal publication.
+post papers _before_ (and sometimes instead of) formal journal publication.
 These are called **preprints**. Almost all HEP papers appear on arXiv first,
 often months before the journal version.
 
@@ -115,6 +120,7 @@ Every paper has a unique ID like `2301.12345`. It encodes the submission date:
 directly to the abstract page.
 
 When submitting a paper to this journal club, you can paste either:
+
 - The bare ID: `2301.12345`
 - The full URL: `https://arxiv.org/abs/2301.12345`
 
@@ -122,13 +128,13 @@ The site will normalise both formats automatically.
 
 ### Reading the abstract page
 
-| Field | What it means |
-|---|---|
-| **Submitted** | Date the authors posted it |
-| **Authors** | Click a name to see all their arXiv papers |
-| **Subjects** | Primary and cross-listed categories |
-| **Abstract** | Short summary written by the authors |
-| **[pdf]** | Direct link to the paper PDF |
+| Field           | What it means                                         |
+| --------------- | ----------------------------------------------------- |
+| **Submitted**   | Date the authors posted it                            |
+| **Authors**     | Click a name to see all their arXiv papers            |
+| **Subjects**    | Primary and cross-listed categories                   |
+| **Abstract**    | Short summary written by the authors                  |
+| **[pdf]**       | Direct link to the paper PDF                          |
 | **[v2], [v3]…** | Revised versions; the site always links to the latest |
 
 ---
@@ -142,13 +148,13 @@ both preprints and published journal articles.
 
 ### What the site shows from INSPIRE
 
-| Field | Where it comes from |
-|---|---|
-| **Title** | INSPIRE record (same as arXiv) |
-| **Authors** | INSPIRE — often more complete than arXiv |
-| **Abstract** | INSPIRE record |
-| **Citation count** | How many other papers cite this one |
-| **iNSPIRE-HEP button** | Direct link to the full INSPIRE record |
+| Field                  | Where it comes from                      |
+| ---------------------- | ---------------------------------------- |
+| **Title**              | INSPIRE record (same as arXiv)           |
+| **Authors**            | INSPIRE — often more complete than arXiv |
+| **Abstract**           | INSPIRE record                           |
+| **Citation count**     | How many other papers cite this one      |
+| **iNSPIRE-HEP button** | Direct link to the full INSPIRE record   |
 
 ### The INSPIRE record page
 
@@ -166,19 +172,19 @@ To get a BibTeX entry for any paper: open its INSPIRE record → click
 ### Citation counts as a rough guide
 
 For a new paper (< 1 year old), citation counts are low by default — this
-does *not* mean the paper is unimportant. For older papers, a rough HEP scale:
+does _not_ mean the paper is unimportant. For older papers, a rough HEP scale:
 
-| Citations | Rough impression |
-|---|---|
-| < 10 | Recent or niche |
-| 10 – 100 | Solid, community-relevant |
-| 100 – 500 | Influential |
-| 500+ | Landmark paper |
+| Citations | Rough impression          |
+| --------- | ------------------------- |
+| < 10      | Recent or niche           |
+| 10 – 100  | Solid, community-relevant |
+| 100 – 500 | Influential               |
+| 500+      | Landmark paper            |
 
 ### Paper not showing on INSPIRE?
 
 INSPIRE typically indexes new arXiv papers within **1–3 days** of posting.
-If the site shows the warning *"Not yet indexed on iNSPIRE-HEP"*, the paper
+If the site shows the warning _"Not yet indexed on iNSPIRE-HEP"_, the paper
 was submitted very recently — the arXiv link still works and you can read it
 immediately. The INSPIRE record will appear within a few days.
 

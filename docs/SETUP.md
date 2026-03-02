@@ -19,11 +19,11 @@ jc-ppi journal club site on GitHub Pages.
 2. Title it e.g. **Iowa Particles & Plots — Paper Submission**.
 3. Add the following questions **in this exact order**:
 
-   | # | Question text | Type |
-   |---|---|---|
-   | 1 | Your name | Short answer |
-   | 2 | arXiv ID or URL (e.g. 2301.12345) | Short answer |
-   | 3 | Why are you suggesting this? (optional) | Paragraph |
+   | #   | Question text                           | Type         |
+   | --- | --------------------------------------- | ------------ |
+   | 1   | Your name                               | Short answer |
+   | 2   | arXiv ID or URL (e.g. 2301.12345)       | Short answer |
+   | 3   | Why are you suggesting this? (optional) | Paragraph    |
 
    > **That's it — only 3 fields.** The site fetches the paper title and
    > authors automatically from the INSPIRE-HEP API using the ID, so submitters
@@ -57,8 +57,8 @@ Open `site/assets/js/config.js` and fill in the two placeholders near the top:
 
 ```js
 const CONFIG = {
-  sheetCsvUrl: "https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=0&single=true&output=csv",
-  formUrl:     "https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform",
+  sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=0&single=true&output=csv',
+  formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
 };
 ```
 

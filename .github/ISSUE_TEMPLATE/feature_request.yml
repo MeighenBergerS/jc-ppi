@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest an improvement or new feature for the site or workflow.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please describe the feature as clearly as you can.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the motivation. What is currently annoying, missing, or confusing?
+      placeholder: "Example: It's hard to find papers from a specific author across all archive weeks."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work?
+      placeholder: "Example: Add a search/filter box on the Archive page."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you thought of?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, links, or anything else that helps explain the request.
+    validations:
+      required: false
