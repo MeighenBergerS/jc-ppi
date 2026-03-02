@@ -32,16 +32,10 @@ async function fetchPapers() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   const rows = parseCsv(text);
-  const allowlist = CONFIG.approvedEmails.map((e) => e.trim().toLowerCase());
   return rows
     .slice(1)
     .filter((r) => r.length > COL.timestamp && r[COL.timestamp])
-    .filter((r) => {
-      const email = (r[COL.email] ?? '').trim().toLowerCase();
-      const emailApproved = allowlist.length > 0 && allowlist.includes(email);
-      const manualApproved = (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE';
-      return emailApproved || manualApproved;
-    });
+    .filter((r) => (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE');
 }
 
 /**
