@@ -11,7 +11,7 @@ export const CONFIG = {
   // That tab mirrors all columns from the response sheet EXCEPT email.
   // File → Share → Publish to web → choose the "Public" tab → CSV → copy URL.
   sheetCsvUrl:
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSV30CUvQZhLXFlvt0HqGmGsMZqaapy4S_xIQAxYiJp1IBkkW515MNIdBvSnEaYRu9NQ1rOvCANW2ua/pubhtml?gid=620589092&single=true',
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSV30CUvQZhLXFlvt0HqGmGsMZqaapy4S_xIQAxYiJp1IBkkW515MNIdBvSnEaYRu9NQ1rOvCANW2ua/pub?gid=620589092&single=true&output=csv',
 
   // Share link for the Google Form (the URL you give to members).
   // Publish → link icon → copy URL.
