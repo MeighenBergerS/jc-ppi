@@ -88,10 +88,7 @@ they submit, so their papers appear on the site without manual action.
 3. Replace any existing code with:
 
    ```js
-   const APPROVED = [
-     'alice@example.com',
-     'bob@example.com',
-   ];
+   const APPROVED = ['alice@example.com', 'bob@example.com'];
 
    function onFormSubmit(e) {
      const sheet = e.range.getSheet();
@@ -123,7 +120,8 @@ Open `site/assets/js/config.js` and fill in the two URLs:
 ```js
 export const CONFIG = {
   // URL of the *Public* tab published as CSV (from Step 4)
-  sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=XXXXXXXX&single=true&output=csv',
+  sheetCsvUrl:
+    'https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=XXXXXXXX&single=true&output=csv',
   // Google Form share link (from Step 2)
   formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
 };
