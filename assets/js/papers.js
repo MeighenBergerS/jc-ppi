@@ -191,7 +191,7 @@ async function fetchArxivMetadata(ids) {
     const citations = m.citation_count ?? null;
 
     console.debug("[INSPIRE] parsed →", { id, title, authors, abstractLen: abstract.length, citations });
-    meta.set(id, { title, authors, abstract, citations, inspireId: data.id });
+    meta.set(id, { title, authors, abstract, citations, inspireId: m.control_number });
   });
 
   // Mark any IDs that got no result so the table can show a warning
@@ -387,10 +387,9 @@ async function renderArchive(papers, container) {
 
 
 // ── ENTRY POINT ──────────────────────────────────────────────
+// Auto-detect the page from the URL — no inline script needed,
+// which avoids Content Security Policy (CSP) violations on GitHub Pages.
 
-/**
- * Called by each page's inline script with "index" or "archive".
- */
 async function initPage(page) {
   // Wire up the Google Form link wherever it appears
   document.querySelectorAll("#submit-link, #submit-cta-link").forEach(el => {
@@ -433,3 +432,7 @@ async function initPage(page) {
     </div>`;
   }
 }
+
+// Detect page from URL and self-start — no inline script required.
+const _page = window.location.pathname.includes("archive") ? "archive" : "index";
+initPage(_page);
