@@ -49,6 +49,18 @@ python -m http.server 8000 --directory site
 # open http://localhost:8000
 ```
 
+To enable automatic code formatting before each commit, run this once after
+cloning:
+
+```bash
+git config core.hooksPath .githooks
+npm install --global prettier   # if not already installed
+```
+
+The pre-commit hook will then auto-format any staged `.html`, `.css`, `.js`,
+or `.md` files with Prettier before the commit is recorded, so the CI lint
+check always passes.
+
 ### File map
 
 | File                        | What it does                                                        |

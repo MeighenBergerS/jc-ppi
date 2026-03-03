@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# Pre-commit hook: auto-formats staged files with Prettier.
+#
+# Activate once after cloning:
+#   git config core.hooksPath .githooks
+#
+# Requires Prettier to be installed globally:
+#   npm install --global prettier
+
+if ! command -v prettier > /dev/null 2>&1; then
+  echo "⚠️  pre-commit: prettier not found — skipping format check."
+  echo "   Install with: npm install --global prettier"
+  exit 0
+fi
+
+# Collect staged files that Prettier can handle
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | \
+  grep -E '\.(html|css|js|md)$')
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+# Format each staged file and re-stage it
+echo "$STAGED" | while IFS= read -r file; do
+  prettier --write "$file"
+  git add "$file"
+done
