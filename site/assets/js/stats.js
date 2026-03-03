@@ -16,6 +16,42 @@ import { fetchPaperMetadata } from './inspire.js';
 
 const YEAR = new Date().getFullYear();
 
+// ── Title word stop list ──────────────────────────────────────
+// Words excluded from the title-word frequency chart.
+// Add or remove entries freely — one word per line, lower-case.
+// Three groups are kept separate for readability:
+//   1. Standard English (articles, prepositions, conjunctions, …)
+//   2. Academic paper filler (common title verbs/nouns with no topic signal)
+//   3. HEP-specific boilerplate (universally present in the field)
+
+const TITLE_STOP_WORDS = new Set([
+  // 1. Standard English
+  'a', 'an', 'the',
+  'and', 'or', 'but', 'nor', 'so', 'yet',
+  'in', 'of', 'for', 'with', 'at', 'by', 'from', 'via', 'on',
+  'to', 'into', 'onto', 'upon', 'over', 'under', 'about',
+  'as', 'its', 'it', 'is', 'are', 'be', 'been', 'being',
+  'has', 'have', 'had', 'was', 'were', 'do', 'does', 'did',
+  'this', 'that', 'these', 'those', 'their', 'they', 'them',
+  'we', 'us', 'our', 'i', 'not', 'no',
+
+  // 2. Academic paper filler
+  'probing', 'probe', 'exploring', 'explore', 'studying', 'study',
+  'searching', 'search', 'constraining', 'constraints', 'constraint',
+  'revisiting', 'revisited', 'towards', 'using', 'beyond',
+  'new', 'novel', 'first', 'improved', 'updated', 'precise',
+  'precision', 'general', 'effective', 'implications', 'implication',
+  'evidence', 'observation', 'observations', 'measurement', 'measurements',
+  'analysis', 'analyses', 'approach', 'approaches', 'case', 'cases',
+  'role', 'impact', 'effects', 'effect', 'via', 'through', 'within',
+  'based', 'induced', 'driven', 'dependent', 'independent',
+
+  // 3. HEP-specific boilerplate
+  'physics', 'particle', 'field', 'theory', 'model', 'models',
+  'standard', 'quantum', 'lhc', 'collider', 'colliders',
+  'cross', 'section', 'sections', 'energy', 'mass',
+]);
+
 // ── Category color palette ────────────────────────────────────
 // ColorBrewer Dark2 (8) + steel blue + deep red.
 // Categories are sorted alphabetically then assigned in order,
@@ -285,25 +321,40 @@ async function init() {
       )
     );
 
-    // ── 8. Keyword distribution (top 20) ───────────────────
-    const kwCounts = new Map();
+    // ── 8. Title word frequency (top 10) ──────────────────
+    // Extract words from INSPIRE titles (falling back to arXiv ID if missing),
+    // filter against TITLE_STOP_WORDS, count occurrences, show top 10.
+    const wordCounts = new Map();
     metaMap.forEach((meta) => {
-      (meta.keywords ?? []).forEach((kw) => {
-        kwCounts.set(kw, (kwCounts.get(kw) ?? 0) + 1);
-      });
+      if (!meta.title) return;
+      meta.title
+        .toLowerCase()
+        // strip punctuation but keep hyphens inside words (e.g. "non-perturbative")
+        .replace(/[^a-z0-9\- ]/g, ' ')
+        .split(/\s+/)
+        .forEach((word) => {
+          // skip stop words, single characters, and pure numbers
+          if (!word || word.length < 2 || TITLE_STOP_WORDS.has(word) || /^\d+$/.test(word))
+            return;
+          wordCounts.set(word, (wordCounts.get(word) ?? 0) + 1);
+        });
     });
 
-    const kwRows = [...kwCounts.entries()]
+    const wordRows = [...wordCounts.entries()]
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 20)
+      .slice(0, 10)
       .map(([label, value], i, arr) => ({
         label,
         value,
-        color: _gradientColor(117, 112, 179, i, arr.length), // purple (--accent-sec)
+        color: _gradientColor(117, 112, 179, i, arr.length), // purple
       }));
 
     container.appendChild(
-      _buildChart('Top keywords (year to date)', kwRows, 'No keyword data yet.')
+      _buildChart(
+        'Top title words (year to date)',
+        wordRows,
+        'Not enough papers yet to show word frequencies.'
+      )
     );
   } catch (err) {
     console.error(err);
