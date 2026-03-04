@@ -11,6 +11,7 @@ import {
   parseCsv,
   normalizeArxivId,
   stripVersion,
+  isValidArxivId,
 } from '../site/assets/js/utils.js';
 
 // ── weekStart ─────────────────────────────────────────────────
@@ -241,5 +242,98 @@ describe('stripVersion', () => {
   it('stripVersion ∘ normalizeArxivId yields a clean bare ID from a versioned URL', () => {
     const raw = 'https://arxiv.org/abs/2410.00841v2';
     assert.equal(stripVersion(normalizeArxivId(raw)), '2410.00841');
+  });
+});
+
+// ── isValidArxivId ──────────────────────────────────────────
+
+describe('isValidArxivId', () => {
+  // ─ Valid modern IDs ─────────────────────────────────
+  it('accepts a standard 5-digit modern ID', () => {
+    assert.ok(isValidArxivId('2301.12345'));
+  });
+
+  it('accepts a 4-digit modern ID', () => {
+    assert.ok(isValidArxivId('0708.1137')); // valid: August 2007, paper 1137
+  });
+
+  it('accepts an early 4-digit modern ID (2007 era)', () => {
+    assert.ok(isValidArxivId('0704.0001'));
+  });
+
+  // ─ Valid old-style IDs ─────────────────────────────
+  it('accepts an old-style hep-ph ID', () => {
+    assert.ok(isValidArxivId('hep-ph/9901123'));
+  });
+
+  it('accepts an old-style astro-ph ID', () => {
+    assert.ok(isValidArxivId('astro-ph/0503354'));
+  });
+
+  // ─ Invalid IDs that should be caught ─────────────────
+  it('rejects 3-digit prefix (708.1137 — the real-world bug)', () => {
+    assert.ok(!isValidArxivId('708.1137'));
+  });
+
+  it('rejects 5-digit prefix', () => {
+    assert.ok(!isValidArxivId('23011.2345'));
+  });
+
+  it('rejects too-short suffix (3 digits)', () => {
+    assert.ok(!isValidArxivId('2301.123'));
+  });
+
+  it('rejects too-long suffix (6 digits)', () => {
+    assert.ok(!isValidArxivId('2301.123456'));
+  });
+
+  it('rejects a bare word', () => {
+    assert.ok(!isValidArxivId('notanid'));
+  });
+
+  it('rejects a URL (must be pre-normalised)', () => {
+    assert.ok(!isValidArxivId('https://arxiv.org/abs/2301.12345'));
+  });
+
+  it('rejects a versioned ID (must be pre-stripped)', () => {
+    assert.ok(!isValidArxivId('2301.12345v2'));
+  });
+
+  it('rejects null', () => {
+    assert.ok(!isValidArxivId(null));
+  });
+
+  it('rejects undefined', () => {
+    assert.ok(!isValidArxivId(undefined));
+  });
+
+  it('rejects empty string', () => {
+    assert.ok(!isValidArxivId(''));
+  });
+
+  it('composition: stripVersion ∘ normalizeArxivId passes isValidArxivId for a real ID', () => {
+    const clean = stripVersion(normalizeArxivId('https://arxiv.org/abs/2301.12345v2'));
+    assert.ok(isValidArxivId(clean));
+  });
+
+  it('composition: stripVersion ∘ normalizeArxivId fails isValidArxivId for 708.1137', () => {
+    const clean = stripVersion(normalizeArxivId('708.1137'));
+    assert.ok(!isValidArxivId(clean));
+  });
+
+  // Zero-padding fallback — the logic inspire.js uses to auto-correct 3-digit prefixes
+  it('zero-padding 708.1137 produces a valid ID', () => {
+    const original = '708.1137';
+    assert.ok(!isValidArxivId(original), 'original should be invalid');
+    const padded = /^\d{3}\./.test(original) ? '0' + original : null;
+    assert.equal(padded, '0708.1137');
+    assert.ok(isValidArxivId(padded), 'padded form should be valid');
+  });
+
+  it('zero-padding does not apply to a 2-digit prefix (8.1137)', () => {
+    const original = '8.1137';
+    assert.ok(!isValidArxivId(original), 'original should be invalid');
+    const padded = /^\d{3}\./.test(original) ? '0' + original : null;
+    assert.equal(padded, null, 'should not attempt padding for non-3-digit prefix');
   });
 });

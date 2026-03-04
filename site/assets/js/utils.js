@@ -95,6 +95,22 @@ export function parseCsv(text) {
 // ── ARXIV ID HELPERS ─────────────────────────────────────────
 
 /**
+ * Returns true if `id` is a syntactically valid arXiv ID.
+ * Accepts:
+ *   - Modern format: YYMM.NNNN or YYMM.NNNNN (exactly 4-digit prefix)
+ *   - Old format:    category/YYMMNNN  e.g. hep-ph/9901123
+ * The id must already be normalised (no URL prefix, no version suffix).
+ */
+export function isValidArxivId(id) {
+  if (!id) return false;
+  // Modern: exactly 4 digits, dot, 4 or 5 digits
+  if (/^\d{4}\.\d{4,5}$/.test(id)) return true;
+  // Old-style: at least one letter category prefix, slash, 7 digits
+  if (/^[a-z][a-z\-]+\/\d{7}$/i.test(id)) return true;
+  return false;
+}
+
+/**
  * Extracts a bare arXiv ID from a URL, short ID, or free-form string.
  * e.g. "https://arxiv.org/abs/2301.12345v2" → "2301.12345v2"
  */

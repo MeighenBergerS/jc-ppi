@@ -236,8 +236,9 @@ function _buildBadgeRow(rawArxivId, cleanId, meta) {
   row.style.cssText =
     'margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;';
 
-  // arXiv badge (always present)
-  row.appendChild(arxivLink(rawArxivId));
+  // arXiv badge — use the corrected (zero-padded) ID if the original was auto-fixed
+  const displayArxivId = meta.correctedId ?? rawArxivId;
+  row.appendChild(arxivLink(displayArxivId));
 
   // INSPIRE-HEP link (only when indexed)
   if (meta.inspireId) {
@@ -287,6 +288,14 @@ function _buildBadgeRow(rawArxivId, cleanId, meta) {
       }
     });
     row.appendChild(btn);
+  }
+
+  // Auto-correction note
+  if (meta.correctedId) {
+    const note = document.createElement('div');
+    note.className = 'inspire-corrected';
+    note.textContent = `ℹ ID auto-corrected: ${rawArxivId} → ${meta.correctedId}`;
+    row.appendChild(note);
   }
 
   // Status warnings — mutually exclusive, in descending severity

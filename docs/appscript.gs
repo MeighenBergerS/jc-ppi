@@ -1,3 +1,17 @@
+const APPROVED = [
+  'example@gmail.com',
+];
+
+function onFormSubmit(e) {
+  const sheet = e.range.getSheet();
+  const row = e.range.getRow();
+  const email = (e.values[4] ?? '').trim().toLowerCase();
+  console.log('Email received:', JSON.stringify(email));  // ← here
+  const approved = APPROVED.map((a) => a.toLowerCase()).includes(email);
+  sheet.getRange(row, 6).setValue(approved);
+}
+
+
 // ============================================================
 // Apps Script — doPost handler for jc-ppi interactivity
 // ============================================================

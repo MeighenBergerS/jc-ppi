@@ -255,6 +255,17 @@ main {
   display: inline-block;
 }
 
+.inspire-corrected {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  padding: 0.25em 0.6em;
+  display: inline-block;
+}
+
 /* ── Interactive row controls (this week only) ───────────── */
 
 th.actions-col,

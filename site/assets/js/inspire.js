@@ -13,11 +13,11 @@
    so repeat visits and archive expansions are near-instant.
    ============================================================ */
 
-import { normalizeArxivId, stripVersion } from './utils.js';
+import { normalizeArxivId, stripVersion, isValidArxivId } from './utils.js';
 
 // ── Cache ────────────────────────────────────────────────────
 
-const CACHE_KEY = 'inspire_meta_v2';
+const CACHE_KEY = 'inspire_meta_v3'; // bumped: v2 may have stale notFound for format-invalid IDs
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const BATCH_SIZE = 25; // INSPIRE API page limit
 
@@ -75,11 +75,25 @@ export async function fetchPaperMetadata(ids) {
   const cache = _loadCache();
   const now = Date.now();
   const toFetch = [];
+  // Maps paddedId → originalId for IDs where we auto-prepend '0'
+  const idRemap = new Map();
 
   cleanIds.forEach((id) => {
     const entry = cache[id];
     if (entry && now - entry.ts < CACHE_TTL_MS) {
+      // Serve from cache
       meta.set(id, entry.data);
+    } else if (!isValidArxivId(id)) {
+      // Format is wrong — try zero-padding a 3-digit prefix (e.g. 708.1137 → 0708.1137)
+      const paddedId = /^\d{3}\./.test(id) ? '0' + id : null;
+      if (paddedId && isValidArxivId(paddedId)) {
+        idRemap.set(paddedId, id); // remember: paddedId is the fetchable form
+        toFetch.push(paddedId);
+      } else {
+        const data = { invalidId: true };
+        meta.set(id, data);
+        cache[id] = { ts: now, data };
+      }
     } else {
       toFetch.push(id);
     }
@@ -147,6 +161,26 @@ export async function fetchPaperMetadata(ids) {
       cache[id] = { ts: now, data };
     });
   }
+
+  // ── Zero-padding remap ──────────────────────────────────────
+  // For any ID that was queued under its padded form (0708.xxxx),
+  // copy the result back to the original key (708.xxxx) with a
+  // correctedId field so the UI can display the right ID.
+  idRemap.forEach((originalId, paddedId) => {
+    const data = meta.get(paddedId);
+    if (data && !data.invalidId) {
+      const remapped = { ...data, correctedId: paddedId };
+      meta.set(originalId, remapped);
+      cache[originalId] = { ts: now, data: remapped };
+      meta.delete(paddedId);
+    } else {
+      // Padded ID was also not found / invalid — report as invalid on original key
+      const d = { invalidId: true };
+      meta.set(originalId, d);
+      cache[originalId] = { ts: now, data: d };
+      meta.delete(paddedId);
+    }
+  });
 
   _saveCache(cache);
   return meta;
