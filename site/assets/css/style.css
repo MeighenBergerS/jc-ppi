@@ -244,6 +244,118 @@ main {
   display: inline-block;
 }
 
+.inspire-invalid {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius);
+  padding: 0.25em 0.6em;
+  display: inline-block;
+}
+
+/* ── Interactive row controls (this week only) ───────────── */
+
+th.actions-col,
+td.actions-cell {
+  width: 8rem;
+  vertical-align: top;
+  padding-top: 0.6rem;
+}
+
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.action-btn {
+  display: block;
+  width: 100%;
+  padding: 0.25em 0.5em;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.action-btn--vote {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+.action-btn--vote:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+.action-btn--edit {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+.action-btn--edit:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.action-btn--remove {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+.action-btn--remove:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.action-btn--save {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+.action-btn--save:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.action-btn--cancel {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.action-btn--cancel:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 0.4em 0.5em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.edit-textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.edit-btn-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.edit-btn-row .action-btn {
+  width: auto;
+}
+
 .paper-title {
   font-weight: 500;
 }
