@@ -1,14 +1,33 @@
-const APPROVED = [
-  'example@gmail.com',
-];
+// Name of the sheet tab that lists approved member emails, one per row in column A.
+// To add or remove a member, edit that tab directly — no code changes needed.
+var MEMBERS_SHEET_NAME = 'Members';
 
 function onFormSubmit(e) {
-  const sheet = e.range.getSheet();
-  const row = e.range.getRow();
-  const email = (e.values[4] ?? '').trim().toLowerCase();
-  console.log('Email received:', JSON.stringify(email));  // ← here
-  const approved = APPROVED.map((a) => a.toLowerCase()).includes(email);
+  var sheet = e.range.getSheet();
+  var row = e.range.getRow();
+  var email = (e.values[4] ?? '').trim().toLowerCase();
+  var approved = _getApprovedEmails().includes(email);
   sheet.getRange(row, 6).setValue(approved);
+}
+
+/**
+ * Reads approved member emails from the Members tab.
+ * Returns an array of lowercase, trimmed email strings.
+ * Falls back to an empty array if the tab doesn't exist yet.
+ */
+function _getApprovedEmails() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var membersSheet = ss.getSheetByName(MEMBERS_SHEET_NAME);
+  if (!membersSheet) return [];
+  var lastRow = membersSheet.getLastRow();
+  if (lastRow < 1) return [];
+  return membersSheet
+    .getRange(1, 1, lastRow, 1)
+    .getValues()
+    .map(function (r) {
+      return r[0].toString().trim().toLowerCase();
+    })
+    .filter(Boolean);
 }
 
 

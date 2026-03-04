@@ -22,6 +22,20 @@ export const CONFIG = {
   // and paste the /exec URL here.  Leave blank to disable interactive controls.
   mutateUrl:
     'https://script.google.com/macros/s/AKfycbw6pJRxEQOXgLGLL3f0ih6HL05aSkwiKLipp0sB2o7Ec906WPxxVQ4ZmKlX742Aedix/exec',
+
+  // Meeting schedule — update these if the day, time, or location changes.
+  // day/time/timezoneLabel/timezone appear in the "When" block on the home page.
+  // icsAnchor/icsDurationEnd/icsDayCode drive the "Add to Calendar" download.
+  meeting: {
+    day: 'Friday',
+    time: '2:30 PM CT',
+    timezoneLabel: 'Central Time', // human-readable label shown next to the time
+    timezone: 'America/Chicago', // IANA timezone name used in the .ics file
+    icsAnchor: '20260306T143000', // DTSTART of a known occurrence — update if time changes
+    icsDurationEnd: '20260306T160000', // DTEND of that same occurrence
+    icsDayCode: 'FR', // RRULE BYDAY value (FR=Friday, TH=Thursday, etc.)
+    slackUrl: '', // Slack channel URL — leave '' to show plain text
+  },
 };
 
 // ── SHEET COLUMN MAP ────────────────────────────────────────
