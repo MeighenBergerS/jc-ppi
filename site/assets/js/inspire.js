@@ -17,7 +17,7 @@ import { normalizeArxivId, stripVersion, isValidArxivId } from './utils.js';
 
 // ── Cache ────────────────────────────────────────────────────
 
-const CACHE_KEY = 'inspire_meta_v3'; // bumped: v2 may have stale notFound for format-invalid IDs
+const CACHE_KEY = 'inspire_meta_v4'; // bumped: v3 remap could overwrite valid data when INSPIRE returns un-padded eprint
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const BATCH_SIZE = 25; // INSPIRE API page limit
 
@@ -163,23 +163,33 @@ export async function fetchPaperMetadata(ids) {
   }
 
   // ── Zero-padding remap ──────────────────────────────────────
-  // For any ID that was queued under its padded form (0708.xxxx),
-  // copy the result back to the original key (708.xxxx) with a
-  // correctedId field so the UI can display the right ID.
+  // For any ID queued under its padded form (e.g. 0708.1137 for input 708.1137),
+  // find the right data and store it under the original key with correctedId.
+  //
+  // INSPIRE may have returned the hit under *either* the padded or original key:
+  //   - Padded  (0708.1137): data is in meta.get(paddedId) — happy path
+  //   - Original (708.1137): INSPIRE stored eprint without leading zero;
+  //     data landed in meta.get(originalId) already, padded key got { notFound }
   idRemap.forEach((originalId, paddedId) => {
-    const data = meta.get(paddedId);
-    if (data && !data.invalidId) {
-      const remapped = { ...data, correctedId: paddedId };
+    const paddedData = meta.get(paddedId);
+    const origData = meta.get(originalId);
+
+    // A result is "real" if it has actual paper data (not just a status flag)
+    const isReal = (d) => d && !d.notFound && !d.invalidId;
+
+    const realData = isReal(paddedData) ? paddedData : isReal(origData) ? origData : paddedData; // fall back to padded (notFound or invalidId)
+
+    if (realData && !realData.invalidId) {
+      const remapped = { ...realData, correctedId: paddedId };
       meta.set(originalId, remapped);
       cache[originalId] = { ts: now, data: remapped };
-      meta.delete(paddedId);
     } else {
-      // Padded ID was also not found / invalid — report as invalid on original key
       const d = { invalidId: true };
       meta.set(originalId, d);
       cache[originalId] = { ts: now, data: d };
-      meta.delete(paddedId);
     }
+    // Always clean up the temporary padded key
+    meta.delete(paddedId);
   });
 
   _saveCache(cache);
