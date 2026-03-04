@@ -3,6 +3,9 @@
 This guide walks through the one-time setup needed to run your own copy of the
 jc-ppi journal club site on GitHub Pages.
 
+For the optional vote/edit/remove interactivity feature, see
+**[INTERACTIVITY.md](INTERACTIVITY.md)** after completing the steps here.
+
 ---
 
 ## Step 1 — Create the Google Sheet
@@ -37,16 +40,6 @@ jc-ppi journal club site on GitHub Pages.
    > position, not by name. The resulting sheet columns will be:
    > A=Timestamp, B=Name, C=arXiv ID, D=Comment, E=Email, F=Approved.
 
-5. Click the **Responses** tab → click the green Sheets icon **"Link to
-   Sheets"** → **Create a new spreadsheet** (or link to the one from Step 1).
-
-6. **Add an Approved column.** In the sheet, click the column F header and
-   type `Approved`. Select F2:F1000 and add checkboxes via
-   **Insert → Checkbox** — this covers all future rows automatically.
-
-7. Click **Publish** (top right) → click the **link icon** → copy the URL.
-   This is your `formUrl`.
-
 ---
 
 ## Step 3 — Create a Public sheet tab (hides email addresses)
@@ -61,6 +54,22 @@ publicly readable CSV, create a second tab that mirrors everything except email:
    ```
    This pulls Timestamp, Name, arXiv ID, Comment, and Approved — skipping
    Email (column E) entirely. Adjust the sheet name if yours differs.
+3. **Add interactivity columns.** In the same Public tab, add three more column
+   headers immediately to the right of the last QUERY output column:
+
+   | Column | Header          | Initial value | Purpose                                                    |
+   | ------ | --------------- | ------------- | ---------------------------------------------------------- |
+   | F      | `Removed`       | _(blank)_     | Set to `TRUE` by Apps Script when someone removes an entry |
+   | G      | `EditedComment` | _(blank)_     | Overrides the original comment when non-empty              |
+   | H      | `Votes`         | `0`           | Running upvote count, incremented by Apps Script           |
+
+   For the `Votes` column, set the initial value to `0` for any existing rows
+   (select the cells → type `0` → Ctrl+Enter). New rows added by the QUERY
+   formula will leave it blank, which the Apps Script treats as `0`.
+
+   > These columns are only written by the Apps Script web app
+   > (see [INTERACTIVITY.md](INTERACTIVITY.md)). If you do not plan to enable
+   > interactivity, you can skip adding them.
 
 ---
 
@@ -85,19 +94,16 @@ they submit, so their papers appear on the site without manual action.
 
 1. Open the **private response sheet** (not the Public tab).
 2. **Extensions → Apps Script**.
-3. Replace any existing code with:
+3. Replace any existing code with the contents of **`docs/appscript.gs`** from
+   this repository. The file contains two parts:
+   - `onFormSubmit` — auto-approves known members on form submission
+   - `doPost` — handles vote/edit/remove mutations from the site (optional;
+     see [INTERACTIVITY.md](INTERACTIVITY.md) for setup)
+
+   At minimum, update the `APPROVED` array at the top:
 
    ```js
    const APPROVED = ['alice@example.com', 'bob@example.com'];
-
-   function onFormSubmit(e) {
-     const sheet = e.range.getSheet();
-     const row = e.range.getRow();
-     // e.values indices: [0] Timestamp [1] Name [2] arXiv [3] Comment [4] Email
-     const email = (e.values[4] ?? '').trim().toLowerCase();
-     const approved = APPROVED.map((a) => a.toLowerCase()).includes(email);
-     sheet.getRange(row, 6).setValue(approved); // column F = Approved
-   }
    ```
 
 4. Save (Ctrl+S).
@@ -107,25 +113,30 @@ they submit, so their papers appear on the site without manual action.
    - Event type: **On form submit**
 6. Save and grant the requested permissions.
 
-For **one-off approvals** (guests, new members not yet in the script): open the
-private sheet and manually tick the Approved checkbox in column F for that row.
-Dropping a member? Remove their email from the `APPROVED` array.
+For **one-off approvals**: open the private sheet and manually tick the
+Approved checkbox in column F for that row. To add a recurring member
+permanently, add their email to the `APPROVED` array.
 
 ---
 
 ## Step 6 — Configure the site
 
-Open `site/assets/js/config.js` and fill in the two URLs:
+Open `site/assets/js/config.js` and fill in the URLs:
 
 ```js
 export const CONFIG = {
-  // URL of the *Public* tab published as CSV (from Step 4)
+  // Published CSV URL for the Public tab (from Step 4)
   sheetCsvUrl:
     'https://docs.google.com/spreadsheets/d/YOUR_ID/pub?gid=XXXXXXXX&single=true&output=csv',
   // Google Form share link (from Step 2)
   formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
+  // Apps Script /exec URL for vote/edit/remove (from INTERACTIVITY.md — leave blank to disable)
+  mutateUrl: '',
 };
 ```
+
+Leave `mutateUrl` blank for now; it is only needed if you deploy the `doPost`
+web app (see [INTERACTIVITY.md](INTERACTIVITY.md)).
 
 ---
 
@@ -136,3 +147,11 @@ In the repository's GitHub Settings → Pages, set the **Source** to
 deployments automatically, and only re-deploys when site files actually change.
 
 Commit and push your `config.js` changes. The site is now fully functional.
+
+---
+
+## Optional — Enable interactive controls
+
+The vote / edit / remove controls on the **This Week** page require deploying
+the `doPost` function as a second Apps Script web app. See
+**[INTERACTIVITY.md](INTERACTIVITY.md)** for the full walkthrough.

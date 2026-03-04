@@ -63,25 +63,58 @@ check always passes.
 
 ### File map
 
-| File                        | What it does                                                        |
-| --------------------------- | ------------------------------------------------------------------- |
-| `site/assets/js/config.js`  | Google Sheet and Form URLs — **only file needed for initial setup** |
-| `site/assets/js/utils.js`   | Week math, CSV parser, arXiv ID helpers                             |
-| `site/assets/js/inspire.js` | INSPIRE-HEP API client                                              |
-| `site/assets/js/table.js`   | DOM table builder                                                   |
-| `site/assets/js/app.js`     | Page renderers and entry point                                      |
-| `site/assets/css/style.css` | All styling                                                         |
-| `site/index.html`           | This Week page                                                      |
-| `site/archive.html`         | Archive page                                                        |
-| `site/resources.html`       | arXiv & INSPIRE-HEP guide                                           |
+| File                        | What it does                                                       |
+| --------------------------- | ------------------------------------------------------------------ |
+| `site/assets/js/config.js`  | Google Sheet / Form URLs and column map — **start here for setup** |
+| `site/assets/js/utils.js`   | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
+| `site/assets/js/inspire.js` | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
+| `site/assets/js/sheet.js`   | Apps Script mutation wrapper (vote / edit / remove)                |
+| `site/assets/js/table.js`   | DOM table builder                                                  |
+| `site/assets/js/app.js`     | Page renderers and entry point                                     |
+| `site/assets/css/style.css` | All styling                                                        |
+| `site/index.html`           | This Week page                                                     |
+| `site/archive.html`         | Archive page (with subfield filter)                                |
+| `site/stats.html`           | Submission statistics by year                                      |
+| `site/resources.html`       | arXiv & INSPIRE-HEP guide                                          |
 
 ### Making changes
 
 1. Fork the repository and create a branch.
 2. Make your changes locally and test with `python -m http.server 8000`.
-3. Open a pull request against `main`.
+3. Run `npm test` to make sure all tests pass.
+4. Open a pull request against `main`.
 
 The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
+
+---
+
+### Tests
+
+The core JavaScript logic is covered by a built-in test suite using Node's
+`node:test` module — no external packages required.
+
+```bash
+npm install   # first time only; also wires up the pre-commit hook
+npm test
+```
+
+Test files live in `tests/`:
+
+| File              | Covers                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `utils.test.js`   | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
+| `data.test.js`    | `deduplicatePapers`, `computeSubmissionStats`                                                 |
+| `inspire.test.js` | `parseHit`                                                                                    |
+| `runner.html`     | Browser-side DOM tests for `buildTable`                                                       |
+
+The **pre-commit hook** (installed by `npm install` via the `prepare` script)
+runs `npm test` automatically before every commit, so the suite must be green
+before any code reaches the repository.
+
+When adding new utility functions or changing existing ones, add or update the
+corresponding test in `tests/utils.test.js`. For INSPIRE metadata parsing
+changes, update `tests/inspire.test.js` and, if needed, the JSON fixture in
+`tests/fixtures/inspire-response.json`.
 
 ---
 
