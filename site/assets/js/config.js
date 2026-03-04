@@ -20,7 +20,8 @@ export const CONFIG = {
   // Apps Script web app URL for vote/edit/remove mutations.
   // Deploy docs/appscript.gs as a web app (Execute as: Me, Anyone can access)
   // and paste the /exec URL here.  Leave blank to disable interactive controls.
-  mutateUrl: '',
+  mutateUrl:
+    'https://script.google.com/macros/s/AKfycbw6pJRxEQOXgLGLL3f0ih6HL05aSkwiKLipp0sB2o7Ec906WPxxVQ4ZmKlX742Aedix/exec',
 };
 
 // ── SHEET COLUMN MAP ────────────────────────────────────────
