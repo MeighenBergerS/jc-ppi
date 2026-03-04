@@ -134,6 +134,11 @@ export async function fetchPaperMetadata(ids) {
 
 // ── Helpers ───────────────────────────────────────────────────
 
+/** Exported for unit testing. */
+export function parseHit(m) {
+  return _parseHit(m);
+}
+
 function _parseHit(m) {
   const title = m.titles?.[0]?.title?.trim() ?? '';
   const abstract = m.abstracts?.[0]?.value?.trim() ?? '';

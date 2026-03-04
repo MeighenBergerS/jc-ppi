@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iowa Particles &amp; Plots Journal Club</title>
+    <meta
+      name="description"
+      content="From arXiv to argument — every week. A weekly HEP paper discussion at the University of Iowa."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Iowa Particles &amp; Plots Journal Club" />
+    <meta
+      property="og:description"
+      content="From arXiv to argument — every week. A weekly HEP paper discussion at the University of Iowa."
+    />
+    <meta property="og:url" content="https://meighenbergers.github.io/jc-ppi/" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
@@ -30,6 +41,47 @@
         <p class="week-label" id="week-label">Loading…</p>
       </section>
 
+      <div class="meeting-info">
+        <div class="meeting-info-row">
+          <span class="meeting-tag">When</span>
+          <span
+            >Every <strong>Friday at 2:30 PM CT</strong> (Central Time &mdash;
+            America/Chicago)</span
+          >
+        </div>
+        <div class="meeting-info-row">
+          <span class="meeting-tag">Updates</span>
+          <span
+            >Room changes and cancellations are announced in the
+            <strong>Slack channel</strong>.</span
+          >
+        </div>
+        <div class="meeting-info-row" style="margin-top: 0.3rem">
+          <button id="cal-export" class="cal-btn">&#128197; Add to Calendar</button>
+        </div>
+        <div class="meeting-info-guides">
+          <strong>How to submit a paper</strong>
+          <ul>
+            <li>
+              Click <em>Submit a Paper ↗</em> above and paste an arXiv ID
+              (e.g. <code>2301.12345</code>) or the full abstract URL.
+            </li>
+            <li>
+              Add a short note on why you find it interesting &mdash; it helps everyone prepare.
+            </li>
+            <li>
+              You don&rsquo;t need to present &mdash; just submit something you&rsquo;d like to
+              discuss.
+            </li>
+            <li>Students at every level are welcome and encouraged to submit!</li>
+            <li>
+              Submissions for the current week close at end of Sunday; approved papers appear here
+              within a minute.
+            </li>
+          </ul>
+        </div>
+      </div>
+
       <div id="papers-container">
         <div class="loading">Fetching this week's papers…</div>
       </div>
@@ -46,6 +98,10 @@
       <p>
         Iowa Particles &amp; Plots Journal Club &mdash;
         <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a>
+        &middot;
+        <a href="https://inspirehep.net" target="_blank" rel="noopener">INSPIRE-HEP</a>
+        &middot;
+        <a href="https://github.com/MeighenBergerS/jc-ppi" target="_blank" rel="noopener">GitHub</a>
       </p>
     </footer>
 

@@ -1,0 +1,12 @@
+{
+  "name": "jc-ppi",
+  "version": "1.0.0",
+  "description": "Iowa Particles & Plots Journal Club",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/utils.test.js tests/data.test.js tests/inspire.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

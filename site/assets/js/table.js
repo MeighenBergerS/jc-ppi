@@ -40,6 +40,9 @@ export function buildTable(papers, metaMap = new Map()) {
     const tdName = tr.insertCell();
     tdName.textContent = (paper[COL.name] || '').trim() || '—';
 
+    // Attach categories as a data attribute for the subfield filter
+    tr.dataset.categories = (meta.categories ?? []).join(',');
+
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
     _appendText(tdPaper, meta.title, 'paper-title');
@@ -120,6 +123,37 @@ function _buildBadgeRow(rawArxivId, meta) {
     span.className = 'cite-count';
     span.textContent = `${meta.citations.toLocaleString()} citation${meta.citations !== 1 ? 's' : ''}`;
     row.appendChild(span);
+  }
+
+  // BibTeX copy button — only when the paper is indexed on INSPIRE
+  if (meta.inspireId) {
+    const btn = document.createElement('button');
+    btn.className = 'bibtex-btn';
+    btn.textContent = 'Cite BibTeX';
+    btn.title = 'Copy BibTeX citation to clipboard';
+    btn.addEventListener('click', async () => {
+      try {
+        const r = await fetch(
+          `https://inspirehep.net/api/literature/${meta.inspireId}?format=bibtex`,
+          { cache: 'force-cache' }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const bib = await r.text();
+        await navigator.clipboard.writeText(bib);
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Cite BibTeX';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch {
+        btn.textContent = 'Error — try again';
+        setTimeout(() => {
+          btn.textContent = 'Cite BibTeX';
+        }, 2000);
+      }
+    });
+    row.appendChild(btn);
   }
 
   // Not-yet-indexed warning

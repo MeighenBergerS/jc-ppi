@@ -1,0 +1,272 @@
+<!doctype html>
+<!--
+  tests/runner.html — Browser-side DOM tests for table.js
+  Open via a local server (e.g. `npx serve` from the repo root) so that
+  ES module imports work: http://localhost:3000/tests/runner.html
+
+  No external libraries required — uses a tiny hand-rolled test harness.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM Tests — jc-ppi</title>
+    <style>
+      body {
+        font-family: monospace;
+        padding: 1.5rem;
+        background: #0d1117;
+        color: #c9d1d9;
+      }
+      h1 {
+        color: #e6edf3;
+        margin-bottom: 1rem;
+      }
+      .suite {
+        margin-top: 1.2rem;
+      }
+      .suite-name {
+        font-weight: bold;
+        color: #79c0ff;
+        margin-bottom: 0.3rem;
+      }
+      .pass {
+        color: #56d364;
+      }
+      .fail {
+        color: #f85149;
+      }
+      .skip {
+        color: #8b949e;
+      }
+      .summary {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        border-top: 1px solid #30363d;
+        padding-top: 0.8rem;
+      }
+      pre {
+        background: #161b22;
+        padding: 0.5rem;
+        border-radius: 4px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DOM Tests</h1>
+    <div id="log"></div>
+    <div class="summary" id="summary"></div>
+
+    <script type="module">
+      // ── Mini test harness ─────────────────────────────────────────────────────────
+
+      const log = document.getElementById('log');
+      const summary = document.getElementById('summary');
+
+      let total = 0,
+        passed = 0,
+        failed = 0;
+      let currentSuite = null;
+      let suiteEl = null;
+
+      function suite(name, fn) {
+        suiteEl = document.createElement('div');
+        suiteEl.className = 'suite';
+        suiteEl.innerHTML = `<div class="suite-name">${name}</div>`;
+        log.appendChild(suiteEl);
+        currentSuite = name;
+        fn();
+      }
+
+      async function test(name, fn) {
+        total++;
+        try {
+          await fn();
+          passed++;
+          appendLine('pass', `  ✓ ${name}`);
+        } catch (err) {
+          failed++;
+          appendLine('fail', `  ✗ ${name}`);
+          appendLine('fail', `      ${err.message}`);
+        }
+      }
+
+      function appendLine(cls, text) {
+        const div = document.createElement('div');
+        div.className = cls;
+        div.textContent = text;
+        (suiteEl || log).appendChild(div);
+      }
+
+      function assert(condition, msg) {
+        if (!condition) throw new Error(msg ?? 'assertion failed');
+      }
+      function assertEqual(a, b, msg) {
+        if (a !== b)
+          throw new Error(msg ?? `expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+      }
+      function assertContains(haystack, needle, msg) {
+        if (!haystack.includes(needle))
+          throw new Error(msg ?? `expected "${haystack}" to contain "${needle}"`);
+      }
+
+      // ── Import modules under test ─────────────────────────────────────────────────
+
+      import { buildTable } from '../site/assets/js/table.js';
+
+      // ── Synthetic test data ───────────────────────────────────────────────────────
+
+      // Minimal paper rows: [timestamp, name, arxivId, comment, approved]
+      const PAPERS = [
+        ['2024-01-08', 'Alice Chen', '2401.00001', 'Great paper', 'TRUE'],
+        ['2024-01-09', 'Bob Martinez', '2401.00002', 'Very nice', 'TRUE'],
+        ['2024-01-10', 'Carol Liu', '2401.00003', '', 'TRUE'],
+      ];
+
+      // Minimal metaMap — keyed by normalised arXiv ID
+      const META_MAP = new Map([
+        [
+          '2401.00001',
+          {
+            inspireId: 1001,
+            title: 'A Dark Matter Study',
+            authors: 'Smith, J., Jones, A.',
+            abstract: 'We study dark matter.',
+            citations: 42,
+            categories: ['Experiment-HEP', 'Astrophysics'],
+            keywords: ['dark matter', 'direct detection'],
+          },
+        ],
+        [
+          '2401.00002',
+          {
+            inspireId: 1002,
+            title: 'Neutrino Oscillations',
+            authors: 'Lee, B., Kim, C.',
+            abstract: 'Neutrino mixing angles.',
+            citations: 17,
+            categories: ['Phenomenology-HEP'],
+            keywords: ['neutrino', 'oscillation'],
+          },
+        ],
+        // 2401.00003 intentionally has NO entry → tests fallback / no BibTeX btn
+      ]);
+
+      // ── Test suites ───────────────────────────────────────────────────────────────
+
+      suite('buildTable — row count', () => {
+        test('produces one <tr> per paper', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = table.querySelectorAll('tbody tr');
+          // Each paper has a title row + a badge row → 2 rows per paper = 6 total
+          assertEqual(rows.length, PAPERS.length * 2);
+        });
+      });
+
+      suite('buildTable — data-categories attribute', () => {
+        test('row for paper with categories has non-empty data-categories', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          // Find the row whose dataset.categories contains 'Experiment-HEP'
+          const hit = rows.find((r) => r.dataset.categories?.includes('Experiment-HEP'));
+          assert(hit != null, 'no row has data-categories containing Experiment-HEP');
+        });
+
+        test('categories from metaMap are joined with commas', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          const hit = rows.find((r) => r.dataset.categories?.includes('Experiment-HEP'));
+          assertContains(hit.dataset.categories, ',', 'expected comma-separated categories');
+          assertContains(hit.dataset.categories, 'Astrophysics');
+        });
+
+        test('row for paper without metaMap entry has empty data-categories', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          // Carol's paper (no metaMap entry) should have empty or absent categories
+          const carolRows = rows.filter((r) => {
+            // badge rows carry dataset.categories; find Carol's badge row
+            const sibling = r.previousElementSibling;
+            return sibling && sibling.textContent.includes('Carol');
+          });
+          // All carol rows should have empty categories
+          for (const r of carolRows) {
+            assertEqual(
+              r.dataset.categories ?? '',
+              '',
+              `Carol's row should have empty categories, got: "${r.dataset.categories}"`
+            );
+          }
+        });
+      });
+
+      suite('buildTable — BibTeX button', () => {
+        test('BibTeX button is present when inspireId is available', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const buttons = table.querySelectorAll('.bibtex-btn');
+          assert(buttons.length > 0, 'expected at least one .bibtex-btn');
+        });
+
+        test('BibTeX button absent for paper with no metaMap entry', async () => {
+          const singlePaper = [PAPERS[2]]; // Carol — no metaMap entry
+          const table = buildTable(singlePaper, META_MAP);
+          const buttons = table.querySelectorAll('.bibtex-btn');
+          assertEqual(buttons.length, 0, 'should be no BibTeX button when inspireId is missing');
+        });
+
+        test('BibTeX buttons have correct INSPIRE id in data-inspire-id', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const btn = table.querySelector('.bibtex-btn');
+          assert(btn != null, 'expected a .bibtex-btn element');
+          const id = parseInt(btn.dataset.inspireId ?? btn.getAttribute('data-inspire-id'), 10);
+          assert([1001, 1002].includes(id), `unexpected inspireId: ${id}`);
+        });
+
+        test('exactly 2 BibTeX buttons for 2 papers with metaMap entries', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const buttons = table.querySelectorAll('.bibtex-btn');
+          assertEqual(buttons.length, 2);
+        });
+      });
+
+      suite('buildTable — title and author display', () => {
+        test('paper title appears in the table', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          assertContains(table.textContent, 'A Dark Matter Study');
+        });
+
+        test('authors appear in the table', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          assertContains(table.textContent, 'Smith, J.');
+        });
+
+        test('citation count appears in the table', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          assertContains(table.textContent, '42');
+        });
+      });
+
+      suite('buildTable — empty inputs', () => {
+        test('returns a table element for empty papers array', async () => {
+          const table = buildTable([], new Map());
+          assertEqual(table.tagName.toLowerCase(), 'table');
+        });
+
+        test('returns a table with no rows for empty papers', async () => {
+          const table = buildTable([], new Map());
+          const rows = table.querySelectorAll('tbody tr');
+          assertEqual(rows.length, 0);
+        });
+      });
+
+      // ── Final summary ─────────────────────────────────────────────────────────────
+
+      const colour = failed > 0 ? '#f85149' : '#56d364';
+      summary.innerHTML =
+        `<span style="color:${colour}">` +
+        `${passed}/${total} passed` +
+        (failed > 0 ? ` — ${failed} failed` : ' — all green ✓') +
+        `</span>`;
+    </script>
+  </body>
+</html>

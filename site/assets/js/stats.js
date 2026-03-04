@@ -14,7 +14,7 @@ import { CONFIG, COL } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 
-const YEAR = new Date().getFullYear();
+const DEFAULT_YEAR = new Date().getFullYear();
 
 // ── Title word stop list ──────────────────────────────────────
 // Words excluded from the title-word frequency chart.
@@ -251,12 +251,12 @@ function _buildChart(title, rows, emptyMsg = 'No data yet.') {
 
 // ── Summary KPI strip ─────────────────────────────────────────
 
-function _buildSummary({ total, members, weeksActive, busiestWeek, topCat }) {
+function _buildSummary({ total, members, weeksActive, busiestWeek, topCat, year }) {
   const strip = document.createElement('div');
   strip.className = 'stat-summary';
 
   const kpis = [
-    { value: total, label: `papers in ${YEAR}` },
+    { value: total, label: `papers in ${year ?? ''}` },
     { value: members, label: `active member${members !== 1 ? 's' : ''}` },
     { value: weeksActive, label: `weeks active` },
     { value: busiestWeek, label: 'busiest week', small: true },
@@ -283,6 +283,168 @@ function _buildSummary({ total, members, weeksActive, busiestWeek, topCat }) {
   return strip;
 }
 
+// ── Pure aggregation (exported for testing) ──────────────────
+
+/**
+ * Computes submission statistics for a given calendar year from raw CSV rows.
+ * Pure function — no DOM, no network.
+ *
+ * @param {number} year
+ * @param {string[][]} allRows - All CSV rows (already sliced past header).
+ * @returns {{ papers, memberCounts, weekCounts, busiestKey }}
+ */
+export function computeSubmissionStats(year, allRows) {
+  const yearRows = allRows.filter((p) => {
+    const ts = new Date(p[COL.timestamp]);
+    return !isNaN(ts) && ts.getFullYear() === year;
+  });
+
+  const seen = new Map();
+  yearRows.forEach((p) => {
+    const id = stripVersion(normalizeArxivId(p[COL.arxivId]));
+    if (!id || seen.has(id)) return;
+    seen.set(id, p);
+  });
+  const papers = [...seen.values()];
+
+  const memberCounts = new Map();
+  papers.forEach((p) => {
+    const name = (p[COL.name] || '').trim() || 'Anonymous';
+    memberCounts.set(name, (memberCounts.get(name) ?? 0) + 1);
+  });
+
+  const weekCounts = new Map();
+  papers.forEach((p) => {
+    const key = weekStart(new Date(p[COL.timestamp])).toISOString();
+    weekCounts.set(key, (weekCounts.get(key) ?? 0) + 1);
+  });
+
+  let busiestKey = null,
+    busiestN = 0;
+  weekCounts.forEach((n, k) => {
+    if (n > busiestN) {
+      busiestN = n;
+      busiestKey = k;
+    }
+  });
+
+  return { papers, memberCounts, weekCounts, busiestKey };
+}
+
+// ── Stats renderer ────────────────────────────────────────────
+
+/**
+ * Renders all stat charts for a given year using pre-fetched rows.
+ * Clears and repopulates #stats-container on each call.
+ */
+async function renderStats(year, allRows) {
+  const container = document.getElementById('stats-container');
+  const subtitle = document.getElementById('stats-subtitle');
+
+  const { papers, memberCounts, weekCounts, busiestKey } = computeSubmissionStats(year, allRows);
+  const busiestWeekLabel = busiestKey ? fmtWeekRange(new Date(busiestKey)) : '—';
+
+  const isCurrentYear = year === new Date().getFullYear();
+  if (subtitle)
+    subtitle.textContent = `${year}${isCurrentYear ? ' year-to-date' : ''} · ${papers.length} paper${papers.length !== 1 ? 's' : ''}`;
+
+  // Render member bars (no API call needed)
+  container.innerHTML = '';
+
+  const memberRows = [...memberCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, value], i, arr) => ({
+      label,
+      value,
+      color: _gradientColor(27, 158, 119, i, arr.length), // teal
+    }));
+
+  // Render summary with placeholder top-cat (filled in after INSPIRE)
+  const summaryEl = _buildSummary({
+    total: papers.length,
+    members: memberCounts.size,
+    weeksActive: weekCounts.size,
+    busiestWeek: busiestWeekLabel,
+    topCat: null,
+    year,
+  });
+  container.appendChild(summaryEl);
+  container.appendChild(_buildChart(`Papers submitted in ${year} by member`, memberRows));
+
+  if (papers.length === 0) return;
+
+  // Fetch INSPIRE metadata (batched + cached)
+  const inspireNote = document.createElement('p');
+  inspireNote.className = 'loading';
+  inspireNote.textContent = 'Fetching subfield & keyword data from INSPIRE-HEP…';
+  container.appendChild(inspireNote);
+
+  const metaMap = await fetchPaperMetadata(papers.map((p) => p[COL.arxivId]));
+  inspireNote.remove();
+
+  // Category distribution
+  const catCounts = new Map();
+  metaMap.forEach((meta) => {
+    (meta.categories ?? []).forEach((cat) => {
+      catCounts.set(cat, (catCounts.get(cat) ?? 0) + 1);
+    });
+  });
+
+  const sortedCatNames = [...catCounts.keys()].sort();
+  const catRows = [...catCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, value]) => ({
+      label,
+      value,
+      color: _catColor(label, sortedCatNames),
+    }));
+
+  // Back-fill top category in summary strip
+  if (catRows.length) {
+    const topCatEl = summaryEl.querySelector('.stat-kpi:last-child .stat-kpi-value');
+    if (topCatEl) topCatEl.textContent = catRows[0].label;
+  }
+
+  container.appendChild(
+    _buildChart(
+      'Subfield distribution',
+      catRows,
+      'No category data yet — papers may still be indexing on INSPIRE-HEP.'
+    )
+  );
+
+  // Title word frequency (top 10)
+  const wordCounts = new Map();
+  metaMap.forEach((meta) => {
+    if (!meta.title) return;
+    meta.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\- ]/g, ' ')
+      .split(/\s+/)
+      .forEach((word) => {
+        if (!word || word.length < 2 || TITLE_STOP_WORDS.has(word) || /^\d+$/.test(word)) return;
+        wordCounts.set(word, (wordCounts.get(word) ?? 0) + 1);
+      });
+  });
+
+  const wordRows = [...wordCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([label, value], i, arr) => ({
+      label,
+      value,
+      color: _gradientColor(117, 112, 179, i, arr.length), // purple
+    }));
+
+  container.appendChild(
+    _buildChart(
+      'Top title words (year to date)',
+      wordRows,
+      'Not enough papers yet to show word frequencies.'
+    )
+  );
+}
+
 // ── Entry point ───────────────────────────────────────────────
 
 async function init() {
@@ -297,7 +459,6 @@ async function init() {
   });
 
   const container = document.getElementById('stats-container');
-  const subtitle = document.getElementById('stats-subtitle');
 
   if (!CONFIG.sheetCsvUrl || CONFIG.sheetCsvUrl === 'PASTE_YOUR_SHEET_CSV_URL_HERE') {
     container.innerHTML = `<div class="error">
@@ -316,145 +477,32 @@ async function init() {
       .slice(1)
       .filter((r) => r.length > COL.timestamp && r[COL.timestamp]);
 
-    // ── 2. Filter to current calendar year ─────────────────
-    const yearRows = allRows.filter((p) => {
-      const ts = new Date(p[COL.timestamp]);
-      return !isNaN(ts) && ts.getFullYear() === YEAR;
-    });
+    // ── 2. Populate year selector ───────────────────────────
+    const availableYears = [
+      ...new Set(
+        allRows.map((r) => new Date(r[COL.timestamp]).getFullYear()).filter((y) => !isNaN(y))
+      ),
+    ].sort((a, b) => b - a); // newest first
 
-    // Deduplicate by arXiv ID (earliest submission wins)
-    const seen = new Map();
-    yearRows.forEach((p) => {
-      const id = stripVersion(normalizeArxivId(p[COL.arxivId]));
-      if (!id || seen.has(id)) return;
-      seen.set(id, p);
-    });
-    const papers = [...seen.values()];
-
-    if (subtitle)
-      subtitle.textContent = `${YEAR} year-to-date · ${papers.length} paper${papers.length !== 1 ? 's' : ''}`;
-
-    // ── 3. Papers per member ────────────────────────────────
-    const memberCounts = new Map();
-    papers.forEach((p) => {
-      const name = (p[COL.name] || '').trim() || 'Anonymous';
-      memberCounts.set(name, (memberCounts.get(name) ?? 0) + 1);
-    });
-
-    // ── 4. Most active week ─────────────────────────────────
-    const weekCounts = new Map();
-    papers.forEach((p) => {
-      const key = weekStart(new Date(p[COL.timestamp])).toISOString();
-      weekCounts.set(key, (weekCounts.get(key) ?? 0) + 1);
-    });
-    let busiestKey = null,
-      busiestN = 0;
-    weekCounts.forEach((n, k) => {
-      if (n > busiestN) {
-        busiestN = n;
-        busiestKey = k;
-      }
-    });
-    const busiestWeekLabel = busiestKey ? fmtWeekRange(new Date(busiestKey)) : '—';
-
-    // ── 5. Render member bars (no API call needed) ──────────
-    container.innerHTML = '';
-
-    const memberRows = [...memberCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, value], i, arr) => ({
-        label,
-        value,
-        color: _gradientColor(27, 158, 119, i, arr.length), // teal
-      }));
-
-    // Render summary with placeholder top-cat (filled in after INSPIRE)
-    const summaryEl = _buildSummary({
-      total: papers.length,
-      members: memberCounts.size,
-      weeksActive: weekCounts.size,
-      busiestWeek: busiestWeekLabel,
-      topCat: null,
-    });
-    container.appendChild(summaryEl);
-    container.appendChild(_buildChart(`Papers submitted in ${YEAR} by member`, memberRows));
-
-    if (papers.length === 0) return;
-
-    // ── 6. Fetch INSPIRE metadata (batched + cached) ────────
-    const inspireNote = document.createElement('p');
-    inspireNote.className = 'loading';
-    inspireNote.textContent = 'Fetching subfield & keyword data from INSPIRE-HEP…';
-    container.appendChild(inspireNote);
-
-    const metaMap = await fetchPaperMetadata(papers.map((p) => p[COL.arxivId]));
-    inspireNote.remove();
-
-    // ── 7. Category distribution ────────────────────────────
-    const catCounts = new Map();
-    metaMap.forEach((meta) => {
-      (meta.categories ?? []).forEach((cat) => {
-        catCounts.set(cat, (catCounts.get(cat) ?? 0) + 1);
+    const yearSelect = document.getElementById('year-select');
+    if (yearSelect && availableYears.length > 0) {
+      availableYears.forEach((y) => {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
       });
-    });
-
-    const sortedCatNames = [...catCounts.keys()].sort();
-    const catRows = [...catCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, value]) => ({
-        label,
-        value,
-        color: _catColor(label, sortedCatNames),
-      }));
-
-    // Back-fill top category in summary strip
-    if (catRows.length) {
-      const topCatEl = summaryEl.querySelector('.stat-kpi:last-child .stat-kpi-value');
-      if (topCatEl) topCatEl.textContent = catRows[0].label;
+      const defaultYear = availableYears.includes(DEFAULT_YEAR) ? DEFAULT_YEAR : availableYears[0];
+      yearSelect.value = defaultYear;
+      yearSelect.addEventListener('change', () => {
+        renderStats(parseInt(yearSelect.value, 10), allRows);
+      });
     }
 
-    container.appendChild(
-      _buildChart(
-        'Subfield distribution',
-        catRows,
-        'No category data yet — papers may still be indexing on INSPIRE-HEP.'
-      )
-    );
-
-    // ── 8. Title word frequency (top 10) ──────────────────
-    // Extract words from INSPIRE titles (falling back to arXiv ID if missing),
-    // filter against TITLE_STOP_WORDS, count occurrences, show top 10.
-    const wordCounts = new Map();
-    metaMap.forEach((meta) => {
-      if (!meta.title) return;
-      meta.title
-        .toLowerCase()
-        // strip punctuation but keep hyphens inside words (e.g. "non-perturbative")
-        .replace(/[^a-z0-9\- ]/g, ' ')
-        .split(/\s+/)
-        .forEach((word) => {
-          // skip stop words, single characters, and pure numbers
-          if (!word || word.length < 2 || TITLE_STOP_WORDS.has(word) || /^\d+$/.test(word)) return;
-          wordCounts.set(word, (wordCounts.get(word) ?? 0) + 1);
-        });
-    });
-
-    const wordRows = [...wordCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([label, value], i, arr) => ({
-        label,
-        value,
-        color: _gradientColor(117, 112, 179, i, arr.length), // purple
-      }));
-
-    container.appendChild(
-      _buildChart(
-        'Top title words (year to date)',
-        wordRows,
-        'Not enough papers yet to show word frequencies.'
-      )
-    );
+    // ── 3. Initial render ───────────────────────────────────
+    const selectedYear =
+      yearSelect && yearSelect.value ? parseInt(yearSelect.value, 10) : DEFAULT_YEAR;
+    await renderStats(selectedYear, allRows);
   } catch (err) {
     console.error(err);
     container.innerHTML = `<div class="error">
@@ -463,4 +511,4 @@ async function init() {
   }
 }
 
-init();
+if (typeof window !== 'undefined') init();

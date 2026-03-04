@@ -643,6 +643,189 @@ main.prose {
   }
 }
 
+/* ── BibTeX copy button ──────────────────────────────────── */
+
+.bibtex-btn {
+  display: inline-block;
+  font-size: 0.78rem;
+  background: var(--bg-alt);
+  color: var(--muted);
+  padding: 0.2em 0.55em;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.bibtex-btn:hover {
+  background: var(--accent-sec);
+  color: #fff;
+  border-color: var(--accent-sec);
+}
+
+.bibtex-btn.copied {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Meeting info block ──────────────────────────────────── */
+
+.meeting-info {
+  background: var(--accent-dim);
+  border: 1px solid #b2dfdb;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.75rem;
+  font-size: 0.92rem;
+}
+
+.meeting-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.meeting-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.meeting-tag {
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  min-width: 5.5rem;
+}
+
+.meeting-info a {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.meeting-info-guides {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid #b2dfdb;
+}
+
+.meeting-info-guides ul {
+  margin: 0.25rem 0 0 1.3rem;
+  color: var(--text);
+}
+
+.meeting-info-guides li {
+  margin-bottom: 0.25rem;
+}
+
+/* ── Calendar export button ──────────────────────────────── */
+
+.cal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  background: #fff;
+  color: var(--accent);
+  padding: 0.28em 0.75em;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.cal-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Year selector (stats) ───────────────────────────────── */
+
+.stats-year-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.stats-year-wrap label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+#year-select {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#year-select:focus {
+  border-color: var(--accent);
+}
+
+/* ── Subfield filter bar (archive) ───────────────────────── */
+
+.subfield-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.subfield-filter-bar:empty {
+  display: none;
+}
+
+.sf-btn {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.25em 0.75em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.sf-btn:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: #b2dfdb;
+}
+
+.sf-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 /* ── Footer ──────────────────────────────────────────────── */
 
 footer {

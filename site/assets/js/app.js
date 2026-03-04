@@ -24,6 +24,14 @@ import { buildTable } from './table.js';
 /** Re-fetch interval for the This Week page (ms). */
 const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
+// ── Subfield filter state ─────────────────────────────────────
+
+/** Currently active category chip, or null for ‘All’. */
+let _activeCategory = null;
+
+/** Union of all categories discovered from loaded weeks. */
+const _knownCategories = new Set();
+
 // ── Helpers ───────────────────────────────────────────────────
 
 /** Fetch and parse all paper rows from the Google Sheet CSV. */
@@ -42,7 +50,7 @@ async function fetchPapers() {
  * Suppress duplicate arXiv IDs, keeping the earliest submission.
  * Rows with no recognisable arXiv ID are kept as-is.
  */
-function deduplicatePapers(papers) {
+export function deduplicatePapers(papers) {
   const seen = new Map();
   papers.forEach((p) => {
     const id = stripVersion(normalizeArxivId(p[COL.arxivId]));
@@ -144,11 +152,13 @@ async function renderArchive(papers, container) {
       fetchPaperMetadata(weekPapers.map((p) => p[COL.arxivId])).then((metaMap) => {
         contentDiv.innerHTML = '';
         const table = buildTable(weekPapers, metaMap);
-        // Apply any active search filter immediately upon load
+        // Register any new subfield categories and re-render filter bar
+        _registerCategories(metaMap);
+        // Apply active text + category filters immediately on load
         const searchInput = document.getElementById('archive-search');
-        if (searchInput?.value.trim()) {
-          _filterTable(table, searchInput.value.trim().toLowerCase());
-        }
+        const query = (searchInput?.value ?? '').trim().toLowerCase();
+        const visible = _filterTable(table, query);
+        if ((query || _activeCategory) && visible === 0) details.style.display = 'none';
         contentDiv.appendChild(table);
       });
     };
@@ -175,13 +185,17 @@ async function renderArchive(papers, container) {
 // ── Archive search ────────────────────────────────────────────
 
 /**
- * Hides/shows <tr> rows in a table based on a lower-cased query.
+ * Hides/shows <tr> rows in a table based on a lower-cased query
+ * and the active subfield category.
  * Returns the count of visible rows.
  */
 function _filterTable(table, query) {
   let visible = 0;
   table.querySelectorAll('tbody tr').forEach((tr) => {
-    const match = !query || tr.textContent.toLowerCase().includes(query);
+    const textMatch = !query || tr.textContent.toLowerCase().includes(query);
+    const catMatch =
+      !_activeCategory || (tr.dataset.categories || '').split(',').includes(_activeCategory);
+    const match = textMatch && catMatch;
     tr.style.display = match ? '' : 'none';
     if (match) visible++;
   });
@@ -196,19 +210,107 @@ function _filterTable(table, query) {
 function initArchiveSearch() {
   const input = document.getElementById('archive-search');
   if (!input) return;
+  input.addEventListener('input', _applyAllFilters);
+}
 
-  input.addEventListener('input', () => {
-    const query = input.value.trim().toLowerCase();
+/**
+ * Re-applies both the text search and the active category filter
+ * to every currently loaded archive table.
+ */
+function _applyAllFilters() {
+  const searchInput = document.getElementById('archive-search');
+  const query = (searchInput?.value ?? '').trim().toLowerCase();
+  document.querySelectorAll('.archive-week').forEach((details) => {
+    const table = details.querySelector('table');
+    if (!table) return; // not yet loaded — filtered on load
+    const visible = _filterTable(table, query);
+    details.style.display = (query || _activeCategory) && visible === 0 ? 'none' : '';
+  });
+}
 
-    document.querySelectorAll('.archive-week').forEach((details) => {
-      const table = details.querySelector('table');
-      if (!table) return; // not yet loaded — filtered on load
-
-      const visible = _filterTable(table, query);
-      // Hide the whole week section when none of its rows match
-      details.style.display = query && visible === 0 ? 'none' : '';
+/**
+ * Adds newly discovered categories from a metaMap to _knownCategories
+ * and re-renders the subfield filter bar when new ones are found.
+ */
+function _registerCategories(metaMap) {
+  let added = false;
+  metaMap.forEach((meta) => {
+    (meta.categories ?? []).forEach((cat) => {
+      if (!_knownCategories.has(cat)) {
+        _knownCategories.add(cat);
+        added = true;
+      }
     });
   });
+  if (added) _renderSubfieldBar();
+}
+
+/** Renders the subfield filter chip bar from _knownCategories. */
+function _renderSubfieldBar() {
+  const bar = document.getElementById('subfield-filter-bar');
+  if (!bar || _knownCategories.size === 0) return;
+  bar.innerHTML = '';
+
+  const makeChip = (label, isActive, onClick) => {
+    const btn = document.createElement('button');
+    btn.className = 'sf-btn' + (isActive ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', onClick);
+    return btn;
+  };
+
+  bar.appendChild(
+    makeChip('All subfields', _activeCategory === null, () => {
+      _activeCategory = null;
+      _applyAllFilters();
+      _renderSubfieldBar();
+    })
+  );
+
+  [..._knownCategories].sort().forEach((cat) =>
+    bar.appendChild(
+      makeChip(cat, _activeCategory === cat, () => {
+        _activeCategory = cat;
+        _applyAllFilters();
+        _renderSubfieldBar();
+      })
+    )
+  );
+}
+
+// ── Calendar export ───────────────────────────────────────────
+
+/**
+ * Generates and downloads a recurring .ics calendar file for the
+ * weekly Friday journal-club meeting (2:30 PM CT, America/Chicago).
+ */
+function _downloadCalendar() {
+  // Use a known Friday as the recurrence anchor (March 6, 2026)
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//jc-ppi//Iowa Particles & Plots JC//EN',
+    'BEGIN:VEVENT',
+    'DTSTART;TZID=America/Chicago:20260306T143000',
+    'DTEND;TZID=America/Chicago:20260306T160000',
+    'RRULE:FREQ=WEEKLY;BYDAY=FR',
+    'SUMMARY:Iowa Particles & Plots Journal Club',
+    'DESCRIPTION:Weekly HEP paper discussion.\\nSubmit papers at https://meighenbergers.github.io/jc-ppi/\\nUpdates in the group Slack channel.',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT30M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Journal club in 30 minutes',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'jc-ppi-meetings.ics';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── Entry point ───────────────────────────────────────────────
@@ -244,6 +346,9 @@ async function init() {
     if (page === 'index') {
       await renderThisWeek(papers, container, { force: true });
 
+      // Wire up calendar export button
+      document.getElementById('cal-export')?.addEventListener('click', _downloadCalendar);
+
       // Poll for new This Week submissions every POLL_INTERVAL ms
       setInterval(async () => {
         try {
@@ -269,4 +374,4 @@ async function init() {
   }
 }
 
-init();
+if (typeof window !== 'undefined') init();

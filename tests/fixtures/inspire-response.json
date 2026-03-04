@@ -1,0 +1,155 @@
+{
+  "hits": {
+    "total": 5,
+    "hits": [
+      {
+        "metadata": {
+          "arxiv_eprints": [{ "value": "2207.03764" }],
+          "control_number": 2118654,
+          "citation_count": 412,
+          "titles": [
+            {
+              "title": "First Dark Matter Search Results from the LUX-ZEPLIN (LZ) Experiment"
+            }
+          ],
+          "authors": [
+            { "full_name": "Aalbers, J." },
+            { "full_name": "AbdusSalam, S.S." },
+            { "full_name": "Abe, K." },
+            { "full_name": "AbeMace, V." },
+            { "full_name": "Abreu, C." },
+            { "full_name": "Adame, A.I." }
+          ],
+          "abstracts": [
+            {
+              "value": "We report the first dark matter search results from the LUX-ZEPLIN (LZ) experiment using an exposure of 60 live days with a 5.5-tonne fiducial mass of liquid xenon."
+            }
+          ],
+          "inspire_categories": [
+            { "term": "Experiment-HEP" },
+            { "term": "Phenomenology-HEP" },
+            { "term": "Experiment-HEP" }
+          ],
+          "keywords": [
+            { "schema": "INSPIRE", "value": "dark matter" },
+            { "schema": "INSPIRE", "value": "WIMP" },
+            { "schema": "INSPIRE", "value": "direct detection" },
+            { "schema": "author", "value": "xenon" },
+            { "schema": "author", "value": "dark matter" },
+            { "schema": "INSPIRE", "value": "nuclear recoil" },
+            { "schema": "CERN", "value": "should be filtered out" }
+          ]
+        }
+      },
+      {
+        "metadata": {
+          "arxiv_eprints": [{ "value": "2107.14476" }],
+          "control_number": 1906625,
+          "citation_count": 287,
+          "titles": [
+            {
+              "title": "Detection of a particle shower at the Glashow resonance with IceCube"
+            }
+          ],
+          "authors": [
+            { "full_name": "Abbasi, R." },
+            { "full_name": "Ackermann, M." },
+            { "full_name": "Adams, J." },
+            { "full_name": "Aguilar, J.A." }
+          ],
+          "abstracts": [
+            {
+              "value": "In 2016, the IceCube Neutrino Observatory detected a cascade of particles produced through the Glashow resonance, an interaction predicted in 1960."
+            }
+          ],
+          "inspire_categories": [
+            { "term": "Experiment-HEP" },
+            { "term": "Astrophysics" }
+          ],
+          "keywords": [
+            { "schema": "INSPIRE", "value": "neutrino" },
+            { "schema": "INSPIRE", "value": "resonance" },
+            { "schema": "author", "value": "astrophysical neutrino" }
+          ]
+        }
+      },
+      {
+        "metadata": {
+          "arxiv_eprints": [{ "value": "2103.00685" }],
+          "control_number": 1846800,
+          "citation_count": 534,
+          "titles": [
+            {
+              "title": "Observation of gamma-ray sources in the Galactic plane and evidence for PeV cosmic rays with LHAASO"
+            }
+          ],
+          "authors": [
+            { "full_name": "Cao, Z." },
+            { "full_name": "Aharonian, F." },
+            { "full_name": "An, Q." }
+          ],
+          "abstracts": [
+            {
+              "value": "We present the first catalog of LHAASO sources and report evidence for multiple PeV cosmic-ray accelerators in the Galaxy."
+            }
+          ],
+          "inspire_categories": [
+            { "term": "Astrophysics" }
+          ],
+          "keywords": [
+            { "schema": "INSPIRE", "value": "cosmic ray" },
+            { "schema": "INSPIRE", "value": "gamma ray" },
+            { "schema": "INSPIRE", "value": "PeVatron" },
+            { "schema": "author", "value": "galactic" }
+          ]
+        }
+      },
+      {
+        "metadata": {
+          "arxiv_eprints": [{ "value": "2301.03086" }],
+          "control_number": 2622901,
+          "citation_count": 198,
+          "titles": [
+            {
+              "title": "Observation of high-energy neutrinos from the Galactic plane"
+            }
+          ],
+          "authors": [
+            { "full_name": "Abbasi, R." },
+            { "full_name": "Ackermann, M." },
+            { "full_name": "Adams, J." },
+            { "full_name": "Aguilar, J.A." },
+            { "full_name": "Ahlers, M." }
+          ],
+          "abstracts": [
+            {
+              "value": "We report the observation of high-energy neutrino emission from the Galactic plane of the Milky Way using ten years of data from the IceCube Neutrino Observatory."
+            }
+          ],
+          "inspire_categories": [
+            { "term": "Astrophysics" },
+            { "term": "Experiment-HEP" }
+          ],
+          "keywords": [
+            { "schema": "INSPIRE", "value": "neutrino" },
+            { "schema": "INSPIRE", "value": "galactic plane" },
+            { "schema": "author", "value": "diffuse emission" },
+            { "schema": "author", "value": "IceCube" }
+          ]
+        }
+      },
+      {
+        "metadata": {
+          "arxiv_eprints": [{ "value": "2101.03729" }],
+          "control_number": 1841234,
+          "citation_count": null,
+          "titles": [],
+          "authors": [],
+          "abstracts": [],
+          "inspire_categories": [],
+          "keywords": []
+        }
+      }
+    ]
+  }
+}
