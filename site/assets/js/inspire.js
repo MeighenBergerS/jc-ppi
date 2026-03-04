@@ -9,7 +9,7 @@
    which supports browser CORS with no authentication required.
 
    Requests are batched (one query per ≤25 papers) and results
-   are cached in sessionStorage for CACHE_TTL_MS milliseconds
+   are cached in localStorage with tiered TTLs per entry type
    so repeat visits and archive expansions are near-instant.
    ============================================================ */
 
@@ -32,7 +32,27 @@ function _ttlFor(data) {
 
 function _loadCache() {
   try {
-    return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    // Remove stale cache from earlier key versions (one-time cleanup per browser)
+    ['inspire_meta_v1', 'inspire_meta_v2', 'inspire_meta_v3', 'inspire_meta_v4'].forEach((old) =>
+      localStorage.removeItem(old)
+    );
+    const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    // Prune expired entries so the cache doesn't grow indefinitely
+    const now = Date.now();
+    let pruned = false;
+    Object.keys(raw).forEach((key) => {
+      const entry = raw[key];
+      if (entry && now - entry.ts >= (entry.ttl ?? TTL_NOT_FOUND_MS)) {
+        delete raw[key];
+        pruned = true;
+      }
+    });
+    if (pruned) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(raw));
+      } catch {}
+    }
+    return raw;
   } catch {
     return {};
   }

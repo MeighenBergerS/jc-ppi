@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Site](https://img.shields.io/badge/site-live-brightgreen)](https://meighenbergers.github.io/jc-ppi/)
 [![Deploy](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/deploy-pages.yml)
+[![Tests](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/test.yml/badge.svg)](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/test.yml)
 [![Lint](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/lint.yml/badge.svg)](https://github.com/MeighenBergerS/jc-ppi/actions/workflows/lint.yml)
 
 Live site: **https://meighenbergers.github.io/jc-ppi/**
