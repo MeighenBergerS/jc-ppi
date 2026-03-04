@@ -17,20 +17,29 @@ import { normalizeArxivId, stripVersion, isValidArxivId } from './utils.js';
 
 // ── Cache ────────────────────────────────────────────────────
 
-const CACHE_KEY = 'inspire_meta_v4'; // bumped: v3 remap could overwrite valid data when INSPIRE returns un-padded eprint
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const CACHE_KEY = 'inspire_meta_v5'; // bumped: switched to localStorage with per-entry tiered TTL
+const TTL_RESOLVED_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — fully indexed papers rarely change
+const TTL_NOT_FOUND_MS = 15 * 60 * 1000; //        15 min  — paper may appear on INSPIRE any time
+const TTL_INVALID_MS = 24 * 60 * 60 * 1000; //    24 h    — invalid IDs are stable
 const BATCH_SIZE = 25; // INSPIRE API page limit
+
+/** Returns the appropriate TTL for a cached metadata value. */
+function _ttlFor(data) {
+  if (data.invalidId) return TTL_INVALID_MS;
+  if (data.notFound) return TTL_NOT_FOUND_MS;
+  return TTL_RESOLVED_MS;
+}
 
 function _loadCache() {
   try {
-    return JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}');
+    return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
   } catch {
     return {};
   }
 }
 function _saveCache(cache) {
   try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {}
 }
 
@@ -80,7 +89,7 @@ export async function fetchPaperMetadata(ids) {
 
   cleanIds.forEach((id) => {
     const entry = cache[id];
-    if (entry && now - entry.ts < CACHE_TTL_MS) {
+    if (entry && now - entry.ts < (entry.ttl ?? TTL_NOT_FOUND_MS)) {
       // Serve from cache
       meta.set(id, entry.data);
     } else if (!isValidArxivId(id)) {
@@ -92,7 +101,7 @@ export async function fetchPaperMetadata(ids) {
       } else {
         const data = { invalidId: true };
         meta.set(id, data);
-        cache[id] = { ts: now, data };
+        cache[id] = { ts: now, data, ttl: _ttlFor(data) };
       }
     } else {
       toFetch.push(id);
@@ -127,7 +136,7 @@ export async function fetchPaperMetadata(ids) {
         found.add(arxivId);
         const parsed = _parseHit(m);
         meta.set(arxivId, parsed);
-        cache[arxivId] = { ts: now, data: parsed };
+        cache[arxivId] = { ts: now, data: parsed, ttl: _ttlFor(parsed) };
       });
 
       // Collect anything INSPIRE missed for arXiv validation
@@ -158,7 +167,7 @@ export async function fetchPaperMetadata(ids) {
     notFoundIds.forEach((id) => {
       const data = validOnArxiv.has(id) ? { notFound: true } : { invalidId: true };
       meta.set(id, data);
-      cache[id] = { ts: now, data };
+      cache[id] = { ts: now, data, ttl: _ttlFor(data) };
     });
   }
 
@@ -182,11 +191,11 @@ export async function fetchPaperMetadata(ids) {
     if (realData && !realData.invalidId) {
       const remapped = { ...realData, correctedId: paddedId };
       meta.set(originalId, remapped);
-      cache[originalId] = { ts: now, data: remapped };
+      cache[originalId] = { ts: now, data: remapped, ttl: _ttlFor(remapped) };
     } else {
       const d = { invalidId: true };
       meta.set(originalId, d);
-      cache[originalId] = { ts: now, data: d };
+      cache[originalId] = { ts: now, data: d, ttl: _ttlFor(d) };
     }
     // Always clean up the temporary padded key
     meta.delete(paddedId);

@@ -100,11 +100,8 @@ they submit, so their papers appear on the site without manual action.
    - `doPost` — handles vote/edit/remove mutations from the site (optional;
      see [INTERACTIVITY.md](INTERACTIVITY.md) for setup)
 
-   At minimum, update the `APPROVED` array at the top:
-
-   ```js
-   const APPROVED = ['alice@example.com', 'bob@example.com'];
-   ```
+   The script reads the approved member list from a **Members** sheet tab
+   (see Step 5a below) — no code editing needed to add or remove members.
 
 4. Save (Ctrl+S).
 5. Click the **Triggers** icon (clock, left sidebar) → **+ Add Trigger**:
@@ -114,8 +111,17 @@ they submit, so their papers appear on the site without manual action.
 6. Save and grant the requested permissions.
 
 For **one-off approvals**: open the private sheet and manually tick the
-Approved checkbox in column F for that row. To add a recurring member
-permanently, add their email to the `APPROVED` array.
+Approved checkbox in column F for that row.
+
+### Step 5a — Create the Members tab
+
+The `onFormSubmit` script looks for a sheet tab called **Members** to find the
+approved member list. Create it once:
+
+1. In the spreadsheet (either the private response sheet or the same workbook),
+   click **+** to add a new tab and name it `Members`.
+2. In column A, add one email address per row — no header needed.
+3. To add or remove a member in future, just edit this tab. No code changes required.
 
 ---
 
@@ -132,11 +138,22 @@ export const CONFIG = {
   formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
   // Apps Script /exec URL for vote/edit/remove (from INTERACTIVITY.md — leave blank to disable)
   mutateUrl: '',
+  // Meeting schedule — shown in the "When" block and used for the calendar download
+  meeting: {
+    day: 'Friday',
+    time: '2:30 PM CT',
+    timezoneLabel: 'Central Time',
+    timezone: 'America/Chicago',
+    icsAnchor: '20260306T143000', // DTSTART of a known occurrence
+    icsDurationEnd: '20260306T160000', // DTEND of that same occurrence
+    icsDayCode: 'FR', // RRULE BYDAY (FR=Friday, TH=Thursday, …)
+    slackUrl: '', // Slack channel URL — leave '' for plain text
+  },
 };
 ```
 
-Leave `mutateUrl` blank for now; it is only needed if you deploy the `doPost`
-web app (see [INTERACTIVITY.md](INTERACTIVITY.md)).
+To update the meeting time in future, change only the `meeting` fields — the
+home page "When" block and the calendar download will both update automatically.
 
 ---
 

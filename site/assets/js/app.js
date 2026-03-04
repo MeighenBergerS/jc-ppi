@@ -288,15 +288,19 @@ function _renderSubfieldBar() {
  * weekly Friday journal-club meeting (2:30 PM CT, America/Chicago).
  */
 function _downloadCalendar() {
-  // Use a known Friday as the recurrence anchor (March 6, 2026)
+  const m = CONFIG.meeting ?? {};
+  const tz = m.timezone ?? 'America/Chicago';
+  const anchor = m.icsAnchor ?? '20260306T143000';
+  const end = m.icsDurationEnd ?? '20260306T160000';
+  const dayCode = m.icsDayCode ?? 'FR';
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//jc-ppi//Iowa Particles & Plots JC//EN',
     'BEGIN:VEVENT',
-    'DTSTART;TZID=America/Chicago:20260306T143000',
-    'DTEND;TZID=America/Chicago:20260306T160000',
-    'RRULE:FREQ=WEEKLY;BYDAY=FR',
+    `DTSTART;TZID=${tz}:${anchor}`,
+    `DTEND;TZID=${tz}:${end}`,
+    `RRULE:FREQ=WEEKLY;BYDAY=${dayCode}`,
     'SUMMARY:Iowa Particles & Plots Journal Club',
     'DESCRIPTION:Weekly HEP paper discussion.\\nSubmit papers at https://meighenbergers.github.io/jc-ppi/\\nUpdates in the group Slack channel.',
     'BEGIN:VALARM',
@@ -331,6 +335,22 @@ async function init() {
       el.removeAttribute('href');
     }
   });
+
+  // Populate meeting info block from CONFIG.meeting
+  if (CONFIG.meeting) {
+    const { day, time, timezone, timezoneLabel, slackUrl } = CONFIG.meeting;
+    const whenEl = document.getElementById('meeting-when');
+    if (whenEl && day && time) {
+      const tzDisplay = timezoneLabel ? `${timezoneLabel} \u2014 ${timezone}` : timezone;
+      whenEl.innerHTML = `Every <strong>${day} at ${time}</strong>${tzDisplay ? ` (${tzDisplay})` : ''}`;
+    }
+    const updatesEl = document.getElementById('meeting-updates');
+    if (updatesEl && slackUrl) {
+      updatesEl.innerHTML =
+        `Room changes and cancellations are announced in the ` +
+        `<a href="${slackUrl}" target="_blank" rel="noopener"><strong>Slack channel</strong></a>.`;
+    }
+  }
 
   const container = document.getElementById('papers-container');
 
@@ -373,8 +393,10 @@ async function init() {
   } catch (err) {
     console.error(err);
     container.innerHTML = `<div class="error">
-      ⚠️ Could not load papers. Make sure the Google Sheet is published as CSV
-      and the URL in <code>config.js</code> is correct.<br>
+      ⚠️ <strong>Could not load papers.</strong> The most likely cause is the
+      Google Sheet CSV being unpublished or expired. In the sheet go to
+      <strong>File \u2192 Share \u2192 Publish to web</strong>, select the <em>Public</em>
+      tab as CSV, and click Publish (or re-publish).<br>
       <small>${err.message}</small>
     </div>`;
   }

@@ -2,8 +2,8 @@ name: Check links
 
 on:
   schedule:
-    # Run on the first day of every month at 08:00 UTC
-    - cron: "0 8 1 * *"
+    # Run every Monday at 08:00 UTC
+    - cron: "0 8 * * 1"
   workflow_dispatch: # allow manual runs
 
 jobs:
@@ -43,8 +43,8 @@ jobs:
       - name: Check site pages are reachable
         run: |
           BASE="https://meighenbergers.github.io/jc-ppi"
-          for PATH in "/" "/archive.html"; do
-            URL="${BASE}${PATH}"
+          for PAGE in "/" "/archive.html" "/stats.html" "/resources.html"; do
+            URL="${BASE}${PAGE}"
             HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
               --max-time 30 --location "$URL")
             echo "$URL → HTTP $HTTP_STATUS"
