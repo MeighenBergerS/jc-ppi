@@ -26,3 +26,13 @@ echo "$STAGED" | while IFS= read -r file; do
   prettier --write "$file"
   git add "$file"
 done
+
+# ── Run test suite ───────────────────────────────────────────
+echo "Running tests..."
+npm test
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Tests failed — commit aborted. Fix the failures above and try again."
+  exit 1
+fi
+echo "All tests passed."

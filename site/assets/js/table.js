@@ -6,8 +6,9 @@
    the page.
    ============================================================ */
 
-import { COL } from './config.js';
+import { COL, CONFIG } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
+import { vote, removeEntry, editComment } from './sheet.js';
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -16,16 +17,19 @@ import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
  * @param {Map}        metaMap - Result of fetchPaperMetadata().
  * @returns {HTMLTableElement}
  */
-export function buildTable(papers, metaMap = new Map()) {
+export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {}) {
   const table = document.createElement('table');
   table.className = 'papers-table';
 
   // ── Header ──────────────────────────────────────────────
   const thead = table.createTHead();
   const hRow = thead.insertRow();
-  ['Submitted by', 'Paper', 'Why they suggest it'].forEach((label) => {
+  const headers = ['Submitted by', 'Paper', 'Why they suggest it'];
+  if (thisWeek) headers.push('');
+  headers.forEach((label) => {
     const th = document.createElement('th');
     th.textContent = label;
+    if (!label) th.className = 'actions-col';
     hRow.appendChild(th);
   });
 
@@ -48,17 +52,142 @@ export function buildTable(papers, metaMap = new Map()) {
     _appendText(tdPaper, meta.title, 'paper-title');
     _appendText(tdPaper, meta.authors, 'paper-comment');
     _appendText(tdPaper, meta.abstract, 'paper-abstract');
-    tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], meta));
+    tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], id, meta));
     _appendKeywordPills(tdPaper, meta);
 
     // Column 3 — Reason for suggestion
+    // Prefer the edited comment (col G) when present; fall back to original.
     const tdComment = tr.insertCell();
-    const comment = (paper[COL.comment] || '').trim();
-    tdComment.textContent = comment || '—';
-    if (!comment) tdComment.style.color = 'var(--muted)';
+    const commentText = ((paper[COL.editedComment] || paper[COL.comment]) ?? '').trim();
+    const commentSpan = document.createElement('span');
+    commentSpan.className = 'comment-text';
+    commentSpan.textContent = commentText || '—';
+    if (!commentText) commentSpan.style.color = 'var(--muted)';
+    tdComment.appendChild(commentSpan);
+
+    // Column 4 — Actions (this week with mutateUrl configured only)
+    if (thisWeek) {
+      const tdActions = tr.insertCell();
+      tdActions.className = 'actions-cell';
+      tdActions.appendChild(
+        _buildActionsCell(id, Number(paper[COL.votes] ?? 0), commentSpan, tdComment)
+      );
+    }
   });
 
   return table;
+}
+
+// ── Action controls ───────────────────────────────────────────
+
+/**
+ * Builds the vote / edit / remove control group for a this-week row.
+ * @param {string}      cleanId      - Normalised arXiv ID.
+ * @param {number}      initialVotes - Vote count from the CSV.
+ * @param {HTMLElement} commentSpan  - The <span> holding the comment text.
+ * @param {HTMLElement} tdComment    - The parent <td> (swapped during editing).
+ */
+function _buildActionsCell(cleanId, initialVotes, commentSpan, tdComment) {
+  const container = document.createElement('div');
+  container.className = 'actions-container';
+
+  // ── Upvote ─────────────────────────────────────────────
+  let voteCount = initialVotes;
+  const voteBtn = document.createElement('button');
+  voteBtn.className = 'action-btn action-btn--vote';
+  const _updateVote = () => {
+    voteBtn.textContent = `▲ ${voteCount}`;
+  };
+  _updateVote();
+  voteBtn.addEventListener('click', async () => {
+    voteBtn.disabled = true;
+    try {
+      const res = await vote(cleanId);
+      if (res.ok) {
+        voteCount = res.votes ?? voteCount + 1;
+        _updateVote();
+      }
+    } catch (err) {
+      console.warn('Vote failed:', err);
+    }
+    setTimeout(() => {
+      voteBtn.disabled = false;
+    }, 1000);
+  });
+
+  // ── Edit ───────────────────────────────────────────────
+  const editBtn = document.createElement('button');
+  editBtn.className = 'action-btn action-btn--edit';
+  editBtn.textContent = '✏ Edit';
+  editBtn.addEventListener('click', () => {
+    const current = commentSpan.textContent === '—' ? '' : commentSpan.textContent;
+    const textarea = document.createElement('textarea');
+    textarea.className = 'edit-textarea';
+    textarea.value = current;
+    textarea.rows = 3;
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'action-btn action-btn--save';
+    saveBtn.textContent = 'Save';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'action-btn action-btn--cancel';
+    cancelBtn.textContent = 'Cancel';
+
+    const btnRow = document.createElement('div');
+    btnRow.className = 'edit-btn-row';
+    btnRow.appendChild(saveBtn);
+    btnRow.appendChild(cancelBtn);
+
+    tdComment.innerHTML = '';
+    tdComment.appendChild(textarea);
+    tdComment.appendChild(btnRow);
+    textarea.focus();
+
+    const _restore = () => {
+      tdComment.innerHTML = '';
+      tdComment.appendChild(commentSpan);
+    };
+
+    saveBtn.addEventListener('click', async () => {
+      const newText = textarea.value.trim();
+      saveBtn.disabled = cancelBtn.disabled = true;
+      try {
+        const res = await editComment(cleanId, newText);
+        if (res.ok) {
+          commentSpan.textContent = newText || '—';
+          commentSpan.style.color = newText ? '' : 'var(--muted)';
+        }
+      } catch (err) {
+        console.warn('Edit failed:', err);
+      }
+      _restore();
+    });
+
+    cancelBtn.addEventListener('click', _restore);
+  });
+
+  // ── Remove ─────────────────────────────────────────────
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'action-btn action-btn--remove';
+  removeBtn.textContent = '✕ Remove';
+  removeBtn.addEventListener('click', async () => {
+    if (!confirm("Remove this paper from this week's list?")) return;
+    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = true;
+    try {
+      const res = await removeEntry(cleanId);
+      if (res.ok) {
+        removeBtn.closest('tr')?.remove();
+        return;
+      }
+    } catch (err) {
+      console.warn('Remove failed:', err);
+    }
+    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = false;
+  });
+
+  container.append(voteBtn, editBtn, removeBtn);
+  return container;
 }
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -96,9 +225,13 @@ function _appendText(parent, text, className) {
 
 /**
  * Builds the badge row: arXiv link, optional INSPIRE-HEP link,
- * optional citation count, optional not-found warning.
+ * optional citation count, and status warnings.
+ *
+ * @param {string} rawArxivId - The raw value from the CSV (used for the link).
+ * @param {string} cleanId    - The normalised, version-stripped ID (empty if unparseable).
+ * @param {object} meta       - Metadata from fetchPaperMetadata(), or {}.
  */
-function _buildBadgeRow(rawArxivId, meta) {
+function _buildBadgeRow(rawArxivId, cleanId, meta) {
   const row = document.createElement('div');
   row.style.cssText =
     'margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;';
@@ -156,8 +289,15 @@ function _buildBadgeRow(rawArxivId, meta) {
     row.appendChild(btn);
   }
 
-  // Not-yet-indexed warning
-  if (meta.notFound) {
+  // Status warnings — mutually exclusive, in descending severity
+  if (!cleanId || meta.invalidId) {
+    // The ID could not be resolved to a real arXiv paper
+    const warn = document.createElement('div');
+    warn.className = 'inspire-invalid';
+    warn.textContent = '⚠ Invalid arXiv ID — this paper could not be found on arXiv';
+    row.appendChild(warn);
+  } else if (meta.notFound) {
+    // Valid arXiv paper but not yet indexed on INSPIRE
     const warn = document.createElement('div');
     warn.className = 'inspire-not-found';
     warn.textContent = '⚠ Not yet indexed on iNSPIRE-HEP — title and abstract unavailable';

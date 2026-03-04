@@ -43,7 +43,8 @@ async function fetchPapers() {
   return rows
     .slice(1)
     .filter((r) => r.length > COL.timestamp && r[COL.timestamp])
-    .filter((r) => (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE');
+    .filter((r) => (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE')
+    .filter((r) => (r[COL.removed] ?? '').trim().toUpperCase() !== 'TRUE');
 }
 
 /**
@@ -94,7 +95,9 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     container.innerHTML = `<div class="loading">Fetching paper details from INSPIRE-HEP…</div>`;
     const metaMap = await fetchPaperMetadata(thisWeek.map((p) => p[COL.arxivId]));
     container.innerHTML = '';
-    container.appendChild(buildTable(thisWeek, metaMap));
+    // Pass thisWeek:true only when the mutation endpoint is configured,
+    // so vote/edit/remove controls appear only when they can actually work.
+    container.appendChild(buildTable(thisWeek, metaMap, { thisWeek: !!CONFIG.mutateUrl }));
   }
 
   const cta = document.getElementById('submit-cta');
@@ -309,7 +312,10 @@ function _downloadCalendar() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'jc-ppi-meetings.ics';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
 }
 
