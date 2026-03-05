@@ -58,4 +58,5 @@ export const COL = {
   removed: 5, // "TRUE" when a visitor removes the entry
   editedComment: 6, // overrides comment when non-empty
   votes: 7, // running upvote count
+  discussed: 8, // "TRUE" when the paper was starred as discussed at the JC meeting
 };

@@ -57,3 +57,13 @@ export async function removeEntry(arxivId) {
 export async function editComment(arxivId, comment) {
   return _post({ action: 'edit', arxivId, comment });
 }
+
+/**
+ * Toggles the Discussed flag for a paper (column I in the Public tab).
+ * If TRUE it is cleared; if blank/FALSE it is set to TRUE.
+ * @param {string} arxivId - Clean arXiv ID.
+ * @returns {Promise<{ ok: boolean, discussed: boolean }>}
+ */
+export async function discussPaper(arxivId) {
+  return _post({ action: 'discuss', arxivId });
+}

@@ -8,7 +8,7 @@
 
 import { COL, CONFIG } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
-import { vote, removeEntry, editComment } from './sheet.js';
+import { vote, removeEntry, editComment, discussPaper } from './sheet.js';
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -49,6 +49,14 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
+    // Discussed star badge — visible in both This Week and Archive
+    const discussed = (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
+    if (discussed) {
+      const star = document.createElement('div');
+      star.className = 'paper-discussed';
+      star.textContent = '\u2605 Discussed at JC';
+      tdPaper.appendChild(star);
+    }
     _appendText(tdPaper, meta.title, 'paper-title');
     _appendText(tdPaper, meta.authors, 'paper-comment');
     _appendText(tdPaper, meta.abstract, 'paper-abstract');
@@ -70,7 +78,7 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
       const tdActions = tr.insertCell();
       tdActions.className = 'actions-cell';
       tdActions.appendChild(
-        _buildActionsCell(id, Number(paper[COL.votes] ?? 0), commentSpan, tdComment)
+        _buildActionsCell(id, Number(paper[COL.votes] ?? 0), discussed, commentSpan, tdComment)
       );
     }
   });
@@ -87,7 +95,7 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
  * @param {HTMLElement} commentSpan  - The <span> holding the comment text.
  * @param {HTMLElement} tdComment    - The parent <td> (swapped during editing).
  */
-function _buildActionsCell(cleanId, initialVotes, commentSpan, tdComment) {
+function _buildActionsCell(cleanId, initialVotes, initialDiscussed, commentSpan, tdComment) {
   const container = document.createElement('div');
   container.className = 'actions-container';
 
@@ -173,7 +181,7 @@ function _buildActionsCell(cleanId, initialVotes, commentSpan, tdComment) {
   removeBtn.textContent = '✕ Remove';
   removeBtn.addEventListener('click', async () => {
     if (!confirm("Remove this paper from this week's list?")) return;
-    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = true;
+    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = discussBtn.disabled = true;
     try {
       const res = await removeEntry(cleanId);
       if (res.ok) {
@@ -183,10 +191,47 @@ function _buildActionsCell(cleanId, initialVotes, commentSpan, tdComment) {
     } catch (err) {
       console.warn('Remove failed:', err);
     }
-    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = false;
+    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = discussBtn.disabled = false;
   });
 
-  container.append(voteBtn, editBtn, removeBtn);
+  // ── Discuss ──────────────────────────────────────────────────
+  let isDiscussed = initialDiscussed;
+  const discussBtn = document.createElement('button');
+  discussBtn.className = 'action-btn action-btn--discuss';
+  const _updateDiscuss = () => {
+    discussBtn.textContent = isDiscussed ? '\u2605 Discussed' : '\u2606 Mark discussed';
+    discussBtn.classList.toggle('active', isDiscussed);
+  };
+  _updateDiscuss();
+  discussBtn.addEventListener('click', async () => {
+    discussBtn.disabled = true;
+    try {
+      const res = await discussPaper(cleanId);
+      if (res.ok) {
+        isDiscussed = res.discussed;
+        _updateDiscuss();
+        // Sync the read-only star badge in the paper cell
+        const row = discussBtn.closest('tr');
+        const tdPaper = row?.cells[1];
+        if (tdPaper) {
+          const existing = tdPaper.querySelector('.paper-discussed');
+          if (isDiscussed && !existing) {
+            const star = document.createElement('div');
+            star.className = 'paper-discussed';
+            star.textContent = '\u2605 Discussed at JC';
+            tdPaper.prepend(star);
+          } else if (!isDiscussed && existing) {
+            existing.remove();
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Discuss failed:', err);
+    }
+    discussBtn.disabled = false;
+  });
+
+  container.append(voteBtn, editBtn, discussBtn, removeBtn);
   return container;
 }
 

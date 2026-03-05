@@ -68,11 +68,12 @@ publicly readable CSV, create a second tab that mirrors everything except email:
 3. **Add interactivity columns.** In the same Public tab, add three more column
    headers immediately to the right of the last QUERY output column:
 
-   | Column | Header          | Initial value | Purpose                                                    |
-   | ------ | --------------- | ------------- | ---------------------------------------------------------- |
-   | F      | `Removed`       | _(blank)_     | Set to `TRUE` by Apps Script when someone removes an entry |
-   | G      | `EditedComment` | _(blank)_     | Overrides the original comment when non-empty              |
-   | H      | `Votes`         | `0`           | Running upvote count, incremented by Apps Script           |
+   | Column | Header          | Initial value | Purpose                                                                                    |
+   | ------ | --------------- | ------------- | ------------------------------------------------------------------------------------------ |
+   | F      | `Removed`       | _(blank)_     | Set to `TRUE` by Apps Script when someone removes an entry                                 |
+   | G      | `EditedComment` | _(blank)_     | Overrides the original comment when non-empty                                              |
+   | H      | `Votes`         | `0`           | Running upvote count, incremented by Apps Script                                           |
+   | I      | `Discussed`     | _(blank)_     | Set to `TRUE` by Apps Script when a paper is starred as discussed; cleared when un-starred |
 
    For the `Votes` column, set the initial value to `0` for any existing rows
    (select the cells → type `0` → Ctrl+Enter). New rows added by the QUERY

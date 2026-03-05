@@ -342,6 +342,37 @@ td.actions-cell {
   background: var(--border);
 }
 
+.action-btn--discuss {
+  background: #fefce8;
+  border-color: #fde68a;
+  color: #92400e;
+}
+.action-btn--discuss:hover:not(:disabled) {
+  background: #fef9c3;
+}
+.action-btn--discuss.active {
+  background: #fef08a;
+  border-color: #f59e0b;
+  color: #78350f;
+  font-weight: 600;
+}
+.action-btn--discuss.active:hover:not(:disabled) {
+  background: #fde047;
+}
+
+.paper-discussed {
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  padding: 0.1em 0.5em;
+  border-radius: var(--radius);
+  background: #fef08a;
+  border: 1px solid #f59e0b;
+  color: #78350f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .edit-textarea {
   width: 100%;
   padding: 0.4em 0.5em;

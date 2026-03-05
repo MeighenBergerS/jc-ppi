@@ -34,17 +34,18 @@ Monday 00:00 – Sunday 23:59 is rejected with an error.
 
 Add three columns to the right of column E on the **Public** tab:
 
-| Column | Header          | Initial value | Written by                                   |
-| ------ | --------------- | ------------- | -------------------------------------------- |
-| F      | `Removed`       | _(blank)_     | Apps Script — set to `TRUE` to hide a row    |
-| G      | `EditedComment` | _(blank)_     | Apps Script — overrides the original comment |
-| H      | `Votes`         | `0`           | Apps Script — incremented on each upvote     |
+| Column | Header          | Initial value | Written by                                         |
+| ------ | --------------- | ------------- | -------------------------------------------------- |
+| F      | `Removed`       | _(blank)_     | Apps Script — set to `TRUE` to hide a row          |
+| G      | `EditedComment` | _(blank)_     | Apps Script — overrides the original comment       |
+| H      | `Votes`         | `0`           | Apps Script — incremented on each upvote           |
+| I      | `Discussed`     | _(blank)_     | Apps Script — toggled `TRUE`/blank by the ★ button |
 
 For existing rows set `Votes` to `0` (select H2:H1000, type `0`, Ctrl+Enter).
 New rows from the QUERY formula will be blank, which the Apps Script treats as `0`.
 
 > The client column map in `config.js` (`COL.removed=5`, `COL.editedComment=6`,
-> `COL.votes=7`) reflects these zero-indexed positions. Do not reorder these
+> `COL.votes=7`, `COL.discussed=8`) reflects these zero-indexed positions. Do not reorder these
 > columns without updating `config.js` and the `COL_*` constants in the Apps
 > Script.
 
@@ -110,6 +111,19 @@ whenever it is non-empty.
 Shows a confirmation dialog. On confirmation, sets column F (`Removed`) to
 `TRUE`. The row is filtered out the next time the CSV is loaded.
 Removed entries do not appear in the Archive either.
+
+---
+
+### ★ Mark discussed
+
+Toggles the `Discussed` flag (column I) for a paper. Clicking once sets it to
+`TRUE` — the button turns gold and shows **★ Discussed**; a **★ Discussed at JC**
+badge also appears at the top of the paper cell. Clicking again clears the
+flag (un-stars). Multiple papers in the same week can be starred.
+
+The badge is read-only in the Archive — the action button only appears on
+the current-week page. To correct a star in the Archive, edit the
+`Discussed` column directly in the Public sheet.
 
 ---
 

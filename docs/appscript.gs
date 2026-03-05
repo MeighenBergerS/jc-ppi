@@ -55,9 +55,10 @@ var SHEET_NAME   = 'Public'; // change if your tab is named differently
 // 1-indexed column positions in the Public tab
 var COL_ARXIV    = 3; // C — arXiv ID as submitted (may be URL or bare ID)
 var COL_APPROVED = 5; // E — "TRUE" when approved
-var COL_REMOVED  = 6; // F — "TRUE" when removed by a visitor
-var COL_EDITED   = 7; // G — edited comment text (empty = use original)
-var COL_VOTES    = 8; // H — running vote count
+var COL_REMOVED   = 6; // F — "TRUE" when removed by a visitor
+var COL_EDITED    = 7; // G — edited comment text (empty = use original)
+var COL_VOTES     = 8; // H — running vote count
+var COL_DISCUSSED = 9; // I — "TRUE" when the paper was starred as discussed at the meeting
 
 // ── Entry point ───────────────────────────────────────────────
 
@@ -96,6 +97,11 @@ function doPost(e) {
     } else if (action === 'edit') {
       sheet.getRange(row, COL_EDITED).setValue(comment.trim());
       result.setContent(JSON.stringify({ ok: true }));
+
+    } else if (action === 'discuss') {
+      var wasDiscussed = sheet.getRange(row, COL_DISCUSSED).getValue().toString().trim().toUpperCase() === 'TRUE';
+      sheet.getRange(row, COL_DISCUSSED).setValue(wasDiscussed ? '' : 'TRUE');
+      result.setContent(JSON.stringify({ ok: true, discussed: !wasDiscussed }));
 
     } else {
       throw new Error('Unknown action: ' + action);
