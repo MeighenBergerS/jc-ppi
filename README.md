@@ -71,7 +71,7 @@ After Sunday they roll automatically into the **Archive** — no manual action r
 
 **For anyone not yet in the list:** their submission is held until you open the private Google Sheet and manually tick the **Approved** checkbox in column F for that row. Changes appear on the site within about a minute.
 
-To add a recurring member permanently, add their email to the `APPROVED` array in your Apps Script project (Extensions → Apps Script → the `onFormSubmit` function).
+To add a recurring member permanently, add their email address (one per row) to the **Members** tab of your Google Sheet. No code changes are needed.
 
 ---
 

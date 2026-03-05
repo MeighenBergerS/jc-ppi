@@ -24,15 +24,30 @@ import { buildTable } from './table.js';
 /** Re-fetch interval for the This Week page (ms). */
 const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
-// ── Subfield filter state ─────────────────────────────────────
+// ── Subfield filter state ───────────────────────────────────────────
 
-/** Currently active category chip, or null for ‘All’. */
+/** Currently active category chip, or null for 'All'. */
 let _activeCategory = null;
 
 /** Union of all categories discovered from loaded weeks. */
 const _knownCategories = new Set();
 
-// ── Helpers ───────────────────────────────────────────────────
+/** Whether the archive is filtered to discussed-only papers. */
+let _discussedOnly = false;
+
+// ── Poll change detection ──────────────────────────────────────────
+
+let _lastThisWeekHash = ''; // used to skip re-renders when nothing changed
+
+/**
+ * Fingerprints the current-week paper list so the poll can detect changes
+ * beyond a simple count: catches vote updates and discussed-flag toggles.
+ */
+export function weekHash(papers) {
+  return papers
+    .map((p) => `${p[COL.arxivId]}|${p[COL.votes] ?? 0}|${p[COL.discussed] ?? ''}`)
+    .join(';');
+}
 
 /** Fetch and parse all paper rows from the Google Sheet CSV. */
 async function fetchPapers() {
@@ -63,8 +78,6 @@ export function deduplicatePapers(papers) {
 
 // ── This Week ─────────────────────────────────────────────────
 
-let _lastThisWeekCount = -1; // used to skip re-renders when nothing changed
-
 async function renderThisWeek(papers, container, { force = false } = {}) {
   const monday = currentWeekStart();
   const sunday = new Date(monday);
@@ -85,9 +98,10 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     return new Date(a[COL.timestamp]) - new Date(b[COL.timestamp]);
   });
 
-  // Skip expensive re-render when paper count hasn't changed (poll path)
-  if (!force && thisWeek.length === _lastThisWeekCount) return;
-  _lastThisWeekCount = thisWeek.length;
+  // Skip expensive re-render when nothing has changed (poll path)
+  const hash = weekHash(thisWeek);
+  if (!force && hash === _lastThisWeekHash) return;
+  _lastThisWeekHash = hash;
 
   container.innerHTML = '';
 
@@ -105,6 +119,43 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     // Pass thisWeek:true only when the mutation endpoint is configured,
     // so vote/edit/remove controls appear only when they can actually work.
     container.appendChild(buildTable(thisWeek, metaMap, { thisWeek: !!CONFIG.mutateUrl }));
+
+    // ── Copy all BibTeX for this week ────────────────────────────────
+    const inspireIds = [...metaMap.values()].map((m) => m.inspireId).filter(Boolean);
+    if (inspireIds.length > 0) {
+      const bibBtn = document.createElement('button');
+      bibBtn.className = 'bibtex-week-btn';
+      bibBtn.textContent = `Copy all BibTeX (${inspireIds.length} paper${inspireIds.length !== 1 ? 's' : ''})`;
+      bibBtn.title = 'Fetch and copy BibTeX for all indexed papers this week';
+      bibBtn.addEventListener('click', async () => {
+        bibBtn.disabled = true;
+        bibBtn.textContent = 'Fetching…';
+        try {
+          const entries = await Promise.all(
+            inspireIds.map((id) =>
+              fetch(`https://inspirehep.net/api/literature/${id}?format=bibtex`, {
+                cache: 'force-cache',
+              }).then((r) => (r.ok ? r.text() : ''))
+            )
+          );
+          await navigator.clipboard.writeText(entries.filter(Boolean).join('\n\n'));
+          bibBtn.textContent = `Copied! (${inspireIds.length} entr${inspireIds.length !== 1 ? 'ies' : 'y'})`;
+          bibBtn.classList.add('copied');
+          setTimeout(() => {
+            bibBtn.textContent = `Copy all BibTeX (${inspireIds.length} paper${inspireIds.length !== 1 ? 's' : ''})`;
+            bibBtn.classList.remove('copied');
+            bibBtn.disabled = false;
+          }, 2500);
+        } catch {
+          bibBtn.textContent = 'Error — try again';
+          setTimeout(() => {
+            bibBtn.textContent = `Copy all BibTeX (${inspireIds.length} paper${inspireIds.length !== 1 ? 's' : ''})`;
+            bibBtn.disabled = false;
+          }, 2000);
+        }
+      });
+      container.appendChild(bibBtn);
+    }
   }
 
   const cta = document.getElementById('submit-cta');
@@ -168,7 +219,8 @@ async function renderArchive(papers, container) {
         const searchInput = document.getElementById('archive-search');
         const query = (searchInput?.value ?? '').trim().toLowerCase();
         const visible = _filterTable(table, query);
-        if ((query || _activeCategory) && visible === 0) details.style.display = 'none';
+        if ((query || _activeCategory || _discussedOnly) && visible === 0)
+          details.style.display = 'none';
         contentDiv.appendChild(table);
       });
     };
@@ -205,7 +257,8 @@ function _filterTable(table, query) {
     const textMatch = !query || tr.textContent.toLowerCase().includes(query);
     const catMatch =
       !_activeCategory || (tr.dataset.categories || '').split(',').includes(_activeCategory);
-    const match = textMatch && catMatch;
+    const discussedMatch = !_discussedOnly || tr.dataset.discussed === 'true';
+    const match = textMatch && catMatch && discussedMatch;
     tr.style.display = match ? '' : 'none';
     if (match) visible++;
   });
@@ -221,6 +274,16 @@ function initArchiveSearch() {
   const input = document.getElementById('archive-search');
   if (!input) return;
   input.addEventListener('input', _applyAllFilters);
+
+  const discussedBtn = document.getElementById('discussed-filter');
+  if (discussedBtn) {
+    discussedBtn.addEventListener('click', () => {
+      _discussedOnly = !_discussedOnly;
+      discussedBtn.classList.toggle('active', _discussedOnly);
+      discussedBtn.setAttribute('aria-pressed', String(_discussedOnly));
+      _applyAllFilters();
+    });
+  }
 }
 
 /**
@@ -234,7 +297,8 @@ function _applyAllFilters() {
     const table = details.querySelector('table');
     if (!table) return; // not yet loaded — filtered on load
     const visible = _filterTable(table, query);
-    details.style.display = (query || _activeCategory) && visible === 0 ? 'none' : '';
+    details.style.display =
+      (query || _activeCategory || _discussedOnly) && visible === 0 ? 'none' : '';
   });
 }
 
@@ -300,6 +364,9 @@ function _downloadCalendar() {
   const anchor = m.icsAnchor ?? '20260306T143000';
   const end = m.icsDurationEnd ?? '20260306T160000';
   const dayCode = m.icsDayCode ?? 'FR';
+  const siteUrl =
+    CONFIG.siteUrl ||
+    (typeof window !== 'undefined' ? window.location.href.replace(/[^/]*$/, '') : '');
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -309,7 +376,7 @@ function _downloadCalendar() {
     `DTEND;TZID=${tz}:${end}`,
     `RRULE:FREQ=WEEKLY;BYDAY=${dayCode}`,
     'SUMMARY:Iowa Particles & Plots Journal Club',
-    'DESCRIPTION:Weekly HEP paper discussion.\\nSubmit papers at https://meighenbergers.github.io/jc-ppi/\\nUpdates in the group Slack channel.',
+    `DESCRIPTION:Weekly HEP paper discussion.\\nSubmit papers at ${siteUrl}\\nUpdates in the group Slack channel.`,
     'BEGIN:VALARM',
     'TRIGGER:-PT30M',
     'ACTION:DISPLAY',

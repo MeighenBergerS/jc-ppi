@@ -10,147 +10,11 @@
    the sessionStorage cache populated by the other pages.
    ============================================================ */
 
-import { CONFIG, COL } from './config.js';
+import { CONFIG, COL, TITLE_STOP_WORDS } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 
 const DEFAULT_YEAR = new Date().getFullYear();
-
-// ── Title word stop list ──────────────────────────────────────
-// Words excluded from the title-word frequency chart.
-// Add or remove entries freely — one word per line, lower-case.
-// Three groups are kept separate for readability:
-//   1. Standard English (articles, prepositions, conjunctions, …)
-//   2. Academic paper filler (common title verbs/nouns with no topic signal)
-//   3. HEP-specific boilerplate (universally present in the field)
-
-const TITLE_STOP_WORDS = new Set([
-  // 1. Standard English
-  'a',
-  'an',
-  'the',
-  'and',
-  'or',
-  'but',
-  'nor',
-  'so',
-  'yet',
-  'in',
-  'of',
-  'for',
-  'with',
-  'at',
-  'by',
-  'from',
-  'via',
-  'on',
-  'to',
-  'into',
-  'onto',
-  'upon',
-  'over',
-  'under',
-  'about',
-  'as',
-  'its',
-  'it',
-  'is',
-  'are',
-  'be',
-  'been',
-  'being',
-  'has',
-  'have',
-  'had',
-  'was',
-  'were',
-  'do',
-  'does',
-  'did',
-  'this',
-  'that',
-  'these',
-  'those',
-  'their',
-  'they',
-  'them',
-  'we',
-  'us',
-  'our',
-  'i',
-  'not',
-  'no',
-
-  // 2. Academic paper filler
-  'probing',
-  'probe',
-  'exploring',
-  'explore',
-  'studying',
-  'study',
-  'searching',
-  'search',
-  'constraining',
-  'constraints',
-  'constraint',
-  'revisiting',
-  'revisited',
-  'towards',
-  'using',
-  'beyond',
-  'new',
-  'novel',
-  'first',
-  'improved',
-  'updated',
-  'precise',
-  'precision',
-  'general',
-  'effective',
-  'implications',
-  'implication',
-  'evidence',
-  'observation',
-  'observations',
-  'measurement',
-  'measurements',
-  'analysis',
-  'analyses',
-  'approach',
-  'approaches',
-  'case',
-  'cases',
-  'role',
-  'impact',
-  'effects',
-  'effect',
-  'via',
-  'through',
-  'within',
-  'based',
-  'induced',
-  'driven',
-  'dependent',
-  'independent',
-
-  // 3. HEP-specific boilerplate
-  'physics',
-  'particle',
-  'field',
-  'theory',
-  'model',
-  'models',
-  'standard',
-  'quantum',
-  'lhc',
-  'collider',
-  'colliders',
-  'cross',
-  'section',
-  'sections',
-  'energy',
-  'mass',
-]);
 
 // ── Category color palette ────────────────────────────────────
 // ColorBrewer Dark2 (8) + steel blue + deep red.
@@ -197,7 +61,7 @@ function _gradientColor(r, g, b, rank, total) {
  * @param {Array<{label:string, value:number, color:string}>} rows  sorted desc
  * @param {string} [emptyMsg]
  */
-function _buildChart(title, rows, emptyMsg = 'No data yet.') {
+function _buildChart(title, rows, emptyMsg = 'No data yet.', { formatValue } = {}) {
   const section = document.createElement('section');
   section.className = 'stat-section';
 
@@ -237,7 +101,7 @@ function _buildChart(title, rows, emptyMsg = 'No data yet.') {
 
     const valueEl = document.createElement('span');
     valueEl.className = 'bar-value';
-    valueEl.textContent = value;
+    valueEl.textContent = formatValue ? formatValue(value) : value;
 
     row.appendChild(labelEl);
     row.appendChild(track);
@@ -328,7 +192,14 @@ export function computeSubmissionStats(year, allRows) {
     }
   });
 
-  return { papers, memberCounts, weekCounts, busiestKey };
+  const discussedCounts = new Map();
+  papers.forEach((p) => {
+    if ((p[COL.discussed] ?? '').trim().toUpperCase() !== 'TRUE') return;
+    const name = (p[COL.name] || '').trim() || 'Anonymous';
+    discussedCounts.set(name, (discussedCounts.get(name) ?? 0) + 1);
+  });
+
+  return { papers, memberCounts, weekCounts, busiestKey, discussedCounts };
 }
 
 // ── Stats renderer ────────────────────────────────────────────
@@ -341,7 +212,10 @@ async function renderStats(year, allRows) {
   const container = document.getElementById('stats-container');
   const subtitle = document.getElementById('stats-subtitle');
 
-  const { papers, memberCounts, weekCounts, busiestKey } = computeSubmissionStats(year, allRows);
+  const { papers, memberCounts, weekCounts, busiestKey, discussedCounts } = computeSubmissionStats(
+    year,
+    allRows
+  );
   const busiestWeekLabel = busiestKey ? fmtWeekRange(new Date(busiestKey)) : '—';
 
   const isCurrentYear = year === new Date().getFullYear();
@@ -370,6 +244,27 @@ async function renderStats(year, allRows) {
   });
   container.appendChild(summaryEl);
   container.appendChild(_buildChart(`Papers submitted in ${year} by member`, memberRows));
+
+  // Discussed-at-JC chart (CSV data only — no INSPIRE call needed)
+  if (discussedCounts.size > 0) {
+    const discussedRows = [...discussedCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, value], i, arr) => ({
+        label,
+        value,
+        color: _gradientColor(230, 171, 2, i, arr.length), // amber
+      }));
+    container.appendChild(
+      _buildChart(
+        `Discussed at JC in ${year} by member`,
+        discussedRows,
+        'No papers starred as discussed yet.',
+        {
+          formatValue: (v) => '★'.repeat(v) + ` (${v})`,
+        }
+      )
+    );
+  }
 
   if (papers.length === 0) return;
 

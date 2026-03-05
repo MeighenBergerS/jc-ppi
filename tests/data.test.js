@@ -7,6 +7,10 @@
  *   - 7 intentional duplicate arXiv ID pairs (same paper, different submitters)
  *   - 1 versioned arXiv ID (2410.00841v2) to exercise stripVersion
  *   - Columns: Timestamp(0), Name(1), arXiv ID(2), Comment(3), Approved(4)
+ *
+ * Inline row fixtures (year 2099) are used for features that require columns
+ * beyond col 4 (Removed, EditedComment, Votes, Discussed) which are absent
+ * from the CSV fixture.
  */
 
 import { describe, it } from 'node:test';
@@ -16,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { parseCsv, normalizeArxivId, stripVersion } from '../site/assets/js/utils.js';
-import { deduplicatePapers } from '../site/assets/js/app.js';
+import { deduplicatePapers, weekHash } from '../site/assets/js/app.js';
 import { computeSubmissionStats } from '../site/assets/js/stats.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -290,5 +294,136 @@ describe('computeSubmissionStats — week aggregation', () => {
         `week sum mismatch for ${year}: ${sumFromWeeks} vs ${papers.length}`
       );
     }
+  });
+});
+
+// ── weekHash ──────────────────────────────────────────────────
+
+// Helper: build a minimal paper row for weekHash.
+// Indices: 0=ts, 1=name, 2=arxivId, 3=comment, 4=approved,
+//          5=removed, 6=editedComment, 7=votes, 8=discussed
+const mkRow = (arxivId, votes = '', discussed = '') => [
+  'ts',
+  'name',
+  arxivId,
+  'comment',
+  'TRUE',
+  '',
+  '',
+  votes,
+  discussed,
+];
+
+describe('weekHash', () => {
+  it('returns a string', () => {
+    assert.equal(typeof weekHash([mkRow('2401.00001', '5', 'TRUE')]), 'string');
+  });
+
+  it('returns an empty string for an empty array', () => {
+    assert.equal(weekHash([]), '');
+  });
+
+  it('same inputs produce the same hash', () => {
+    const papers = [mkRow('2401.00001', '3', 'TRUE'), mkRow('2401.00002', '0', '')];
+    assert.equal(weekHash(papers), weekHash(papers));
+  });
+
+  it('incrementing a vote count changes the hash', () => {
+    const before = [mkRow('2401.00001', '3', ''), mkRow('2401.00002', '1', '')];
+    const after = [mkRow('2401.00001', '4', ''), mkRow('2401.00002', '1', '')];
+    assert.notEqual(weekHash(before), weekHash(after));
+  });
+
+  it('toggling discussed on a paper changes the hash', () => {
+    const before = [mkRow('2401.00001', '0', '')];
+    const after = [mkRow('2401.00001', '0', 'TRUE')];
+    assert.notEqual(weekHash(before), weekHash(after));
+  });
+
+  it('adding a paper changes the hash', () => {
+    const before = [mkRow('2401.00001', '0', '')];
+    const after = [mkRow('2401.00001', '0', ''), mkRow('2401.00002', '0', '')];
+    assert.notEqual(weekHash(before), weekHash(after));
+  });
+
+  it('removing a paper changes the hash', () => {
+    const before = [mkRow('2401.00001', '0', ''), mkRow('2401.00002', '0', '')];
+    const after = [mkRow('2401.00001', '0', '')];
+    assert.notEqual(weekHash(before), weekHash(after));
+  });
+
+  it('changing only a comment (untracked field) does not change the hash', () => {
+    // weekHash only tracks arxivId, votes, and discussed—not the comment
+    const before = [['ts', 'name', '2401.00001', 'Old comment', 'TRUE', '', '', '0', '']];
+    const after = [['ts', 'name', '2401.00001', 'New comment', 'TRUE', '', '', '0', '']];
+    assert.equal(weekHash(before), weekHash(after));
+  });
+});
+
+// ── computeSubmissionStats — discussedCounts ────────────────────────────
+
+// Inline rows in year 2099 to avoid collisions with the fixture.
+// Full column set: [ts(0), name(1), arxivId(2), comment(3), approved(4),
+//                   removed(5), editedComment(6), votes(7), discussed(8)]
+const mkDisc = (name, arxivId, discussed) => [
+  '2099-01-07 10:00:00',
+  name,
+  arxivId,
+  '',
+  'TRUE',
+  '',
+  '',
+  '0',
+  discussed,
+];
+
+// Six rows: 5 unique arXiv IDs + one duplicate of the first.
+// After dedup: 5 papers remain.
+const DISC_ROWS = [
+  mkDisc('Alice Chen', '9901.00001', 'TRUE'), // Alice: discussed
+  mkDisc('Alice Chen', '9901.00002', 'TRUE'), // Alice: discussed (2 total)
+  mkDisc('Bob Martinez', '9901.00003', 'TRUE'), // Bob: discussed
+  mkDisc('Bob Martinez', '9901.00004', ''), // Bob: NOT discussed
+  mkDisc('Carol Liu', '9901.00005', 'FALSE'), // Carol: explicitly FALSE
+  mkDisc('Alice Chen', '9901.00001', 'TRUE'), // duplicate — dropped by dedup
+];
+
+describe('computeSubmissionStats — discussedCounts', () => {
+  it('counts discussed papers correctly per submitter', () => {
+    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.equal(discussedCounts.get('Alice Chen'), 2);
+    assert.equal(discussedCounts.get('Bob Martinez'), 1);
+  });
+
+  it('does not include submitters with no discussed papers', () => {
+    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.ok(!discussedCounts.has('Carol Liu'), 'Carol had no discussed papers');
+  });
+
+  it('undiscussed paper by the same submitter does not inflate their count', () => {
+    // Bob has one discussed and one undiscussed paper; count should be 1, not 2
+    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.equal(discussedCounts.get('Bob Martinez'), 1);
+  });
+
+  it('dedup runs before counting: duplicate discussed paper counts once', () => {
+    // 9901.00001 appears twice in DISC_ROWS (both discussed=TRUE, both Alice).
+    // After dedup only one row survives, so Alice’s count is 2, not 3.
+    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.equal(discussedCounts.get('Alice Chen'), 2);
+  });
+
+  it('returns an empty Map when no rows have Discussed = TRUE', () => {
+    const { discussedCounts } = computeSubmissionStats(2099, [
+      mkDisc('Alice Chen', '9901.99001', ''),
+      mkDisc('Bob Martinez', '9901.99002', 'FALSE'),
+    ]);
+    assert.equal(discussedCounts.size, 0);
+  });
+
+  it('fixture rows (no col 8) produce empty discussedCounts', () => {
+    // The fixture CSV only has columns 0–4; p[8] is undefined, treated as not discussed.
+    const { discussedCounts } = computeSubmissionStats(2021, allRows);
+    assert.equal(discussedCounts.size, 0);
   });
 });

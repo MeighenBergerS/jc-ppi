@@ -23,6 +23,11 @@ export const CONFIG = {
   mutateUrl:
     'https://script.google.com/macros/s/AKfycbw6pJRxEQOXgLGLL3f0ih6HL05aSkwiKLipp0sB2o7Ec906WPxxVQ4ZmKlX742Aedix/exec',
 
+  // Base URL of the deployed site — used in the calendar .ics file description.
+  // Leave blank to derive from window.location automatically (correct for most deployments).
+  // Set explicitly if the auto-detected URL is wrong for your setup.
+  siteUrl: '',
+
   // Meeting schedule — update these if the day, time, or location changes.
   // day/time/timezoneLabel/timezone appear in the "When" block on the home page.
   // icsAnchor/icsDurationEnd/icsDayCode drive the "Add to Calendar" download.
@@ -44,6 +49,142 @@ export const CONFIG = {
 //   F (5) Removed    G (6) EditedComment          H (7) Votes
 // The three new columns (F-H) are written by the Apps Script.
 // Do not change these unless you reorder the Public tab columns.
+
+// ── STATS PAGE STOP WORDS ──────────────────────────────────
+// Words excluded from the title-word frequency chart on the Stats page.
+// Add or remove entries freely — lower-case, one word per entry.
+// Three groups are kept separate for readability:
+//   1. Standard English (articles, prepositions, conjunctions, …)
+//   2. Academic paper filler (common title verbs/nouns with no topic signal)
+//   3. HEP-specific boilerplate (universally present in the field)
+
+export const TITLE_STOP_WORDS = new Set([
+  // 1. Standard English
+  'a',
+  'an',
+  'the',
+  'and',
+  'or',
+  'but',
+  'nor',
+  'so',
+  'yet',
+  'in',
+  'of',
+  'for',
+  'with',
+  'at',
+  'by',
+  'from',
+  'via',
+  'on',
+  'to',
+  'into',
+  'onto',
+  'upon',
+  'over',
+  'under',
+  'about',
+  'as',
+  'its',
+  'it',
+  'is',
+  'are',
+  'be',
+  'been',
+  'being',
+  'has',
+  'have',
+  'had',
+  'was',
+  'were',
+  'do',
+  'does',
+  'did',
+  'this',
+  'that',
+  'these',
+  'those',
+  'their',
+  'they',
+  'them',
+  'we',
+  'us',
+  'our',
+  'i',
+  'not',
+  'no',
+
+  // 2. Academic paper filler
+  'probing',
+  'probe',
+  'exploring',
+  'explore',
+  'studying',
+  'study',
+  'searching',
+  'search',
+  'constraining',
+  'constraints',
+  'constraint',
+  'revisiting',
+  'revisited',
+  'towards',
+  'using',
+  'beyond',
+  'new',
+  'novel',
+  'first',
+  'improved',
+  'updated',
+  'precise',
+  'precision',
+  'general',
+  'effective',
+  'implications',
+  'implication',
+  'evidence',
+  'observation',
+  'observations',
+  'measurement',
+  'measurements',
+  'analysis',
+  'analyses',
+  'approach',
+  'approaches',
+  'case',
+  'cases',
+  'role',
+  'impact',
+  'effects',
+  'effect',
+  'via',
+  'through',
+  'within',
+  'based',
+  'induced',
+  'driven',
+  'dependent',
+  'independent',
+
+  // 3. HEP-specific boilerplate
+  'physics',
+  'particle',
+  'field',
+  'theory',
+  'model',
+  'models',
+  'standard',
+  'quantum',
+  'lhc',
+  'collider',
+  'colliders',
+  'cross',
+  'section',
+  'sections',
+  'energy',
+  'mass',
+]);
 
 export const COL = {
   timestamp: 0,

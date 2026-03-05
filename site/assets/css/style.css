@@ -639,10 +639,14 @@ main.prose {
 
 .archive-search-wrap {
   margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 #archive-search {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 0.55rem 0.9rem;
   font-size: 0.9rem;
   border: 1px solid var(--border);
@@ -826,6 +830,43 @@ main.prose {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+}
+
+/* Week-level BibTeX export button (This Week page) */
+
+.bibtex-week-btn {
+  display: block;
+  margin: 0.75rem 0 0;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  background: var(--bg-alt);
+  color: var(--accent-sec);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.bibtex-week-btn:hover {
+  background: var(--accent-sec);
+  color: #fff;
+  border-color: var(--accent-sec);
+}
+
+.bibtex-week-btn.copied {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.bibtex-week-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 /* ── Meeting info block ──────────────────────────────────── */
