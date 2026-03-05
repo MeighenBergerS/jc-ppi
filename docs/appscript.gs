@@ -132,11 +132,8 @@ function _findRow(sheet, cleanId) {
     if (approved !== 'TRUE' || removed === 'TRUE') continue;
     if (_normalizeId(rawId) !== cleanId) continue;
 
-    // Reject rows outside the current week.
-    // Column A may hold a Date object (native cell) or a text string
-    // (when the Public tab uses ARRAYFORMULA(TO_TEXT(...)) to preserve URLs).
-    var tsVal = sheet.getRange(i, 1).getValue();
-    var ts = tsVal instanceof Date ? tsVal : new Date(tsVal);
+    // Reject rows outside the current week
+    var ts = new Date(sheet.getRange(i, 1).getValue()); // column A — Timestamp
     if (isNaN(ts) || ts < weekStart || ts >= weekEnd) continue;
 
     return i;
@@ -166,4 +163,150 @@ function _normalizeId(raw) {
   s = s.replace(/^https?:\/\/arxiv\.org\/(abs|pdf)\//, '');
   s = s.replace(/v\d+$/, '');
   return s;
+}
+
+// ============================================================
+// Weekly Slack Reminder — Thursday 1 PM
+// ============================================================
+// Posts a summary to your Slack channel via an Incoming Webhook.
+//
+// SETUP:
+//   1. Go to https://api.slack.com/apps → Create App → From scratch
+//   2. Enable "Incoming Webhooks" and add a webhook for your channel
+//   3. Paste the webhook URL into SLACK_WEBHOOK_URL below
+//   4. Set SLACK_CHANNEL to your channel name (for display only)
+//
+// TRIGGER:
+//   Apps Script → Triggers → Add trigger
+//     Function:   weeklySlackReminder
+//     Event:      Time-driven → Week timer → Thursday → 1pm–2pm
+// ============================================================
+
+var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL';
+
+// ── Column indices for the PUBLIC sheet (1-indexed) ───────────
+// Adjust COL_NAME if your submitter name column is not column B.
+var COL_TIMESTAMP  = 1; // A — submission timestamp
+var COL_NAME       = 2; // B — submitter's name ← adjust if needed
+// COL_ARXIV, COL_APPROVED, COL_REMOVED, COL_VOTES already defined above
+
+// ── Main function ─────────────────────────────────────────────
+
+function weeklySlackReminder() {
+  var ss          = SpreadsheetApp.getActiveSpreadsheet();
+  var publicSheet = ss.getSheetByName(SHEET_NAME);   // 'Public', defined above
+  if (!publicSheet) {
+    Logger.log('Sheet "' + SHEET_NAME + '" not found — aborting reminder.');
+    return;
+  }
+
+  var now       = new Date();
+  var weekStart = _thisWeekMonday(now); // reuses existing helper
+  var weekEnd   = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+
+  var lastRow = publicSheet.getLastRow();
+  if (lastRow < 2) {
+    _postToSlack(_buildMessage([], null));
+    return;
+  }
+
+  // Read all relevant columns in one batch (faster than per-cell reads)
+  var data = publicSheet.getRange(2, 1, lastRow - 1, COL_VOTES).getValues();
+
+  var submitters  = []; // names of people who submitted this week
+  var topPaper    = null; // { arxivId, votes, name }
+
+  data.forEach(function (row) {
+    var tsVal    = row[COL_TIMESTAMP - 1];
+    var name     = (row[COL_NAME - 1] || '').toString().trim();
+    var arxivId  = _normalizeId((row[COL_ARXIV - 1] || '').toString());
+    var approved = (row[COL_APPROVED - 1] || '').toString().trim().toUpperCase();
+    var removed  = (row[COL_REMOVED - 1] || '').toString().trim().toUpperCase();
+    var votes    = Number(row[COL_VOTES - 1]) || 0;
+
+    // Skip unapproved or removed rows
+    if (approved !== 'TRUE' || removed === 'TRUE') return;
+
+    // Check timestamp falls within this week
+    var ts = tsVal instanceof Date ? tsVal : new Date(tsVal);
+    if (isNaN(ts) || ts < weekStart || ts >= weekEnd) return;
+
+    // Collect submitter name (deduplicated)
+    if (name && !submitters.includes(name)) submitters.push(name);
+
+    // Track highest-voted paper
+    if (!topPaper || votes > topPaper.votes) {
+      topPaper = { arxivId: arxivId, votes: votes, name: name };
+    }
+  });
+
+  _postToSlack(_buildMessage(submitters, topPaper));
+}
+
+// ── Message builder ───────────────────────────────────────────
+
+function _buildMessage(submitters, topPaper) {
+  var siteUrl = 'https://meighenbergers.github.io/jc-ppi/';
+  var lines   = [];
+
+  lines.push('*📄 Journal Club — weekly paper reminder* (meeting tomorrow at 2:30pm!)');
+  lines.push('');
+
+  // Thank submitters
+  if (submitters.length === 0) {
+    lines.push('No papers submitted yet this week — be the first! 🚀');
+  } else if (submitters.length === 1) {
+    lines.push('Thank you *' + submitters[0] + '* for submitting! 🎉');
+  } else {
+    var last  = submitters[submitters.length - 1];
+    var rest  = submitters.slice(0, -1);
+    lines.push('Thank you *' + rest.join(', ') + '*, and *' + last + '* for submitting! 🎉');
+  }
+
+  lines.push('');
+
+  // Top paper
+  if (topPaper && topPaper.arxivId) {
+    var arxivUrl = 'https://arxiv.org/abs/' + topPaper.arxivId;
+    if (topPaper.votes > 0) {
+      lines.push(
+        '🏆 *Top paper so far:* <' + arxivUrl + '|' + topPaper.arxivId + '>' +
+        ' — ' + topPaper.votes + (topPaper.votes === 1 ? ' vote' : ' votes')
+      );
+    } else {
+      lines.push(
+        '📌 *This week\'s paper:* <' + arxivUrl + '|' + topPaper.arxivId + '>' +
+        ' (no votes yet — go cast yours!)'
+      );
+    }
+  }
+
+  lines.push('');
+
+  // Nudge to submit
+  if (submitters.length < 3) {
+    // Encourage more submissions if the list is thin
+    lines.push('👀 Haven\'t submitted yet? There\'s still time — browse arXiv and share something interesting!');
+  } else {
+    lines.push('💡 Haven\'t submitted yet? You can still add a paper before the meeting.');
+  }
+
+  lines.push('➡️  Submit here: ' + siteUrl);
+
+  return lines.join('\n');
+}
+
+// ── Slack poster ──────────────────────────────────────────────
+
+function _postToSlack(text) {
+  var payload = JSON.stringify({ text: text });
+  var options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: payload,
+    muteHttpExceptions: true
+  };
+  var response = UrlFetchApp.fetch(SLACK_WEBHOOK_URL, options);
+  Logger.log('Slack response: ' + response.getContentText());
 }

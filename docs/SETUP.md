@@ -136,7 +136,36 @@ approved member list. Create it once:
 
 ---
 
-## Step 6 — Configure the site
+## Step 6 — Set up the weekly Slack reminder (optional)
+
+The Apps Script can post a Thursday afternoon reminder to your Slack channel
+that lists who has submitted papers and highlights the top-voted paper.
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) → **Create New App → From scratch**.
+2. Under **Features → Incoming Webhooks**, toggle it on, then click
+   **Add New Webhook to Workspace** and pick your channel.
+3. Copy the webhook URL (looks like `https://hooks.slack.com/services/T.../B.../...`).
+4. In your Apps Script project, paste the URL as the value of `SLACK_WEBHOOK_URL`
+   near the top of the Slack section in `docs/appscript.gs`:
+   ```js
+   var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL';
+   ```
+5. Set up the recurring trigger:
+   - **Triggers** (clock icon, left sidebar) → **+ Add Trigger**
+   - Function: `weeklySlackReminder`
+   - Event source: **Time-driven**
+   - Type of time-based trigger: **Week timer**
+   - Day of week: **Thursday**
+   - Time of day: **1pm – 2pm**
+6. Save and grant the requested permissions.
+
+The reminder posts every Thursday between 1 and 2 pm in the Apps Script
+environment's timezone. It thanks submitters by name and links the top-voted
+paper (or nudges people to submit if none have been posted yet).
+
+---
+
+## Step 7 — Configure the site
 
 Open `site/assets/js/config.js` and fill in the URLs:
 
@@ -168,7 +197,7 @@ home page "When" block and the calendar download will both update automatically.
 
 ---
 
-## Step 7 — Enable GitHub Pages
+## Step 8 — Enable GitHub Pages
 
 In the repository's GitHub Settings → Pages, set the **Source** to
 **GitHub Actions**. The `deploy-pages.yml` workflow will then handle all
