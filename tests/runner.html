@@ -116,11 +116,13 @@
 
       // ── Synthetic test data ───────────────────────────────────────────────────────
 
-      // Minimal paper rows: [timestamp, name, arxivId, comment, approved]
+      // Minimal paper rows:
+      // [timestamp(0), name(1), arxivId(2), comment(3), approved(4),
+      //  removed(5), editedComment(6), votes(7), discussed(8)]
       const PAPERS = [
-        ['2024-01-08', 'Alice Chen', '2401.00001', 'Great paper', 'TRUE'],
-        ['2024-01-09', 'Bob Martinez', '2401.00002', 'Very nice', 'TRUE'],
-        ['2024-01-10', 'Carol Liu', '2401.00003', '', 'TRUE'],
+        ['2024-01-08', 'Alice Chen', '2401.00001', 'Great paper', 'TRUE', '', '', '3', 'TRUE'],
+        ['2024-01-09', 'Bob Martinez', '2401.00002', 'Very nice', 'TRUE', '', '', '1', ''],
+        ['2024-01-10', 'Carol Liu', '2401.00003', '', 'TRUE', '', '', '0', ''],
       ];
 
       // Minimal metaMap — keyed by normalised arXiv ID
@@ -158,8 +160,7 @@
         test('produces one <tr> per paper', async () => {
           const table = buildTable(PAPERS, META_MAP);
           const rows = table.querySelectorAll('tbody tr');
-          // Each paper has a title row + a badge row → 2 rows per paper = 6 total
-          assertEqual(rows.length, PAPERS.length * 2);
+          assertEqual(rows.length, PAPERS.length);
         });
       });
 
@@ -183,20 +184,13 @@
         test('row for paper without metaMap entry has empty data-categories', async () => {
           const table = buildTable(PAPERS, META_MAP);
           const rows = [...table.querySelectorAll('tbody tr')];
-          // Carol's paper (no metaMap entry) should have empty or absent categories
-          const carolRows = rows.filter((r) => {
-            // badge rows carry dataset.categories; find Carol's badge row
-            const sibling = r.previousElementSibling;
-            return sibling && sibling.textContent.includes('Carol');
-          });
-          // All carol rows should have empty categories
-          for (const r of carolRows) {
-            assertEqual(
-              r.dataset.categories ?? '',
-              '',
-              `Carol's row should have empty categories, got: "${r.dataset.categories}"`
-            );
-          }
+          const carolRow = rows.find((r) => r.cells[0]?.textContent === 'Carol Liu');
+          assert(carolRow != null, "could not find Carol's row");
+          assertEqual(
+            carolRow.dataset.categories ?? '',
+            '',
+            `Carol's row should have empty categories, got: "${carolRow.dataset.categories}"`
+          );
         });
       });
 
@@ -214,12 +208,18 @@
           assertEqual(buttons.length, 0, 'should be no BibTeX button when inspireId is missing');
         });
 
-        test('BibTeX buttons have correct INSPIRE id in data-inspire-id', async () => {
+        test("BibTeX button text is 'Cite BibTeX'", async () => {
           const table = buildTable(PAPERS, META_MAP);
           const btn = table.querySelector('.bibtex-btn');
           assert(btn != null, 'expected a .bibtex-btn element');
-          const id = parseInt(btn.dataset.inspireId ?? btn.getAttribute('data-inspire-id'), 10);
-          assert([1001, 1002].includes(id), `unexpected inspireId: ${id}`);
+          assertEqual(btn.textContent, 'Cite BibTeX');
+        });
+
+        test('BibTeX button has a title attribute', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const btn = table.querySelector('.bibtex-btn');
+          assert(btn != null, 'expected a .bibtex-btn element');
+          assert(btn.title.length > 0, 'expected a non-empty title attribute');
         });
 
         test('exactly 2 BibTeX buttons for 2 papers with metaMap entries', async () => {
@@ -256,6 +256,61 @@
           const table = buildTable([], new Map());
           const rows = table.querySelectorAll('tbody tr');
           assertEqual(rows.length, 0);
+        });
+      });
+
+      suite('buildTable — data-discussed attribute', () => {
+        test('row with discussed=TRUE has data-discussed="true"', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          const aliceRow = rows.find((r) => r.cells[0]?.textContent === 'Alice Chen');
+          assert(aliceRow != null, "could not find Alice's row");
+          assertEqual(aliceRow.dataset.discussed, 'true');
+        });
+
+        test('row with discussed="" has data-discussed="false"', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          const bobRow = rows.find((r) => r.cells[0]?.textContent === 'Bob Martinez');
+          assert(bobRow != null, "could not find Bob's row");
+          assertEqual(bobRow.dataset.discussed, 'false');
+        });
+
+        test('every row has a data-discussed attribute', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          table.querySelectorAll('tbody tr').forEach((tr) => {
+            assert(
+              tr.dataset.discussed === 'true' || tr.dataset.discussed === 'false',
+              `unexpected data-discussed value: "${tr.dataset.discussed}"`
+            );
+          });
+        });
+      });
+
+      suite('buildTable — discussed star badge', () => {
+        test('discussed row renders .paper-discussed badge', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          const aliceRow = rows.find((r) => r.cells[0]?.textContent === 'Alice Chen');
+          assert(aliceRow != null, "could not find Alice's row");
+          const badge = aliceRow.cells[1]?.querySelector('.paper-discussed');
+          assert(badge != null, "expected .paper-discussed badge on Alice's row");
+        });
+
+        test('non-discussed row has no .paper-discussed badge', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const rows = [...table.querySelectorAll('tbody tr')];
+          const bobRow = rows.find((r) => r.cells[0]?.textContent === 'Bob Martinez');
+          assert(bobRow != null, "could not find Bob's row");
+          const badge = bobRow.cells[1]?.querySelector('.paper-discussed');
+          assert(badge == null, "Bob's row should not have a .paper-discussed badge");
+        });
+
+        test('badge text contains the star character \u2605', async () => {
+          const table = buildTable(PAPERS, META_MAP);
+          const badge = table.querySelector('.paper-discussed');
+          assert(badge != null, 'expected at least one .paper-discussed badge');
+          assert(badge.textContent.includes('\u2605'), 'badge should contain the \u2605 character');
         });
       });
 

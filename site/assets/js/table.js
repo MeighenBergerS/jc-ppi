@@ -44,8 +44,10 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
     const tdName = tr.insertCell();
     tdName.textContent = (paper[COL.name] || '').trim() || '—';
 
-    // Attach categories as a data attribute for the subfield filter
+    // Attach filter data attributes
     tr.dataset.categories = (meta.categories ?? []).join(',');
+    tr.dataset.discussed =
+      (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE' ? 'true' : 'false';
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
