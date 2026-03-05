@@ -10,6 +10,46 @@ import { COL, CONFIG } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
 import { vote, removeEntry, editComment, discussPaper } from './sheet.js';
 
+// ── Discussed override cache ──────────────────────────────────
+// Google Sheets' published CSV has a ~1–5 min propagation delay after
+// the Apps Script writes to the sheet.  We store the user's last known
+// discussed state in localStorage so the star survives a reload while
+// the CSV catches up.  Entries expire after 10 minutes.
+
+const _DISC_KEY = 'jc_discussed_overrides';
+const _DISC_TTL = 10 * 60 * 1000; // 10 minutes
+
+function _getDiscussedOverrides() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(_DISC_KEY) || '{}');
+    const now = Date.now();
+    // Prune expired entries
+    let pruned = false;
+    Object.keys(raw).forEach((k) => {
+      if (now - raw[k].ts >= _DISC_TTL) {
+        delete raw[k];
+        pruned = true;
+      }
+    });
+    if (pruned) localStorage.setItem(_DISC_KEY, JSON.stringify(raw));
+    return raw;
+  } catch {
+    return {};
+  }
+}
+
+function _setDiscussedOverride(cleanId, discussed) {
+  try {
+    const raw = _getDiscussedOverrides();
+    if (discussed) {
+      raw[cleanId] = { v: true, ts: Date.now() };
+    } else {
+      delete raw[cleanId]; // cleared — no need to persist false
+    }
+    localStorage.setItem(_DISC_KEY, JSON.stringify(raw));
+  } catch {}
+}
+
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
  *
@@ -35,6 +75,7 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
 
   // ── Body ─────────────────────────────────────────────────
   const tbody = table.createTBody();
+  const discussedOverrides = _getDiscussedOverrides();
   papers.forEach((paper) => {
     const tr = tbody.insertRow();
     const id = stripVersion(normalizeArxivId(paper[COL.arxivId]));
@@ -46,13 +87,15 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
 
     // Attach filter data attributes
     tr.dataset.categories = (meta.categories ?? []).join(',');
-    tr.dataset.discussed =
-      (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE' ? 'true' : 'false';
+    // Prefer the local override (bridges the Sheets CSV propagation delay)
+    const discussed =
+      discussedOverrides[id]?.v === true ||
+      (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
+    tr.dataset.discussed = discussed ? 'true' : 'false';
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
     // Discussed star badge — visible in both This Week and Archive
-    const discussed = (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
     if (discussed) {
       const star = document.createElement('div');
       star.className = 'paper-discussed';
@@ -211,6 +254,7 @@ function _buildActionsCell(cleanId, initialVotes, initialDiscussed, commentSpan,
       const res = await discussPaper(cleanId);
       if (res.ok) {
         isDiscussed = res.discussed;
+        _setDiscussedOverride(cleanId, isDiscussed);
         _updateDiscuss();
         // Sync the read-only star badge in the paper cell
         const row = discussBtn.closest('tr');

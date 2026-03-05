@@ -140,6 +140,14 @@ package.json                 ← Test runner config (node:test, no external deps
 
 ---
 
+## Known limitations
+
+| Limitation                       | Detail                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sheets CSV propagation delay** | Google's "Publish to web" CSV endpoint is cached on Google's side and can lag **1–5 minutes** behind the actual sheet data. Actions that write to the sheet via the Apps Script (votes, edits, the discussed ★ toggle) take effect in the sheet instantly but may not be reflected in the CSV on the next page load. The site works around this for the ★ flag by storing the user's last-known discussed state in `localStorage` for 10 minutes, so the star badge survives a reload while the CSV catches up. Other mutations (votes, comment edits) are rendered optimistically in the DOM without waiting for the CSV to sync. |
+
+---
+
 ## Documentation
 
 | Document                                       | Contents                                                      |
