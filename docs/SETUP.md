@@ -49,11 +49,22 @@ publicly readable CSV, create a second tab that mirrors everything except email:
 
 1. At the bottom of the sheet, click **+** to add a new tab. Name it `Public`.
 2. In cell **A1** of the Public tab, paste this formula:
+
    ```
-   =QUERY('Form Responses 1'!A:F, "SELECT A, B, C, D, F", 1)
+   =QUERY(ARRAYFORMULA(TO_TEXT('Form Responses 1'!A:F)), "SELECT Col1, Col2, Col3, Col4, Col6", 1)
    ```
+
    This pulls Timestamp, Name, arXiv ID, Comment, and Approved — skipping
    Email (column E) entirely. Adjust the sheet name if yours differs.
+
+   > **Why `TO_TEXT`?** When a submitter pastes a full arXiv URL (e.g.
+   > `https://arxiv.org/abs/2301.12345`), Google Sheets auto-formats the cell
+   > as a hyperlink. Plain `QUERY` returns an empty string for hyperlink cells;
+   > wrapping the range in `ARRAYFORMULA(TO_TEXT(...))` forces every cell to
+   > plain text first so URLs are preserved. Column references change from
+   > letter-based (`A`, `C`, …) to positional (`Col1`, `Col3`, …) because the
+   > input is no longer a direct named range.
+
 3. **Add interactivity columns.** In the same Public tab, add three more column
    headers immediately to the right of the last QUERY output column:
 

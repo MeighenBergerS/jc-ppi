@@ -132,8 +132,11 @@ function _findRow(sheet, cleanId) {
     if (approved !== 'TRUE' || removed === 'TRUE') continue;
     if (_normalizeId(rawId) !== cleanId) continue;
 
-    // Reject rows outside the current week
-    var ts = new Date(sheet.getRange(i, 1).getValue()); // column A — Timestamp
+    // Reject rows outside the current week.
+    // Column A may hold a Date object (native cell) or a text string
+    // (when the Public tab uses ARRAYFORMULA(TO_TEXT(...)) to preserve URLs).
+    var tsVal = sheet.getRange(i, 1).getValue();
+    var ts = tsVal instanceof Date ? tsVal : new Date(tsVal);
     if (isNaN(ts) || ts < weekStart || ts >= weekEnd) continue;
 
     return i;
