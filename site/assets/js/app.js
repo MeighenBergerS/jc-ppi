@@ -78,6 +78,13 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     return !isNaN(ts) && ts >= monday && ts <= sunday;
   });
 
+  // Sort by votes descending; break ties by submission time ascending.
+  thisWeek.sort((a, b) => {
+    const voteDiff = Number(b[COL.votes] ?? 0) - Number(a[COL.votes] ?? 0);
+    if (voteDiff !== 0) return voteDiff;
+    return new Date(a[COL.timestamp]) - new Date(b[COL.timestamp]);
+  });
+
   // Skip expensive re-render when paper count hasn't changed (poll path)
   if (!force && thisWeek.length === _lastThisWeekCount) return;
   _lastThisWeekCount = thisWeek.length;
