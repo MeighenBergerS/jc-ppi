@@ -20,6 +20,7 @@ import {
 } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 import { buildTable } from './table.js';
+import { renderTrending } from './trending.js';
 
 /** Re-fetch interval for the This Week page (ms). */
 const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
@@ -60,6 +61,26 @@ async function fetchPapers() {
     .filter((r) => r.length > COL.timestamp && r[COL.timestamp])
     .filter((r) => (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE')
     .filter((r) => (r[COL.removed] ?? '').trim().toUpperCase() !== 'TRUE');
+}
+
+/**
+ * Fetch and parse the Trending CSV.
+ * Returns { state: 'ok'|'empty'|'error', rows: string[][] }.
+ * 'empty' rows are an empty array; trigger is attempted by the caller.
+ */
+async function fetchTrendingPapers() {
+  if (!CONFIG.trendingCsvUrl) return { state: 'empty', rows: [] };
+  try {
+    const res = await fetch(CONFIG.trendingCsvUrl, { cache: 'no-cache' });
+    if (!res.ok) return { state: 'error', rows: [] };
+    const text = await res.text();
+    const rows = parseCsv(text)
+      .slice(1)
+      .filter((r) => r.length > 0 && r[0]);
+    return { state: rows.length > 0 ? 'ok' : 'empty', rows };
+  } catch {
+    return { state: 'error', rows: [] };
+  }
 }
 
 /**
@@ -441,7 +462,11 @@ async function init() {
   const page = window.location.pathname.includes('archive') ? 'archive' : 'index';
 
   try {
-    const papers = await fetchPapers();
+    // Fetch submissions and (on index page) trending papers in parallel
+    const [papers, trendingResult] = await Promise.all([
+      fetchPapers(),
+      page === 'index' ? fetchTrendingPapers() : Promise.resolve(null),
+    ]);
 
     if (page === 'index') {
       await renderThisWeek(papers, container, { force: true });
@@ -458,6 +483,24 @@ async function init() {
           console.warn('Poll failed:', e);
         }
       }, POLL_INTERVAL);
+
+      // Render trending section
+      const trendingContainer = document.getElementById('trending');
+      if (trendingContainer) {
+        if (trendingResult.state === 'empty' && CONFIG.mutateUrl) {
+          // Attempt to trigger a refresh server-side, then show static message
+          try {
+            await fetch(CONFIG.mutateUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: JSON.stringify({ action: 'triggerTrendingRefresh' }),
+            });
+          } catch {
+            // Ignore — the static message handles both trigger-succeeded and trigger-failed
+          }
+        }
+        renderTrending(trendingResult.state, trendingResult.rows, trendingContainer);
+      }
     }
 
     if (page === 'archive') {

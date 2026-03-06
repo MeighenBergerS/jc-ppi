@@ -63,19 +63,20 @@ check always passes.
 
 ### File map
 
-| File                        | What it does                                                       |
-| --------------------------- | ------------------------------------------------------------------ |
-| `site/assets/js/config.js`  | Google Sheet / Form URLs and column map — **start here for setup** |
-| `site/assets/js/utils.js`   | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
-| `site/assets/js/inspire.js` | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
-| `site/assets/js/sheet.js`   | Apps Script mutation wrapper (vote / edit / remove)                |
-| `site/assets/js/table.js`   | DOM table builder                                                  |
-| `site/assets/js/app.js`     | Page renderers and entry point                                     |
-| `site/assets/css/style.css` | All styling                                                        |
-| `site/index.html`           | This Week page                                                     |
-| `site/archive.html`         | Archive page (with subfield filter)                                |
-| `site/stats.html`           | Submission statistics by year                                      |
-| `site/resources.html`       | arXiv & INSPIRE-HEP guide                                          |
+| File                         | What it does                                                       |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `site/assets/js/config.js`   | Google Sheet / Form URLs and column map — **start here for setup** |
+| `site/assets/js/utils.js`    | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
+| `site/assets/js/inspire.js`  | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
+| `site/assets/js/sheet.js`    | Apps Script mutation wrapper (vote / edit / remove)                |
+| `site/assets/js/table.js`    | DOM table builder                                                  |
+| `site/assets/js/app.js`      | Page renderers and entry point                                     |
+| `site/assets/js/trending.js` | Trending papers section renderer (display-only)                    |
+| `site/assets/css/style.css`  | All styling                                                        |
+| `site/index.html`            | This Week page                                                     |
+| `site/archive.html`          | Archive page (with subfield filter)                                |
+| `site/stats.html`            | Submission statistics by year                                      |
+| `site/resources.html`        | arXiv & INSPIRE-HEP guide                                          |
 
 ### Making changes
 

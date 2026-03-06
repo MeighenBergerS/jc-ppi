@@ -127,6 +127,22 @@ the current-week page. To correct a star in the Archive, edit the
 
 ---
 
+### Trending refresh (automatic)
+
+When the **Trending Papers** section on the home page detects that the
+Trending CSV is empty (e.g. on a brand-new deployment before the first
+scheduled trigger fires), the site automatically sends a silent background
+POST to `doPost` with `{ action: "triggerTrendingRefresh" }`. This invokes
+`refreshTrendingPapers()` in the Apps Script, which fetches the latest data
+from INSPIRE-HEP and writes it to the Trending tab — the section will be
+populated on the next page load.
+
+No `arxivId` is required for this action. Under normal operation the refresh
+is handled by the Monday/Wednesday time-driven triggers described in
+[SETUP.md](SETUP.md#step-6b--set-up-the-trending-papers-section-optional).
+
+---
+
 ## Date guard
 
 The Apps Script `_findRow` function will only match a paper if its timestamp

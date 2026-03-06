@@ -17,6 +17,12 @@ export const CONFIG = {
   // Publish → link icon → copy URL.
   formUrl: 'https://forms.gle/j88TQiKnpScU9xY28',
 
+  // Published CSV export URL for the *Trending* tab.
+  // File → Share → Publish to web → choose the "Trending" tab → CSV → copy URL.
+  // Leave blank until the Trending tab has been created and published.
+  trendingCsvUrl:
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSV30CUvQZhLXFlvt0HqGmGsMZqaapy4S_xIQAxYiJp1IBkkW515MNIdBvSnEaYRu9NQ1rOvCANW2ua/pub?gid=1574674238&single=true&output=csv',
+
   // Apps Script web app URL for vote/edit/remove mutations.
   // Deploy docs/appscript.gs as a web app (Execute as: Me, Anyone can access)
   // and paste the /exec URL here.  Leave blank to disable interactive controls.
@@ -200,4 +206,20 @@ export const COL = {
   editedComment: 6, // overrides comment when non-empty
   votes: 7, // running upvote count
   discussed: 8, // "TRUE" when the paper was starred as discussed at the JC meeting
+};
+
+// ── TRENDING TAB COLUMN MAP ─────────────────────────────────
+// Columns in the Trending tab CSV (0-indexed):
+//   A (0) Category  B (1) Rank  C (2) ArxivId  D (3) Title  E (4) Abstract
+//   F (5) Authors   G (6) Affiliation  H (7) Citations  I (8) CitationsNoSelf
+export const COL_TREND = {
+  category: 0,
+  rank: 1,
+  arxivId: 2,
+  title: 3,
+  abstract: 4,
+  authors: 5,
+  affiliation: 6,
+  citations: 7,
+  citationsNoSelf: 8,
 };

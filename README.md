@@ -45,23 +45,38 @@ INSPIRE-HEP API fills in title, authors, abstract, citations, BibTeX
 Papers submitted during the current Monday–Sunday window appear on the **This Week** page.
 After Sunday they roll automatically into the **Archive** — no manual action required.
 
+A second pipeline keeps the **Trending Papers** section on the home page up to date:
+
+```
+Apps Script triggers on Monday and Wednesday morning
+        ↓
+refreshTrendingPapers() queries INSPIRE-HEP for top-cited hep-ph papers
+        ↓
+Results written to the Trending tab in the Google Sheet
+        ↓
+Site fetches Trending tab as CSV → renders dedicated Trending section on home page
+        ↓
+weeklySlackReminder reads the same Trending tab (no live API calls needed)
+```
+
 ---
 
 ## Features
 
-| Feature                | Details                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------- |
-| **Auto metadata**      | Title, authors, abstract, citation count fetched from INSPIRE-HEP               |
-| **BibTeX copy**        | One-click copy of the INSPIRE BibTeX entry                                      |
-| **arXiv validation**   | Invalid IDs shown in red; IDs not yet on INSPIRE shown in amber                 |
-| **ID auto-correction** | Three-digit-prefix IDs (e.g. `708.1137`) are automatically tried as `0708.1137` |
-| **Subfield filter**    | Archive can be filtered by broad HEP category (Pheno, Theory, Experiment, …)    |
-| **Year selector**      | Stats page can be scoped to a specific year                                     |
-| **This-week voting**   | Visitors can upvote papers on the current week's list                           |
-| **Inline editing**     | Submitters (or anyone) can update the suggestion comment for this week's papers |
-| **Remove entry**       | Entries can be removed from the live list (this week only, with confirmation)   |
-| **Calendar export**    | One-click `.ics` download for the next meeting                                  |
-| **Meeting info**       | Slack link, time, student guide, and calendar button on the home page           |
+| Feature                | Details                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auto metadata**      | Title, authors, abstract, citation count fetched from INSPIRE-HEP                                                                     |
+| **BibTeX copy**        | One-click copy of the INSPIRE BibTeX entry                                                                                            |
+| **arXiv validation**   | Invalid IDs shown in red; IDs not yet on INSPIRE shown in amber                                                                       |
+| **ID auto-correction** | Three-digit-prefix IDs (e.g. `708.1137`) are automatically tried as `0708.1137`                                                       |
+| **Subfield filter**    | Archive can be filtered by broad HEP category (Pheno, Theory, Experiment, …)                                                          |
+| **Year selector**      | Stats page can be scoped to a specific year                                                                                           |
+| **This-week voting**   | Visitors can upvote papers on the current week's list                                                                                 |
+| **Inline editing**     | Submitters (or anyone) can update the suggestion comment for this week's papers                                                       |
+| **Remove entry**       | Entries can be removed from the live list (this week only, with confirmation)                                                         |
+| **Calendar export**    | One-click `.ics` download for the next meeting                                                                                        |
+| **Meeting info**       | Slack link, time, student guide, and calendar button on the home page                                                                 |
+| **Trending papers**    | Top-cited recent hep-ph papers from INSPIRE-HEP shown in a dedicated home-page section; refreshed automatically on Monday & Wednesday |
 
 ---
 
@@ -118,6 +133,7 @@ site/                        ← everything GitHub Pages serves
       sheet.js               ← Apps Script mutation wrapper (vote/edit/remove)
       table.js               ← DOM table builder
       app.js                 ← Page renderers and entry point
+      trending.js            ← Trending papers section renderer
 docs/
   SETUP.md                   ← Full deployment guide for your own instance
   CONTRIBUTING.md            ← How to suggest a paper / contribute to the site
