@@ -466,8 +466,10 @@ function refreshTrendingPapers() {
 
     try {
       // arxiv_eprints.categories is the correct INSPIRE field for arXiv category filtering.
-      // date > YYYY-MM-DD is the working INSPIRE date range syntax.
-      var query = 'arxiv_eprints.categories:hep-ph and date > ' + dateStr;
+      // `de` (date earliest) filters by arXiv submission/preprint date, not journal publication date.
+      // Using plain `date >` would also match journal publication dates, causing old preprints
+      // that were recently published in a journal to appear as "trending".
+      var query = 'arxiv_eprints.categories:hep-ph and de > ' + dateStr;
       if (cat.extra) query += ' and ' + cat.extra;
 
       var url = 'https://inspirehep.net/api/literature'

@@ -1,0 +1,55 @@
+{
+  "_comment": "Controls the generated fixture data. Edit freely — no code changes needed.",
+
+  "users": [
+    "Alice Chen",
+    "Bob Martinez",
+    "Carol Liu",
+    "David Osei",
+    "Emma Walsh",
+    "Frank Nguyen",
+    "Grace Park",
+    "Hector Reyes",
+    "Ivan Petrov",
+    "Judy Kim"
+  ],
+
+  "rounds": [
+    {
+      "label": "current week",
+      "weeksAgo": 0,
+      "papersPerUser": 1,
+      "comment": "Papers submitted in the current Mon–Sun window"
+    },
+    {
+      "label": "last week",
+      "weeksAgo": 1,
+      "papersPerUser": 1,
+      "comment": "Papers from one week ago — appear in Archive"
+    },
+    {
+      "label": "2 weeks ago",
+      "weeksAgo": 2,
+      "papersPerUser": 1,
+      "comment": "Papers from two weeks ago — appear in Archive"
+    },
+    {
+      "label": "distant past",
+      "weeksAgo": 52,
+      "papersPerUser": 1,
+      "comment": "Papers from ~1 year ago — appear deep in Archive"
+    }
+  ],
+
+  "totalPapers": 500,
+  "recentPapers": 50,
+  "recentWeeks": 4,
+
+  "trendingCategories": [
+    { "label": "Overall hep-ph", "extra": "" },
+    { "label": "Neutrinos",      "extra": "neutrino" },
+    { "label": "Dark Matter",    "extra": "\"dark matter\"" }
+  ],
+  "trendingResultsPerCategory": 3,
+  "trendingLookbackWeeks": 4
+}

@@ -42,12 +42,8 @@ The site is a static GitHub Pages site. All source files are in this repository.
 
 ### Setup
 
-No build step is required. Any static file server works for local development:
-
-```bash
-python -m http.server 8000 --directory site
-# open http://localhost:8000
-```
+No build step is required. Node ≥ 18 is the only requirement (needed for the
+test suite and the local dev server).
 
 To enable automatic code formatting before each commit, run this once after
 cloning:
@@ -63,29 +59,95 @@ check always passes.
 
 ### File map
 
-| File                         | What it does                                                       |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `site/assets/js/config.js`   | Google Sheet / Form URLs and column map — **start here for setup** |
-| `site/assets/js/utils.js`    | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
-| `site/assets/js/inspire.js`  | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
-| `site/assets/js/sheet.js`    | Apps Script mutation wrapper (vote / edit / remove)                |
-| `site/assets/js/table.js`    | DOM table builder                                                  |
-| `site/assets/js/app.js`      | Page renderers and entry point                                     |
-| `site/assets/js/trending.js` | Trending papers section renderer (display-only)                    |
-| `site/assets/css/style.css`  | All styling                                                        |
-| `site/index.html`            | This Week page                                                     |
-| `site/archive.html`          | Archive page (with subfield filter)                                |
-| `site/stats.html`            | Submission statistics by year                                      |
-| `site/resources.html`        | arXiv & INSPIRE-HEP guide                                          |
+| File                                   | What it does                                                       |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| `site/assets/js/config.js`             | Google Sheet / Form URLs and column map — **start here for setup** |
+| `site/assets/js/utils.js`              | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
+| `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
+| `site/assets/js/sheet.js`              | Apps Script mutation wrapper (vote / edit / remove)                |
+| `site/assets/js/table.js`              | DOM table builder                                                  |
+| `site/assets/js/app.js`                | Page renderers and entry point                                     |
+| `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                    |
+| `site/assets/css/style.css`            | All styling                                                        |
+| `site/index.html`                      | This Week page                                                     |
+| `site/archive.html`                    | Archive page (with subfield filter)                                |
+| `site/stats.html`                      | Submission statistics by year                                      |
+| `site/resources.html`                  | arXiv & INSPIRE-HEP guide                                          |
+| `tests/server/index.mjs`               | Local dev server (mock endpoints, config URL injection)            |
+| `tests/server/generate-fixtures.mjs`   | Fetches real papers from INSPIRE and writes fresh fixture files    |
+| `tests/server/scenario.json`           | User/round config for fixture generation — edit freely             |
+| `tests/fixtures/submissions.csv`       | Committed fixture: baseline submission data                        |
+| `tests/fixtures/inspire-response.json` | Committed fixture: baseline INSPIRE API response                   |
 
 ### Making changes
 
 1. Fork the repository and create a branch.
-2. Make your changes locally and test with `python -m http.server 8000`.
+2. Make your changes locally and test with `npm run dev` (see below).
 3. Run `npm test` to make sure all tests pass.
 4. Open a pull request against `main`.
 
 The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
+
+---
+
+### Local dev server
+
+The dev server lets you run the full site locally against realistic fake data,
+with no access to Google Sheets or the live INSPIRE API required.
+
+```
+npm run dev      # start the server with committed fixture data
+npm run refresh  # fetch fresh papers from INSPIRE, then start the server
+```
+
+Then open **http://localhost:3000** in your browser.
+
+#### How it works
+
+The server (`tests/server/index.mjs`) intercepts the three external URLs the
+site normally talks to and routes them to local mock endpoints:
+
+| External URL                    | Mock endpoint            | Source                                         |
+| ------------------------------- | ------------------------ | ---------------------------------------------- |
+| Google Sheets CSV (submissions) | `GET /mock/sheet.csv`    | `tests/fixtures/submissions[.fresh].csv`       |
+| Google Sheets CSV (trending)    | `GET /mock/trending.csv` | `tests/fixtures/trending[.fresh].csv`          |
+| `inspirehep.net/api/literature` | `GET /mock/inspire`      | `tests/fixtures/inspire-response[.fresh].json` |
+| Apps Script mutate URL          | `POST /mock/mutate`      | In-memory store (votes, edits, removals)       |
+
+URL substitution happens by serving a patched version of `config.js` and
+`inspire.js` at request time — the source files on disk are never modified.
+
+#### Fixture files
+
+Two sets of fixtures can exist side by side:
+
+- **Committed** (`submissions.csv`, `inspire-response.json`) — checked into
+  the repo, always present, used by default. Safe to edit by hand for
+  targeted test scenarios.
+- **Fresh** (`*.fresh.*`) — generated by `npm run refresh`, gitignored.
+  The server automatically prefers these over the committed files when present.
+
+#### Regenerating fixtures (`--refresh`)
+
+`npm run refresh` runs `tests/server/generate-fixtures.mjs`, which:
+
+1. Fetches ~500 hep-ph papers from the live INSPIRE-HEP API.
+2. Synthesises a submission CSV using the users and week schedule defined in
+   `tests/server/scenario.json` — 10 users each submitting papers across
+   four time windows (current week, last week, 2 weeks ago, ~1 year ago).
+3. Writes `tests/fixtures/submissions.fresh.csv`,
+   `inspire-response.fresh.json`, and `trending.fresh.csv`.
+
+To change the simulated users, round structure, or paper counts, edit
+`tests/server/scenario.json`. No code changes are needed.
+
+#### Health check
+
+`GET /mock/status` returns a JSON summary of what the server loaded:
+
+```json
+{ "ok": true, "submissions": 40, "inspireHits": 40, "trending": 12, "mutations": 0 }
+```
 
 ---
 

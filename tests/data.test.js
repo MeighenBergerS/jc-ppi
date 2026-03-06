@@ -3,14 +3,13 @@
  * Run with: node --test tests/data.test.js
  *
  * Uses the synthetic fixture in tests/fixtures/submissions.csv which contains:
- *   - 102 data rows spanning 2021–2025
- *   - 7 intentional duplicate arXiv ID pairs (same paper, different submitters)
- *   - 1 versioned arXiv ID (2410.00841v2) to exercise stripVersion
- *   - Columns: Timestamp(0), Name(1), arXiv ID(2), Comment(3), Approved(4)
+ *   - 40 data rows spanning 2025–2026
+ *   - 3 duplicate arXiv IDs: 2602.24253 (×3) and 2602.10215 (×2)
+ *   - Columns: Timestamp(0), Name(1), arXiv ID(2), Comment(3), Approved(4),
+ *              Removed(5), EditedComment(6), Votes(7), Discussed(8)
  *
- * Inline row fixtures (year 2099) are used for features that require columns
- * beyond col 4 (Removed, EditedComment, Votes, Discussed) which are absent
- * from the CSV fixture.
+ * Inline row fixtures (year 2099) are used for edge-case duplicate patterns
+ * and specific column-layout scenarios.
  */
 
 import { describe, it } from 'node:test';
@@ -34,8 +33,8 @@ const allRows = parseCsv(CSV)
 // ── Fixture sanity ────────────────────────────────────────────
 
 describe('fixture CSV', () => {
-  it('contains exactly 102 data rows (after slicing header)', () => {
-    assert.equal(allRows.length, 102);
+  it('contains exactly 40 data rows (after slicing header)', () => {
+    assert.equal(allRows.length, 40);
   });
 
   it('every row has Approved = TRUE', () => {
@@ -44,16 +43,13 @@ describe('fixture CSV', () => {
     }
   });
 
-  it('timestamps span 2021–2025', () => {
+  it('timestamps span 2025–2026', () => {
     const years = new Set(allRows.map((r) => new Date(r[0]).getFullYear()));
-    assert.ok(years.has(2021));
-    assert.ok(years.has(2022));
-    assert.ok(years.has(2023));
-    assert.ok(years.has(2024));
     assert.ok(years.has(2025));
+    assert.ok(years.has(2026));
   });
 
-  it('contains the 8 expected submitters', () => {
+  it('contains the 10 expected submitters', () => {
     const names = new Set(allRows.map((r) => r[1].trim()));
     for (const name of [
       'Alice Chen',
@@ -64,6 +60,8 @@ describe('fixture CSV', () => {
       'Frank Nguyen',
       'Grace Park',
       'Hector Reyes',
+      'Ivan Petrov',
+      'Judy Kim',
     ]) {
       assert.ok(names.has(name), `missing submitter "${name}"`);
     }
@@ -117,32 +115,17 @@ describe('deduplicatePapers', () => {
     assert.deepEqual(deduplicatePapers([]), []);
   });
 
-  it('removes exactly 7 duplicates from the full fixture', () => {
-    // The fixture has 7 arXiv IDs submitted by two different people.
-    // Global dedup should remove the 7 later submissions.
+  it('removes exactly 3 duplicates from the full fixture', () => {
+    // The fixture has 2602.24253 (×3) and 2602.10215 (×2).
+    // Global dedup removes 2 + 1 = 3 later submissions.
     const result = deduplicatePapers(allRows);
-    assert.equal(result.length, 95);
-  });
-
-  it('the version-suffix row (2410.00841v2) survives as a unique paper globally', () => {
-    const result = deduplicatePapers(allRows);
-    const ids = result.map((r) => r[2].trim());
-    // The v-suffix ID has no plain-version counterpart in the fixture
-    assert.ok(ids.includes('2410.00841v2'));
+    assert.equal(result.length, 37);
   });
 
   it('the duplicate IDs each appear exactly once in the deduplicated list', () => {
     const result = deduplicatePapers(allRows);
     const cleanIds = result.map((r) => stripVersion(normalizeArxivId(r[2])));
-    const duplicatedIDs = [
-      '2104.07421',
-      '2109.05433',
-      '2207.03764',
-      '2301.03086',
-      '2309.08679',
-      '2402.07987',
-      '2403.14059',
-    ];
+    const duplicatedIDs = ['2602.24253', '2602.10215'];
     for (const id of duplicatedIDs) {
       const count = cleanIds.filter((x) => x === id).length;
       assert.equal(count, 1, `expected exactly 1 occurrence of ${id}, got ${count}`);
@@ -153,95 +136,57 @@ describe('deduplicatePapers', () => {
 // ── computeSubmissionStats — per-year paper counts ────────────
 
 describe('computeSubmissionStats — paper counts per year', () => {
-  it('2021: 30 raw rows, 29 unique papers (one intra-year dup)', () => {
-    const { papers } = computeSubmissionStats(2021, allRows);
-    assert.equal(papers.length, 29);
-  });
-
-  it('2022: 30 raw rows, 29 unique papers (one intra-year dup)', () => {
-    const { papers } = computeSubmissionStats(2022, allRows);
-    assert.equal(papers.length, 29);
-  });
-
-  it('2023: 22 raw rows, 20 unique papers (two intra-year dups)', () => {
-    const { papers } = computeSubmissionStats(2023, allRows);
-    assert.equal(papers.length, 20);
-  });
-
-  it('2024: 15 raw rows, 13 unique papers (two intra-year dups)', () => {
-    const { papers } = computeSubmissionStats(2024, allRows);
-    assert.equal(papers.length, 13);
-  });
-
-  it('2025: 5 raw rows, 5 unique papers (no dups)', () => {
+  it('2025: 10 raw rows, 10 unique papers (no intra-year dups)', () => {
     const { papers } = computeSubmissionStats(2025, allRows);
-    assert.equal(papers.length, 5);
+    assert.equal(papers.length, 10);
+  });
+
+  it('2026: 30 raw rows, 27 unique papers (3 intra-year dups)', () => {
+    // 2602.24253 appears 3× (2 extras) and 2602.10215 appears 2× (1 extra).
+    const { papers } = computeSubmissionStats(2026, allRows);
+    assert.equal(papers.length, 27);
   });
 
   it('returns zero papers for a year with no submissions', () => {
     const { papers } = computeSubmissionStats(2019, allRows);
     assert.equal(papers.length, 0);
   });
-
-  it('cross-year duplicate (2109.05433) appears in both 2021 and 2022', () => {
-    // David submitted in 2021; Bob submitted the same ID in 2022.
-    // Each year's stats counts it independently (year filter runs before dedup).
-    const { papers: p21 } = computeSubmissionStats(2021, allRows);
-    const { papers: p22 } = computeSubmissionStats(2022, allRows);
-    const ids21 = p21.map((r) => r[2].trim());
-    const ids22 = p22.map((r) => r[2].trim());
-    assert.ok(ids21.includes('2109.05433'), '2109.05433 should appear in 2021 stats');
-    assert.ok(ids22.includes('2109.05433'), '2109.05433 should appear in 2022 stats');
-  });
 });
 
 // ── computeSubmissionStats — member counts ────────────────────
 
 describe('computeSubmissionStats — member counts', () => {
-  it('2021: Alice Chen submitted 3 papers', () => {
-    const { memberCounts } = computeSubmissionStats(2021, allRows);
-    assert.equal(memberCounts.get('Alice Chen'), 3);
-  });
-
-  it('2021: 8 distinct submitters', () => {
-    const { memberCounts } = computeSubmissionStats(2021, allRows);
-    assert.equal(memberCounts.size, 8);
-  });
-
-  it('2021: member counts sum to the unique paper count (29)', () => {
-    const { memberCounts } = computeSubmissionStats(2021, allRows);
-    const total = [...memberCounts.values()].reduce((a, b) => a + b, 0);
-    assert.equal(total, 29);
-  });
-
-  it('2022: Grace Park has 2 papers (one deduped as she submitted the same as Carol)', () => {
-    const { memberCounts } = computeSubmissionStats(2022, allRows);
-    assert.equal(memberCounts.get('Grace Park'), 2);
-  });
-
-  it('2022: member counts sum to 29', () => {
-    const { memberCounts } = computeSubmissionStats(2022, allRows);
-    const total = [...memberCounts.values()].reduce((a, b) => a + b, 0);
-    assert.equal(total, 29);
-  });
-
-  it('2024: uses Frank Nguyen count of 1 (row 92 deduped; row 84 kept)', () => {
-    const { memberCounts } = computeSubmissionStats(2024, allRows);
-    assert.equal(memberCounts.get('Frank Nguyen'), 1);
-  });
-
-  it('2024: member counts sum to 13', () => {
-    const { memberCounts } = computeSubmissionStats(2024, allRows);
-    const total = [...memberCounts.values()].reduce((a, b) => a + b, 0);
-    assert.equal(total, 13);
-  });
-
-  it('2025: each of the 5 submitters has exactly 1 paper', () => {
+  it('2025: all 10 submitters have exactly 1 paper each (no intra-year dups)', () => {
     const { memberCounts } = computeSubmissionStats(2025, allRows);
-    assert.equal(memberCounts.size, 5);
+    assert.equal(memberCounts.size, 10);
     for (const [name, count] of memberCounts) {
       assert.equal(count, 1, `${name} should have 1 paper in 2025`);
     }
+  });
+
+  it('2025: member counts sum to 10', () => {
+    const { memberCounts } = computeSubmissionStats(2025, allRows);
+    const total = [...memberCounts.values()].reduce((a, b) => a + b, 0);
+    assert.equal(total, 10);
+  });
+
+  it('2026: Bob Martinez keeps 2602.24253 (first submitter); Carol Liu and Frank Nguyen deduped away', () => {
+    const { memberCounts } = computeSubmissionStats(2026, allRows);
+    assert.equal(memberCounts.get('Bob Martinez'), 3); // retains 2602.24253
+    assert.equal(memberCounts.get('Carol Liu'), 2); // loses 2602.24253 dup
+    assert.equal(memberCounts.get('Frank Nguyen'), 2); // loses 2602.24253 dup
+  });
+
+  it('2026: Alice Chen keeps 2602.10215 (first submitter); Hector Reyes deduped away', () => {
+    const { memberCounts } = computeSubmissionStats(2026, allRows);
+    assert.equal(memberCounts.get('Alice Chen'), 3); // retains 2602.10215
+    assert.equal(memberCounts.get('Hector Reyes'), 2); // loses 2602.10215 dup
+  });
+
+  it('2026: member counts sum to 27', () => {
+    const { memberCounts } = computeSubmissionStats(2026, allRows);
+    const total = [...memberCounts.values()].reduce((a, b) => a + b, 0);
+    assert.equal(total, 27);
   });
 
   it('empty year: memberCounts is an empty Map', () => {
@@ -254,7 +199,7 @@ describe('computeSubmissionStats — member counts', () => {
 
 describe('computeSubmissionStats — week aggregation', () => {
   it('weekCounts is non-empty for years with submissions', () => {
-    const { weekCounts } = computeSubmissionStats(2021, allRows);
+    const { weekCounts } = computeSubmissionStats(2025, allRows);
     assert.ok(weekCounts.size > 0);
   });
 
@@ -264,14 +209,14 @@ describe('computeSubmissionStats — week aggregation', () => {
   });
 
   it('busiestKey is non-null for years with submissions', () => {
-    for (const year of [2021, 2022, 2023, 2024, 2025]) {
+    for (const year of [2025, 2026]) {
       const { busiestKey } = computeSubmissionStats(year, allRows);
       assert.notEqual(busiestKey, null, `busiestKey should not be null for ${year}`);
     }
   });
 
   it('busiestKey points to the week with the highest paper count', () => {
-    for (const year of [2021, 2022, 2023, 2024]) {
+    for (const year of [2025, 2026]) {
       const { weekCounts, busiestKey } = computeSubmissionStats(year, allRows);
       const maxCount = Math.max(...weekCounts.values());
       assert.equal(weekCounts.get(busiestKey), maxCount, `busiestKey mismatch for ${year}`);
@@ -279,13 +224,13 @@ describe('computeSubmissionStats — week aggregation', () => {
   });
 
   it('busiestKey is a parseable ISO date string', () => {
-    const { busiestKey } = computeSubmissionStats(2021, allRows);
+    const { busiestKey } = computeSubmissionStats(2025, allRows);
     const parsed = new Date(busiestKey);
     assert.ok(!isNaN(parsed.getTime()), `busiestKey "${busiestKey}" is not parseable`);
   });
 
   it('week sums equal unique paper count for each year', () => {
-    for (const year of [2021, 2022, 2023, 2024, 2025]) {
+    for (const year of [2025, 2026]) {
       const { papers, weekCounts } = computeSubmissionStats(year, allRows);
       const sumFromWeeks = [...weekCounts.values()].reduce((a, b) => a + b, 0);
       assert.equal(
@@ -421,9 +366,10 @@ describe('computeSubmissionStats — discussedCounts', () => {
     assert.equal(discussedCounts.size, 0);
   });
 
-  it('fixture rows (no col 8) produce empty discussedCounts', () => {
-    // The fixture CSV only has columns 0–4; p[8] is undefined, treated as not discussed.
-    const { discussedCounts } = computeSubmissionStats(2021, allRows);
+  it('rows without col 8 produce empty discussedCounts', () => {
+    // Rows with only columns 0–4 should not crash; none are treated as discussed.
+    const shortRows = [['2099-06-01 10:00:00', 'Alice', '9901.88001', '', 'TRUE']];
+    const { discussedCounts } = computeSubmissionStats(2099, shortRows);
     assert.equal(discussedCounts.size, 0);
   });
 });
