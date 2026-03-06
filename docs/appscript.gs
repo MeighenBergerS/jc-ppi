@@ -36,8 +36,8 @@ var ABSTRACT_MAX_CHARS = 500;
 //   extra — extra INSPIRE search term (empty string = all hep-ph)
 var INSPIRE_CATEGORIES = [
   { label: 'Overall hep-ph', emoji: '🔬', extra: '' },
-  { label: 'Neutrinos',      emoji: '⚛️ ', extra: 'and a neutrino' },
-  { label: 'Dark Matter',    emoji: '🌑', extra: 'and a "dark matter"' }
+  { label: 'Neutrinos',      emoji: '⚛️ ', extra: 'neutrino' },
+  { label: 'Dark Matter',    emoji: '🌑', extra: '"dark matter"' }
 ];
 
 // ── Public tab — 1-indexed column positions ──────────────────
@@ -465,14 +465,18 @@ function refreshTrendingPapers() {
     if (catIndex > 0) Utilities.sleep(1000); // stay within INSPIRE rate limits
 
     try {
-      var query = 'arxiv_categories hep-ph and date > ' + dateStr;
-      if (cat.extra) query += ' ' + cat.extra;
+      // arxiv_eprints.categories is the correct INSPIRE field for arXiv category filtering.
+      // date > YYYY-MM-DD is the working INSPIRE date range syntax.
+      var query = 'arxiv_eprints.categories:hep-ph and date > ' + dateStr;
+      if (cat.extra) query += ' and ' + cat.extra;
 
       var url = 'https://inspirehep.net/api/literature'
         + '?sort=mostcited'
         + '&size=' + INSPIRE_RESULTS_PER_CATEGORY
         + '&fields=arxiv_eprints,titles,abstracts,authors,collaborations,citation_count,citation_count_without_self_citations'
         + '&q=' + encodeURIComponent(query);
+
+      Logger.log('Fetching INSPIRE for "' + cat.label + '": ' + url);
 
       var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
       var code     = response.getResponseCode();
@@ -485,11 +489,14 @@ function refreshTrendingPapers() {
       }
 
       if (code !== 200) {
-        Logger.log('INSPIRE returned HTTP ' + code + ' for "' + cat.label + '"');
+        Logger.log('INSPIRE returned HTTP ' + code + ' for "' + cat.label + '": ' + response.getContentText().substring(0, 200));
         return;
       }
 
       var json = JSON.parse(response.getContentText());
+      var total = (json.hits && json.hits.total != null) ? json.hits.total : 'unknown';
+      Logger.log('INSPIRE total hits for "' + cat.label + '": ' + total);
+
       if (!json.hits || !json.hits.hits || json.hits.hits.length === 0) {
         Logger.log('No INSPIRE results for "' + cat.label + '"');
         return;
