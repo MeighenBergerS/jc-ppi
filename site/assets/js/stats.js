@@ -370,7 +370,8 @@ async function init() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const allRows = parseCsv(await res.text())
       .slice(1)
-      .filter((r) => r.length > COL.timestamp && r[COL.timestamp]);
+      .filter((r) => r.length > COL.timestamp && r[COL.timestamp])
+      .filter((r) => (r[COL.removed] ?? '').trim().toUpperCase() !== 'TRUE');
 
     // ── 2. Populate year selector ───────────────────────────
     const availableYears = [
