@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/utils.test.js tests/data.test.js tests/inspire.test.js tests/config.test.js",
+    "dev": "node tests/server/index.mjs",
+    "refresh": "node tests/server/index.mjs --refresh",
     "prepare": "git config core.hooksPath .githooks"
   },
   "engines": {

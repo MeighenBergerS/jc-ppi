@@ -1,103 +1,41 @@
-Timestamp,Name,arXiv ID,Comment,Approved
-2021-01-12 09:15:00,Alice Chen,2101.03729,XENONnT results significantly constrain the WIMP-nucleon cross-section,TRUE
-2021-01-14 10:10:00,Grace Park,2101.02645,T2K updated oscillation results prefer normal mass ordering,TRUE
-2021-01-19 11:30:00,Hector Reyes,2101.07808,Pierre Auger composition measurement constrains UHECR source models,TRUE
-2021-02-23 14:20:00,Frank Nguyen,2102.05719,Comprehensive EFT analysis of dark matter direct detection operators,TRUE
-2021-02-25 16:05:00,Hector Reyes,2102.11800,KamLAND-Zen 800 sets the world best limit on neutrinoless double beta decay,TRUE
-2021-03-16 09:10:00,Bob Martinez,2103.00685,LHAASO identifies twelve PeVatron candidates above 100 TeV,TRUE
-2021-03-23 09:40:00,Bob Martinez,2103.09684,IceCube extends the astrophysical neutrino spectrum measurement to 60 TeV,TRUE
-2021-04-08 10:30:00,David Osei,2104.07421,LISA could detect gravitational wave signals from DM first-order phase transitions,TRUE
-2021-04-20 14:55:00,Carol Liu,2104.13678,NOvA oscillations: CP asymmetry tension with T2K continues to grow,TRUE
-2021-04-21 15:20:00,Carol Liu,2104.02948,AMS-02 antiproton spectrum above 450 GV: constraints on secondary production,TRUE
-2021-05-13 11:30:00,Frank Nguyen,2104.07421,Same LISA/DM phase transition paper — noticed independently,TRUE
-2021-05-18 11:45:00,Emma Walsh,2105.01069,Ultra-light axion-like particles could explain small-scale structure,TRUE
-2021-06-08 10:50:00,Alice Chen,2106.07553,Auger spectrum precision reaching new level above 2.5 EeV,TRUE
-2021-06-14 16:00:00,Grace Park,2106.11989,PandaX-4T first results: world-leading spin-independent WIMP constraints,TRUE
-2021-06-17 10:15:00,Frank Nguyen,2106.14159,Borexino Phase III: complete observation of the pp solar neutrino chain,TRUE
-2021-07-20 15:40:00,David Osei,2107.14476,IceCube Glashow resonance: first detection of a 6.3 PeV anti-electron neutrino,TRUE
-2021-07-22 13:10:00,Hector Reyes,2107.03554,Freeze-in dark matter via light mediator stays viable at direct detection,TRUE
-2021-07-27 14:05:00,Frank Nguyen,2107.09071,Telescope Array hotspot persists with 2021 statistics at 3.5 sigma,TRUE
-2021-08-17 09:45:00,Bob Martinez,2108.07546,Constraints on inelastic DM from SN1987A energy loss arguments,TRUE
-2021-08-24 11:55:00,Emma Walsh,2108.05283,Global fit to reactor antineutrino data: sterile neutrino 3+1 is disfavoured,TRUE
-2021-09-07 11:40:00,David Osei,2109.05433,Updated ISM gas distribution and its implications for CR grammage,TRUE
-2021-09-14 09:30:00,Grace Park,2109.00081,COHERENT new CsI measurement confirms CEvNS at 4 sigma,TRUE
-2021-10-05 14:22:00,Carol Liu,2110.01632,Microlensing limits on primordial black holes: OGLE and HSC combined,TRUE
-2021-10-19 14:10:00,Hector Reyes,2110.06928,Planck+BAO constraints on the sum of neutrino masses: updated analysis,TRUE
-2021-10-26 09:00:00,Emma Walsh,2110.09456,HESS detection of TeV gamma-ray emission from the Galactic Centre ridge,TRUE
-2021-11-19 10:55:00,Alice Chen,2111.03628,Fuzzy dark matter: Lyman-alpha constraints tension with warm DM models,TRUE
-2021-11-23 10:50:00,Bob Martinez,2111.07602,SNO+ initial measurement of reactor antineutrinos in scintillator phase,TRUE
-2021-12-14 15:15:00,Grace Park,2112.03930,PeV gamma rays from LHAASO sources: hadronic vs leptonic models,TRUE
-2021-12-16 15:33:00,Frank Nguyen,2112.09122,LZ projected sensitivity update: reach toward the neutrino floor,TRUE
-2021-12-21 13:35:00,Carol Liu,2112.07560,Neutrino magnetic moments limited by red giant and HB star cooling,TRUE
-2022-01-20 11:10:00,David Osei,2201.07241,Dark photon dark matter stellar production bounds from solar observations,TRUE
-2022-01-25 09:15:00,Frank Nguyen,2201.05456,JUNO full physics case: mass ordering at 3 sigma in 6 years is realistic,TRUE
-2022-02-08 10:35:00,Hector Reyes,2202.07598,AMS-02 iron spectrum connects smoothly to knee in CR spectrum,TRUE
-2022-02-15 10:05:00,Bob Martinez,2109.05433,Same CR propagation paper from David — worth a second look at systematics,TRUE
-2022-02-22 15:20:00,Alice Chen,2202.09261,Super-K atmospheric neutrinos 6th result: marginal mass ordering preference,TRUE
-2022-03-08 09:25:00,Emma Walsh,2203.11788,Liquid argon boosted DM: signal topologies and background subtraction,TRUE
-2022-03-15 11:45:00,David Osei,2203.07659,MicroBooNE rules out the MiniBooNE excess as a nu_e appearance signal,TRUE
-2022-03-22 13:55:00,Bob Martinez,2203.15545,HAWC extended emission from Geminga and Monogem: TeV halo sample grows,TRUE
-2022-04-14 13:40:00,Grace Park,2204.12927,Self-interacting DM addresses core-cusp and diversity problems simultaneously,TRUE
-2022-04-19 10:00:00,Emma Walsh,2204.03747,Neutrino decay constraints from IceCube HESE: new bounds on invisible decay,TRUE
-2022-04-26 09:20:00,Carol Liu,2204.10588,Pierre Auger anisotropy above 8 EeV: 2022 update shows persistent hotspot,TRUE
-2022-05-10 10:05:00,Hector Reyes,2205.09777,Migdal effect in xenon: DM detection below the nuclear recoil threshold,TRUE
-2022-05-17 14:30:00,Grace Park,2205.15325,XMM-Newton galactic center: sterile neutrino lifetime limit from non-observation,TRUE
-2022-05-31 14:45:00,Alice Chen,2205.14333,CR electron and positron spectra from AMS-02: updated combined measurement,TRUE
-2022-06-21 16:30:00,Bob Martinez,2206.14245,Cluster substructure via strong lensing: DM density slopes measured,TRUE
-2022-06-28 11:15:00,Hector Reyes,2206.16176,NuFIT 5.2 global oscillation analysis: tension with normal hierarchy strengthens,TRUE
-2022-07-05 14:15:00,Carol Liu,2207.03764,LZ first science results: WIMP spin-independent exclusion record,TRUE
-2022-07-12 10:10:00,Frank Nguyen,2207.13723,Sub-PeV diffuse Galactic emission: LHAASO sets new benchmark,TRUE
-2022-07-19 09:50:00,Bob Martinez,2207.12497,IceCube first evidence for tau neutrino appearance in astrophysical flux,TRUE
-2022-08-16 15:05:00,Carol Liu,2208.11741,KATRIN 90% limit on neutrino mass: cosmological tension with inverted hierarchy,TRUE
-2022-08-23 11:00:00,Alice Chen,2208.02794,Revised axion coupling bounds from stellar populations post-JWST first data,TRUE
-2022-09-06 15:35:00,David Osei,2209.07653,DAMPE 5-year proton spectrum: spectral break structure at 50 TeV confirmed,TRUE
-2022-09-12 10:40:00,Grace Park,2207.03764,"LZ results are really significant, happy to lead the discussion",TRUE
-2022-10-11 09:35:00,Frank Nguyen,2210.07192,Sub-GeV DM entropy injection: CMB spectral distortion constraints,TRUE
-2022-10-18 11:00:00,Emma Walsh,2210.09912,Stochastic CR acceleration in turbulent magnetic fields: new Monte Carlo,TRUE
-2022-10-18 14:25:00,Alice Chen,2210.01807,NUCLEUS prototype: first CEνNS detection in Al2O3 above 20 eVee,TRUE
-2022-11-08 15:55:00,David Osei,2211.04515,Updated dwarf spheroidal DM annihilation limits from Fermi-LAT 15-year data,TRUE
-2022-11-15 11:00:00,Frank Nguyen,2211.14299,Coherent neutrino floor: spin-dependent analogue for xenon DM searches,TRUE
-2022-12-20 09:30:00,David Osei,2212.11590,DSNB measurements from Super-K: implications for SN rate at high redshift,TRUE
-2022-12-20 15:00:00,Bob Martinez,2212.08623,Bullet Cluster DM scattering cross-section from merger simulations revisited,TRUE
-2023-01-10 15:50:00,Emma Walsh,2301.03086,IceCube sees diffuse neutrino emission from the Galactic Plane at 4.5 sigma,TRUE
-2023-01-17 10:25:00,Frank Nguyen,2301.05765,Mirror DM parameter space after new FASER constraint from LHC Run 3,TRUE
-2023-01-24 09:40:00,Grace Park,2301.09989,LHAASO-WCDA survey below 10 TeV: sensitivity to PeVatron halos,TRUE
-2023-02-07 14:00:00,Hector Reyes,2301.03086,Same IceCube Galactic plane paper — milestone for multimessenger astro,TRUE
-2023-02-21 10:20:00,Grace Park,2302.05820,DUNE CDR v2: new sensitivities for tau-appearance and BSM physics,TRUE
-2023-03-21 13:50:00,Hector Reyes,2303.09468,XENONnT combined DM and solar neutrino analysis: first simultaneous result,TRUE
-2023-03-28 14:40:00,Hector Reyes,2303.11703,KM3NeT ORCA first atmospheric neutrino result: normal ordering preferred,TRUE
-2023-04-04 10:25:00,Bob Martinez,2304.07826,Telescope Array ankle transition measured precisely with low-energy extension,TRUE
-2023-04-25 11:05:00,Bob Martinez,2304.03427,NuSTAR galactic center: sterile neutrino dark matter radiative decay limits,TRUE
-2023-05-16 09:10:00,Hector Reyes,2305.11512,Forbidden dark matter via dark sector phase transition: novel detection strategy,TRUE
-2023-05-30 09:55:00,Carol Liu,2305.14630,Quantum decoherence in long-baseline neutrino experiments: DUNE sensitivity,TRUE
-2023-06-06 15:50:00,Carol Liu,2306.03799,Deflection of UHECR in structured extragalactic magnetic fields: updated model,TRUE
-2023-06-27 14:45:00,Bob Martinez,2306.16227,Molecular crystal phonon excitation as DM detector: athermal resolution,TRUE
-2023-07-04 14:35:00,Alice Chen,2306.07642,IceCube DeepCore improved reconstruction: PID for 5-100 GeV showers,TRUE
-2023-07-19 11:20:00,Carol Liu,2307.09068,JWST early galaxies: tension with fuzzy DM resolved with UV feedback,TRUE
-2023-08-08 10:15:00,Frank Nguyen,2307.04663,Solar neutrino NSI: Borexino new analysis constrains off-diagonal couplings,TRUE
-2023-08-21 10:40:00,Alice Chen,2308.14440,Galactic center excess: improved background from Gaia DR3 reduces significance,TRUE
-2023-09-12 15:45:00,David Osei,2309.08679,Hyper-K sensitivity to DSNB: detection of around 10 events per year realistic,TRUE
-2023-09-18 11:15:00,Alice Chen,2309.08679,Same Hyper-K DSNB paper — think we should discuss this one,TRUE
-2023-10-31 09:30:00,Frank Nguyen,2310.14558,Pierre Auger revised correlation with starburst galaxies after updated catalog,TRUE
-2023-11-14 15:10:00,Emma Walsh,2311.09471,Low-threshold germanium CEνNS detector: first MeV reactor neutrino events,TRUE
-2023-12-12 11:35:00,Grace Park,2312.05426,High-latitude diffuse gamma-ray emission: unresolved blazar contribution,TRUE
-2024-01-09 11:20:00,Emma Walsh,2401.04865,JUNO calibration completed: first reactor antineutrino events detected,TRUE
-2024-01-15 15:30:00,Frank Nguyen,2401.09852,XLZD detector design: 60-tonne liquid xenon for post-LZ dark matter search,TRUE
-2024-01-23 14:20:00,David Osei,2401.12803,Telescope Array spectrum above the ankle: TA x4 combined results,TRUE
-2024-02-13 09:45:00,Alice Chen,2402.07987,CEvNS and oscillation global fit: generalized neutrino interactions constraints,TRUE
-2024-02-20 09:55:00,David Osei,2402.14411,Asymmetric dark matter from inflaton decay: correct relic density naturally,TRUE
-2024-02-27 14:40:00,Hector Reyes,2402.07987,Same NSI paper from Alice — relevant to our group CEvNS analysis,TRUE
-2024-03-12 13:15:00,Emma Walsh,2403.05769,Updated global fit to LZ+XENONnT+PandaX direct detection data combined,TRUE
-2024-03-19 14:55:00,Grace Park,2403.14059,IceCube-Gen2 sensitivity whitepaper: full science case across all channels,TRUE
-2024-03-26 10:55:00,Emma Walsh,2403.17229,SWGO observatory design: Southern Hemisphere TeV sky from 5000m altitude,TRUE
-2024-03-26 11:25:00,Frank Nguyen,2403.14059,IceCube-Gen2 paper essential reading for our group's interests,TRUE
-2024-05-07 10:30:00,Grace Park,2405.07142,PBH dark matter: stochastic GW background rules out monochromatic masses,TRUE
-2024-07-09 14:25:00,Hector Reyes,2407.11302,SENSEI new result: dark matter-electron scattering in silicon below 2 eV,TRUE
-2024-09-10 11:50:00,Bob Martinez,2409.08731,Axion photon conversion in magnetar magnetospheres: observable signal windows,TRUE
-2024-10-07 09:15:00,Carol Liu,2410.00841v2,Coherent forward scattering in core-collapse supernovae: flavor transformation,TRUE
-2024-11-06 09:20:00,Carol Liu,2411.06743,PandaX-xT sensitivity forecast: target mass scaling for next decade,TRUE
-2025-01-14 15:10:00,Alice Chen,2501.08412,Light mediator DM: direct+indirect+relic density constraints combined,TRUE
-2025-02-18 15:30:00,Grace Park,2502.08614,GRAND array design: cosmogenic GZK neutrinos detectable within 10 years,TRUE
-2025-03-11 10:45:00,Frank Nguyen,2503.05821,Galactic DM density profile: microlensing constraints on parametric forms,TRUE
-2025-04-08 11:20:00,Emma Walsh,2504.03791,IceCube alert trigger rates: real-time multimessenger follow-up prospects,TRUE
-2025-05-13 13:20:00,David Osei,2505.03167,Self-interacting DM N-body simulations: core-cusp problem with baryons,TRUE
+Timestamp,Name,arXiv ID,Comment,Approved,Removed,EditedComment,Votes,Discussed
+2025-03-04 14:44:00,"Ivan Petrov",2005.00059,"Interesting recent result — Murphy et al.",TRUE,,"",2,
+2025-03-05 08:33:00,"Hector Reyes",2201.12363,"Related to our recent discussion on this topic.",TRUE,,"",4,
+2025-03-05 10:42:00,"Judy Kim",2203.14974,"Highly cited already — 240 citations.",TRUE,,"",0,
+2025-03-05 12:57:00,"Emma Walsh",2308.05587,"Interesting recent result — FASER Collaboration et al.",TRUE,,"",2,
+2025-03-06 11:44:00,"Bob Martinez",2203.08128,"Interesting recent result — Achúcarro et al.",TRUE,,"",0,
+2025-03-06 12:16:00,"Grace Park",2212.11107,"Related to our recent discussion on this topic.",TRUE,,"",6,TRUE
+2025-03-07 08:14:00,"Carol Liu",2501.11723,"Potential implications for our research.",TRUE,,"",3,
+2025-03-08 14:52:00,"Frank Nguyen",2204.00363,"Interesting recent result — Song et al.",TRUE,,"",3,TRUE
+2025-03-08 15:57:00,"David Osei",1606.06642,"Relevant to current experiments.",TRUE,,"",0,TRUE
+2025-03-08 17:35:00,"Alice Chen",2203.13199,"Potential implications for our research.",TRUE,,"",0,
+2026-02-18 13:12:00,"Emma Walsh",2410.05380,"Related to our recent discussion on this topic.",TRUE,,"",1,TRUE
+2026-02-18 16:03:00,"Ivan Petrov",2602.19842,"Worth discussing at the next meeting.",TRUE,,"",7,
+2026-02-18 17:59:00,"Alice Chen",2602.18393,"Relevant to current experiments.",TRUE,,"",6,
+2026-02-19 10:06:00,"Grace Park",2409.17019,"Relevant to current experiments.",TRUE,,"",0,
+2026-02-19 10:53:00,"Judy Kim",2411.04268,"Interesting recent result — Flavour Lattice Averaging Group (FLAG) Collaboration et al.",TRUE,,"",0,
+2026-02-19 15:05:00,"Bob Martinez",2602.24253,"Highly cited already — 1 citations.",TRUE,,"",7,TRUE
+2026-02-21 08:52:00,"David Osei",2602.14164,"Potential implications for our research.",TRUE,,"",6,TRUE
+2026-02-21 11:49:00,"Hector Reyes",2408.02365,"Interesting recent result — Jiang et al.",TRUE,,"",3,TRUE
+2026-02-21 13:47:00,"Carol Liu",2603.01037,"Interesting recent result — Mohan et al.",TRUE,,"",5,
+2026-02-21 14:07:00,"Frank Nguyen",2404.19437,"Relevant to current experiments.",TRUE,,"",7,
+2026-02-24 11:17:00,"Alice Chen",2602.10215,"New constraints from latest data.",TRUE,,"",2,
+2026-02-25 16:46:00,"Carol Liu",2602.24253,"Worth discussing at the next meeting.",TRUE,,"",5,
+2026-02-26 13:03:00,"Judy Kim",2602.11100,"Highly cited already — 2 citations.",TRUE,,"",6,
+2026-02-26 16:45:00,"David Osei",2405.00502,"Highly cited already — 149 citations.",TRUE,,"",7,
+2026-02-26 17:29:00,"Bob Martinez",2602.11263,"New constraints from latest data.",TRUE,,"",0,
+2026-02-26 17:46:00,"Frank Nguyen",2405.03933,"Highly cited already — 164 citations.",TRUE,,"",7,
+2026-02-27 12:38:00,"Emma Walsh",2602.17243,"Saw this on arXiv this morning.",TRUE,,"",4,TRUE
+2026-02-27 12:52:00,"Grace Park",2602.11253,"New constraints from latest data.",TRUE,,"",6,TRUE
+2026-02-28 09:33:00,"Ivan Petrov",2602.13355,"Potential implications for our research.",TRUE,,"",5,TRUE
+2026-02-28 17:22:00,"Hector Reyes",2602.15928,"Highly cited already — 2 citations.",TRUE,,"",1,
+2026-03-03 11:34:00,"David Osei",2602.15097,"Potential implications for our research.",TRUE,,"",1,
+2026-03-03 15:24:00,"Alice Chen",2404.05722,"Relevant to current experiments.",TRUE,,"",5,
+2026-03-03 15:44:00,"Emma Walsh",2407.14934,"Worth discussing at the next meeting.",TRUE,,"",5,
+2026-03-04 08:26:00,"Judy Kim",2602.12176,"Saw this on arXiv this morning.",TRUE,,"",1,
+2026-03-04 08:57:00,"Carol Liu",2409.13022,"Relevant to current experiments.",TRUE,,"",4,
+2026-03-04 11:33:00,"Ivan Petrov",2403.17697,"Saw this on arXiv this morning.",TRUE,,"",3,
+2026-03-05 13:54:00,"Hector Reyes",2602.10215,"Relevant to current experiments.",TRUE,,"",2,
+2026-03-05 13:58:00,"Grace Park",2403.15860,"New constraints from latest data.",TRUE,,"",4,
+2026-03-05 14:18:00,"Bob Martinez",2602.20970,"Highly cited already — 2 citations.",TRUE,,"",3,
+2026-03-05 15:08:00,"Frank Nguyen",2602.24253,"Worth discussing at the next meeting.",TRUE,,"",7,
