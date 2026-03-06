@@ -107,10 +107,14 @@ they submit, so their papers appear on the site without manual action.
 1. Open the **private response sheet** (not the Public tab).
 2. **Extensions → Apps Script**.
 3. Replace any existing code with the contents of **`docs/appscript.gs`** from
-   this repository. The file contains two parts:
+   this repository. The file contains the following functions:
    - `onFormSubmit` — auto-approves known members on form submission
-   - `doPost` — handles vote/edit/remove mutations from the site (optional;
-     see [INTERACTIVITY.md](INTERACTIVITY.md) for setup)
+   - `doPost` — handles vote/edit/remove/trending-refresh mutations from the site
+     (optional; see [INTERACTIVITY.md](INTERACTIVITY.md) for setup)
+   - `weeklySlackReminder` — posts the weekly Thursday Slack message (reads
+     trending data from the Trending tab if present — see Step 6b)
+   - `refreshTrendingPapers` — fetches top-cited hep-ph papers from INSPIRE-HEP
+     and writes them to the Trending tab (see Step 6b)
 
    The script reads the approved member list from a **Members** sheet tab
    (see Step 5a below) — no code editing needed to add or remove members.
@@ -164,6 +168,67 @@ The reminder posts every Thursday between 1 and 2 pm in the Apps Script
 environment's timezone. It thanks submitters by name and links the top-voted
 paper (or nudges people to submit if none have been posted yet).
 
+If you have also completed Step 6b, the reminder will additionally list the
+top-cited paper from each INSPIRE-HEP category, sourced from the Trending tab
+(no live API calls at reminder time).
+
+---
+
+## Step 6b — Set up the Trending Papers section (optional)
+
+The home page can display a **Trending Papers** section showing the top-cited
+recent hep-ph papers from INSPIRE-HEP, grouped by category. Papers are
+refreshed automatically on Monday and Wednesday mornings.
+
+### Create the Trending tab
+
+1. In your Google Sheet, click **+** to add a new tab and name it `Trending`.
+2. In row 1 add the following headers (one per column, A through I):
+
+   | A        | B    | C       | D     | E        | F       | G           | H         | I               |
+   | -------- | ---- | ------- | ----- | -------- | ------- | ----------- | --------- | --------------- |
+   | Category | Rank | ArxivId | Title | Abstract | Authors | Affiliation | Citations | CitationsNoSelf |
+
+### Customise the categories (optional)
+
+At the top of `docs/appscript.gs`, inside the **CONFIGURATION** block, edit
+`INSPIRE_CATEGORIES` to add, remove, or rename search categories. Other
+relevant settings in the same block:
+
+| Variable                       | Default | Description                                 |
+| ------------------------------ | ------- | ------------------------------------------- |
+| `INSPIRE_LOOKBACK_WEEKS`       | `4`     | How many weeks back to search               |
+| `INSPIRE_RESULTS_PER_CATEGORY` | `3`     | Top N papers shown per category on the site |
+| `ABSTRACT_MAX_CHARS`           | `500`   | Maximum characters stored per abstract      |
+
+> All user-editable variables live at the very top of `appscript.gs` inside the
+> clearly marked CONFIGURATION block — no need to edit the logic further down.
+
+### Add the refresh triggers
+
+In the Apps Script editor (**Extensions → Apps Script → Triggers**):
+
+1. **+ Add Trigger**:
+   - Function: `refreshTrendingPapers`
+   - Event source: **Time-driven** → **Week timer** → **Monday** → **7am–8am**
+2. **+ Add Trigger**:
+   - Function: `refreshTrendingPapers`
+   - Event source: **Time-driven** → **Week timer** → **Wednesday** → **7am–8am**
+3. **Run `refreshTrendingPapers` once manually** from the editor (click the
+   function name in the dropdown then hit **Run**) to pre-populate the tab and
+   verify INSPIRE is responding correctly.
+
+### Publish the Trending tab as CSV
+
+1. Click **File → Share → Publish to web**.
+2. In the first dropdown choose the **Trending** tab; in the second choose
+   **Comma-separated values (.csv)**.
+3. Click **Publish** and confirm.
+4. Copy the URL and paste it into `trendingCsvUrl` in `config.js` (Step 7).
+
+> If `trendingCsvUrl` is left blank in `config.js`, the Trending section is
+> simply hidden — no other functionality is affected.
+
 ---
 
 ## Step 7 — Configure the site
@@ -179,6 +244,8 @@ export const CONFIG = {
   formUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform',
   // Apps Script /exec URL for vote/edit/remove (from INTERACTIVITY.md — leave blank to disable)
   mutateUrl: '',
+  // Published CSV URL for the Trending tab (from Step 6b — leave blank to hide the section)
+  trendingCsvUrl: '',
   // Meeting schedule — shown in the "When" block and used for the calendar download
   meeting: {
     day: 'Friday',

@@ -1039,6 +1039,131 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* ── Submit top button ───────────────────────────────────── */
+
+.submit-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Trending section ────────────────────────────────────── */
+
+.trending-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border);
+}
+
+.trending-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.trending-subheading {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.55;
+}
+
+.trending-message {
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.trending-message--empty {
+  background: var(--bg-alt);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.trending-message--error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-left: 3px solid #f87171;
+  color: #7f1d1d;
+}
+
+.trending-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.trending-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.trending-cat-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 0.1rem;
+}
+
+.trending-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-sec);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trending-rank {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-sec);
+  background: #ede7f6;
+  border: 1px solid #d1c4e9;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  align-self: flex-start;
+  margin-bottom: 0.15rem;
+}
+
+.trending-card-title {
+  font-size: 0.9rem;
+}
+
+.trending-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 600px) {
+  .trending-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-top {
+    justify-content: stretch;
+  }
+
+  .submit-top .btn {
+    display: block;
+    text-align: center;
+  }
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 
 @media (max-width: 600px) {
