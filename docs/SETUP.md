@@ -280,3 +280,24 @@ Commit and push your `config.js` changes. The site is now fully functional.
 The vote / edit / remove controls on the **This Week** page require deploying
 the `doPost` function as a second Apps Script web app. See
 **[INTERACTIVITY.md](INTERACTIVITY.md)** for the full walkthrough.
+
+---
+
+## Known issues
+
+### arXiv IDs with a trailing zero are silently truncated
+
+**Symptom:** A paper submitted with an ID like `2507.12270` appears on the site
+as `2507.1227` (trailing zero dropped), causing the INSPIRE-HEP lookup to fail
+or resolve to the wrong paper.
+
+**Cause:** When the arXiv ID column in the raw Google Form response sheet is
+formatted as _Automatic_ (the default), Google Sheets interprets a value such
+as `2507.12270` as a decimal number and silently drops the insignificant
+trailing zero before any formula or script ever sees it. By the time the Public
+tab QUERY runs — even with the `TO_TEXT` wrapper — the zero is already gone.
+
+**Fix:** In the raw **Form Responses** sheet, select column C (the arXiv ID
+column), then go to **Format → Number → Plain text**. This must be done
+_before_ affected submissions arrive; existing truncated entries will need to be
+corrected manually in the sheet.
