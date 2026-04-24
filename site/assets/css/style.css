@@ -46,6 +46,14 @@ header {
   margin: 0 auto;
 }
 
+.header-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+}
+
 .site-tag {
   display: inline-block;
   font-size: 0.72rem;
