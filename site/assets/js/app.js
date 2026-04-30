@@ -115,9 +115,9 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     return !isNaN(ts) && ts >= monday && ts <= sunday;
   });
 
-  // Sort by submission time ascending so the earliest submission in
-  // the week is preserved when deduplicating.
-  thisWeekRaw.sort((a, b) => new Date(a[COL.timestamp]) - new Date(b[COL.timestamp]));
+  // Sort by submission time descending so the most recent submission in
+  // the week is preserved when deduplicating (so users see their latest submitter).
+  thisWeekRaw.sort((a, b) => new Date(b[COL.timestamp]) - new Date(a[COL.timestamp]));
   const thisWeek = deduplicatePapers(thisWeekRaw);
 
   // Sort by votes descending; break ties by submission time ascending.
