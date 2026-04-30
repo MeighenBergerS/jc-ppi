@@ -107,10 +107,18 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
   const label = document.getElementById('week-label');
   if (label) label.textContent = fmtWeekRange(monday);
 
-  const thisWeek = deduplicatePapers(papers).filter((p) => {
+  // Select only papers submitted this week, then deduplicate within
+  // this week's submissions so that a paper submitted in a previous
+  // week can still appear this week.
+  const thisWeekRaw = papers.filter((p) => {
     const ts = new Date(p[COL.timestamp]);
     return !isNaN(ts) && ts >= monday && ts <= sunday;
   });
+
+  // Sort by submission time ascending so the earliest submission in
+  // the week is preserved when deduplicating.
+  thisWeekRaw.sort((a, b) => new Date(a[COL.timestamp]) - new Date(b[COL.timestamp]));
+  const thisWeek = deduplicatePapers(thisWeekRaw);
 
   // Sort by votes descending; break ties by submission time ascending.
   thisWeek.sort((a, b) => {
@@ -139,7 +147,24 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     container.innerHTML = '';
     // Pass thisWeek:true only when the mutation endpoint is configured,
     // so vote/edit/remove controls appear only when they can actually work.
-    container.appendChild(buildTable(thisWeek, metaMap, { thisWeek: !!CONFIG.mutateUrl }));
+    // Build a map of the most-recent previous submission (before this
+    // week) for each arXiv ID so we can annotate re-submissions.
+    const previousSubmissions = new Map();
+    papers.forEach((p) => {
+      const id = stripVersion(normalizeArxivId(p[COL.arxivId]));
+      if (!id) return;
+      const ts = new Date(p[COL.timestamp]);
+      if (isNaN(ts)) return;
+      if (ts < monday) {
+        const existing = previousSubmissions.get(id);
+        // Keep the most recent previous submission
+        if (!existing || ts > existing) previousSubmissions.set(id, ts);
+      }
+    });
+
+    container.appendChild(
+      buildTable(thisWeek, metaMap, { thisWeek: !!CONFIG.mutateUrl, previousSubmissions })
+    );
 
     // ── Copy all BibTeX for this week ────────────────────────────────
     const inspireIds = [...metaMap.values()].map((m) => m.inspireId).filter(Boolean);

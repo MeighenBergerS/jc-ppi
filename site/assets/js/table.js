@@ -57,7 +57,11 @@ function _setDiscussedOverride(cleanId, discussed) {
  * @param {Map}        metaMap - Result of fetchPaperMetadata().
  * @returns {HTMLTableElement}
  */
-export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {}) {
+export function buildTable(
+  papers,
+  metaMap = new Map(),
+  { thisWeek = false, previousSubmissions = new Map() } = {}
+) {
   const table = document.createElement('table');
   table.className = 'papers-table';
 
@@ -107,6 +111,28 @@ export function buildTable(papers, metaMap = new Map(), { thisWeek = false } = {
     _appendText(tdPaper, meta.abstract, 'paper-abstract');
     tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], id, meta));
     _appendKeywordPills(tdPaper, meta);
+
+    // If this is the This Week view and there was a previous submission
+    // of the same paper in an earlier week, show a short note with the
+    // most-recent previous submission date.
+    if (thisWeek && previousSubmissions && previousSubmissions.has(id)) {
+      const prev = previousSubmissions.get(id);
+      try {
+        const prevDate = prev instanceof Date ? prev : new Date(prev);
+        if (!isNaN(prevDate)) {
+          const note = document.createElement('div');
+          note.className = 'previous-submission';
+          note.textContent = `Submitted previously on ${prevDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}`;
+          tdPaper.appendChild(note);
+        }
+      } catch (e) {
+        // ignore formatting errors — do not block rendering
+      }
+    }
 
     // Column 3 — Reason for suggestion
     // Prefer the edited comment (col G) when present; fall back to original.
