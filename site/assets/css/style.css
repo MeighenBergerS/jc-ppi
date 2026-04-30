@@ -273,6 +273,38 @@ main {
   display: inline-block;
 }
 
+/* Previously-submitted note box */
+.previous-submission {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.6rem;
+  background: #eff8ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid var(--accent-sec);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.previous-submission .note-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.previous-submission .note-text {
+  line-height: 1;
+}
+
 /* ── Interactive row controls (this week only) ───────────── */
 
 th.actions-col,

@@ -122,11 +122,16 @@ export function buildTable(
         if (!isNaN(prevDate)) {
           const note = document.createElement('div');
           note.className = 'previous-submission';
-          note.textContent = `Submitted previously on ${prevDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}`;
+          note.innerHTML =
+            `<span class="note-icon">!</span>` +
+            `<span class="note-text"><strong>Note:</strong> Previously submitted on ${prevDate.toLocaleDateString(
+              'en-US',
+              {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }
+            )}</span>`;
           tdPaper.appendChild(note);
         }
       } catch (e) {
