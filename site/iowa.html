@@ -40,6 +40,7 @@
         <a href="./stats.html">Stats</a>
         <a href="./iowa.html" class="active">Iowa Research</a>
         <a href="./resources.html">Resources</a>
+        <a href="#" id="submit-link" target="_blank" rel="noopener">Submit a Paper ↗</a>
       </nav>
     </header>
 
@@ -60,6 +61,13 @@
 
     <script type="module">
       import { renderIowa } from './assets/js/iowa.js';
+      import { CONFIG } from './assets/js/config.js';
+
+      const submitLink = document.getElementById('submit-link');
+      if (submitLink && CONFIG.formUrl && CONFIG.formUrl !== 'PASTE_YOUR_GOOGLE_FORM_URL_HERE') {
+        submitLink.href = CONFIG.formUrl;
+      }
+
       const container = document.getElementById('iowa-container');
       renderIowa(container);
     </script>
