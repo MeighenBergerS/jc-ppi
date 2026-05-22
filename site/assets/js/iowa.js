@@ -13,7 +13,7 @@
 import { CONFIG } from './config.js';
 import { normalizeArxivId, stripVersion } from './utils.js';
 
-const CACHE_KEY = 'iowa_highlights_v1';
+const CACHE_KEY = 'iowa_highlights_v2';
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const MAX_AUTHORS = 10;
 const PAGE_SIZE = 50;
