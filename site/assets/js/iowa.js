@@ -18,8 +18,10 @@ const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const MAX_AUTHORS = 10;
 const PAGE_SIZE = 50;
 
-// INSPIRE affiliation query terms for University of Iowa
-const AFF_QUERY = 'aff "University of Iowa" or aff "Iowa U." or aff "U. Iowa"';
+// INSPIRE affiliation query terms for University of Iowa.
+// Verified against INSPIRE: "Iowa U." is the canonical stored form;
+// "U. Iowa, Iowa City" catches the city-qualified variant.
+const AFF_QUERY = 'aff "Iowa U." or aff "U. Iowa, Iowa City"';
 
 // ── Cache ────────────────────────────────────────────────────
 
