@@ -29,6 +29,9 @@ export const CONFIG = {
   mutateUrl:
     'https://script.google.com/macros/s/AKfycbw6pJRxEQOXgLGLL3f0ih6HL05aSkwiKLipp0sB2o7Ec906WPxxVQ4ZmKlX742Aedix/exec',
 
+  // How many weeks back to search for Iowa-affiliated papers on the Iowa Research tab.
+  iowaLookbackWeeks: 8,
+
   // Base URL of the deployed site — used in the calendar .ics file description.
   // Leave blank to derive from window.location automatically (correct for most deployments).
   // Set explicitly if the auto-detected URL is wrong for your setup.

@@ -3,15 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Archive — Iowa Particles &amp; Plots Journal Club</title>
+    <title>Iowa Research — Iowa Particles &amp; Plots Journal Club</title>
     <meta
       name="description"
-      content="All past paper submissions from Iowa Particles &amp; Plots Journal Club, newest first."
+      content="Recent papers from University of Iowa authors on INSPIRE-HEP."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Archive — Iowa Particles &amp; Plots Journal Club" />
-    <meta property="og:description" content="All past paper submissions, grouped by week." />
-    <meta property="og:url" content="https://meighenbergers.github.io/jc-ppi/archive.html" />
+    <meta property="og:title" content="Iowa Research — Iowa Particles &amp; Plots Journal Club" />
+    <meta
+      property="og:description"
+      content="Recent papers from University of Iowa authors on INSPIRE-HEP."
+    />
+    <meta property="og:url" content="https://meighenbergers.github.io/jc-ppi/iowa.html" />
     <link rel="stylesheet" href="./assets/css/style.css" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico" />
   </head>
@@ -27,43 +30,21 @@
           <div class="header-text">
             <span class="site-tag">jc-ppi</span>
             <h1>Iowa Particles &amp; Plots<br />Journal Club</h1>
-            <p class="tagline">From arXiv to argument 4 every week.</p>
+            <p class="tagline">From arXiv to argument — every week.</p>
           </div>
         </div>
       </div>
       <nav>
         <a href="./index.html">This Week</a>
-        <a href="./archive.html" class="active">Archive</a>
+        <a href="./archive.html">Archive</a>
         <a href="./stats.html">Stats</a>
-        <a href="./iowa.html">Iowa Research</a>
+        <a href="./iowa.html" class="active">Iowa Research</a>
         <a href="./resources.html">Resources</a>
-        <a href="#" id="submit-link" target="_blank" rel="noopener">Submit a Paper ↗</a>
       </nav>
     </header>
 
     <main>
-      <section class="week-header">
-        <h2>Past Discussions</h2>
-        <p class="week-label">All submissions from previous weeks, newest first.</p>
-      </section>
-
-      <div class="archive-search-wrap">
-        <input
-          id="archive-search"
-          type="search"
-          placeholder="Filter by title, author, keyword, submitter…"
-          aria-label="Search archive"
-        />
-        <button id="discussed-filter" class="sf-btn" aria-pressed="false">
-          &#9733; Discussed only
-        </button>
-      </div>
-
-      <div id="subfield-filter-bar" class="subfield-filter-bar"></div>
-
-      <div id="papers-container">
-        <div class="loading">Loading archive…</div>
-      </div>
+      <div id="iowa-container"></div>
     </main>
 
     <footer>
@@ -77,6 +58,10 @@
       </p>
     </footer>
 
-    <script type="module" src="./assets/js/app.js"></script>
+    <script type="module">
+      import { renderIowa } from './assets/js/iowa.js';
+      const container = document.getElementById('iowa-container');
+      renderIowa(container);
+    </script>
   </body>
 </html>

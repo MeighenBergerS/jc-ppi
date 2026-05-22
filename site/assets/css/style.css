@@ -1203,6 +1203,108 @@ footer a:hover {
   }
 }
 
+/* ── Iowa Research section ───────────────────────────────── */
+
+.iowa-section {
+  margin-top: 2rem;
+}
+
+.iowa-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.iowa-subheading {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.55;
+}
+
+.iowa-message {
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.iowa-message--empty {
+  background: var(--bg-alt);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.iowa-message--error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-left: 3px solid #f87171;
+  color: #7f1d1d;
+}
+
+.iowa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.iowa-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid #ffcd00; /* Iowa gold */
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.iowa-date {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.1rem;
+}
+
+.iowa-card-title {
+  font-size: 0.9rem;
+}
+
+.iowa-authors-callout {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #b5891a;
+  margin-top: 0.1rem;
+}
+
+.iowa-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.cat-chip {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-sec);
+  background: #ede7f6;
+  border: 1px solid #d1c4e9;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+}
+
+@media (max-width: 600px) {
+  .iowa-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 
 @media (max-width: 600px) {
