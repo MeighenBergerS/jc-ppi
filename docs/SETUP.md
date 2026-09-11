@@ -249,11 +249,11 @@ export const CONFIG = {
   // Meeting schedule — shown in the "When" block and used for the calendar download
   meeting: {
     day: 'Friday',
-    time: '2:30 PM CT',
+    time: '3:30 PM CT',
     timezoneLabel: 'Central Time',
     timezone: 'America/Chicago',
-    icsAnchor: '20260306T143000', // DTSTART of a known occurrence
-    icsDurationEnd: '20260306T160000', // DTEND of that same occurrence
+    icsAnchor: '20260306T153000', // DTSTART of a known occurrence
+    icsDurationEnd: '20260306T170000', // DTEND of that same occurrence
     icsDayCode: 'FR', // RRULE BYDAY (FR=Friday, TH=Thursday, …)
     slackUrl: '', // Slack channel URL — leave '' for plain text
   },

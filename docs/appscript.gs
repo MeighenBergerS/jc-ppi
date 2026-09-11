@@ -16,7 +16,7 @@ var SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL';
 var SITE_URL = 'https://meighenbergers.github.io/jc-ppi/';
 
 // ── Meeting description (used in Slack messages) ─────────────
-var MEETING_TIME = '2:30pm';      // e.g. '2:30pm', '3pm'
+var MEETING_TIME = '3:30pm';      // e.g. '3:30pm', '3pm'
 var MEETING_DAY  = 'tomorrow'; // e.g. 'tomorrow', 'Friday'
 
 // ── INSPIRE-HEP settings ─────────────────────────────────────

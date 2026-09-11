@@ -403,13 +403,13 @@ function _renderSubfieldBar() {
 
 /**
  * Generates and downloads a recurring .ics calendar file for the
- * weekly Friday journal-club meeting (2:30 PM CT, America/Chicago).
+ * weekly Friday journal-club meeting (3:30 PM CT, America/Chicago).
  */
 function _downloadCalendar() {
   const m = CONFIG.meeting ?? {};
   const tz = m.timezone ?? 'America/Chicago';
-  const anchor = m.icsAnchor ?? '20260306T143000';
-  const end = m.icsDurationEnd ?? '20260306T160000';
+  const anchor = m.icsAnchor ?? '20260306T153000';
+  const end = m.icsDurationEnd ?? '20260306T170000';
   const dayCode = m.icsDayCode ?? 'FR';
   const siteUrl =
     CONFIG.siteUrl ||

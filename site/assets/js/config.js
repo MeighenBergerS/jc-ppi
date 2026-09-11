@@ -42,11 +42,11 @@ export const CONFIG = {
   // icsAnchor/icsDurationEnd/icsDayCode drive the "Add to Calendar" download.
   meeting: {
     day: 'Friday',
-    time: '2:30 PM CT',
+    time: '3:30 PM CT',
     timezoneLabel: 'Central Time', // human-readable label shown next to the time
     timezone: 'America/Chicago', // IANA timezone name used in the .ics file
-    icsAnchor: '20260306T143000', // DTSTART of a known occurrence — update if time changes
-    icsDurationEnd: '20260306T160000', // DTEND of that same occurrence
+    icsAnchor: '20260306T153000', // DTSTART of a known occurrence — update if time changes
+    icsDurationEnd: '20260306T170000', // DTEND of that same occurrence
     icsDayCode: 'FR', // RRULE BYDAY value (FR=Friday, TH=Thursday, etc.)
     slackUrl: '', // Slack channel URL — leave '' to show plain text
   },
