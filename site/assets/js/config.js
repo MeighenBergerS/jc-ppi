@@ -65,7 +65,7 @@ if (CONFIG.issuesPreview) {
   CONFIG.sheetCsvUrl = './data/papers-from-issues.csv';
   CONFIG.trendingCsvUrl = './data/trending.csv';
   CONFIG.mutateUrl = '';
-  CONFIG.formUrl = `https://github.com/${CONFIG.issuesRepo}/issues/new?template=paper.yml`;
+  CONFIG.formUrl = `https://github.com/${CONFIG.issuesRepo}/issues/new?template=1-paper.yml`;
 }
 
 // ── SHEET COLUMN MAP ────────────────────────────────────────

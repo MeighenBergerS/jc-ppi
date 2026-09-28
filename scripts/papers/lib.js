@@ -22,7 +22,7 @@ export const LABELS = {
   trending: 'Trending',
 };
 
-// Field labels of .github/ISSUE_TEMPLATE/paper.yml. Change both together.
+// Field labels of .github/ISSUE_TEMPLATE/1-paper.yml. Change both together.
 // `name` is no longer in the form (names come from GitHub profiles); only
 // issues imported from the Google Sheet carry it.
 export const FIELDS = {

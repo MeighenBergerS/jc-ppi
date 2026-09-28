@@ -36,7 +36,7 @@ if (source === 'issues') {
   const api = github(process.env.GITHUB_TOKEN, repo);
   const issues = await api.paginate(`/issues?labels=${LABELS.paper}&state=all`);
   rows = issuesToRows(issues, await fetchProfileNames(api, issues));
-  submitUrl = `https://github.com/${repo}/issues/new?template=paper.yml`;
+  submitUrl = `https://github.com/${repo}/issues/new?template=1-paper.yml`;
 } else {
   const res = await fetch(CONFIG.sheetCsvUrl);
   if (!res.ok) throw new Error(`Sheet CSV: HTTP ${res.status}`);
