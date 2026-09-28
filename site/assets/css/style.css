@@ -9,6 +9,7 @@
   --accent-btn: #d95f02; /* orange — only "Bring a paper" */
   --accent-sec: #7570b3; /* soft purple — INSPIRE, topics */
   --gold: #ffcd00; /* Iowa gold — logo, tagline    */
+  --header-bg: #000000; /* the logo tile's black      */
   --text: #1a1a2e;
   --muted: #6b7280;
   --border: #e5e7eb;
@@ -46,7 +47,7 @@ body {
 /* ── Header ─────────────────────────────────────────────── */
 
 header {
-  background: var(--accent);
+  background: var(--header-bg);
   color: #fff;
   padding: 2.5rem 1.5rem 0;
 }
@@ -96,6 +97,7 @@ nav {
   max-width: var(--max-width);
   margin: 1.5rem auto 0;
   display: flex;
+  justify-content: center;
   gap: 0.25rem;
   border-bottom: none;
 }
@@ -123,10 +125,33 @@ nav a.active {
   color: var(--accent);
 }
 
+/* "Bring a paper": the orange tab in the middle of the menu */
+nav a.nav-cta {
+  background: var(--accent-btn);
+  color: #fff;
+  font-weight: 600;
+  margin: 0 0.4rem;
+}
+
+nav a.nav-cta:hover {
+  background: var(--accent-btn);
+  color: #fff;
+  opacity: 0.88;
+}
+
 /* Six tabs don't fit on a phone: let them wrap. */
 @media (max-width: 600px) {
   nav {
     flex-wrap: wrap;
+  }
+
+  /* On a phone the orange tab gets a row of its own, above the others */
+  nav a.nav-cta {
+    order: -1;
+    flex-basis: 100%;
+    text-align: center;
+    margin: 0 0 0.35rem;
+    border-radius: var(--radius);
   }
 
   nav a {
@@ -1553,14 +1578,6 @@ footer p + p {
   margin-top: 0.35rem;
 }
 
-/* ── Submit top button ───────────────────────────────────── */
-
-.submit-top {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1.25rem;
-}
-
 /* ── Trending section ────────────────────────────────────── */
 
 .trending-section {
@@ -1666,15 +1683,6 @@ footer p + p {
 @media (max-width: 600px) {
   .trending-grid {
     grid-template-columns: 1fr;
-  }
-
-  .submit-top {
-    justify-content: stretch;
-  }
-
-  .submit-top .btn {
-    display: block;
-    text-align: center;
   }
 }
 
