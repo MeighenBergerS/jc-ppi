@@ -1,0 +1,25 @@
+name: Labels
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/labels.yml]
+  # A pull request that edits the labels shows what would change, without applying it.
+  pull_request:
+    paths: [.github/labels.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    name: Sync labels with .github/labels.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crazy-max/ghaction-github-labeler@v6
+        with:
+          yaml-file: .github/labels.yml
+          dry-run: ${{ github.event_name == 'pull_request' }}

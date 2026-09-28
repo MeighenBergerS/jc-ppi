@@ -1,0 +1,31 @@
+name: Suggest a paper
+description: Suggest an arXiv paper for the journal club.
+title: "Paper: "
+labels: [paper]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A bot adds the title, authors, abstract and BibTeX to this issue within a few minutes.
+        Vote for papers you want to discuss with a 👍 reaction on their issue.
+  - type: input
+    id: arxiv
+    attributes:
+      label: arXiv ID or link
+      placeholder: 2301.12345 or https://arxiv.org/abs/2301.12345
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this paper?
+      description: A sentence or two is plenty. "General interest" is a fine answer.
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Name to show on the site
+      description: Your first name, or however you'd like to be listed.
+    validations:
+      required: true

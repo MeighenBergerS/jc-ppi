@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Paper submission
+  - name: Suggest a paper through the website
     url: https://meighenbergers.github.io/jc-ppi/
-    about: To suggest a paper for the journal club, use the form on the website — not a GitHub issue.
+    about: The Google Form on the website still works while issue submissions are on trial.

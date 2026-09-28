@@ -1,0 +1,71 @@
+# The repository's labels. Edit here, never on GitHub: workflows/labels.yml
+# syncs this file to GitHub on every change to main and deletes labels not listed.
+
+# Paper submissions (see docs/ISSUES-PREVIEW.md)
+- name: paper
+  color: "5319e7"
+  description: A paper suggested for the journal club
+- name: needs approval
+  color: "fbca04"
+  description: From someone not yet on the members list; remove this label to approve
+- name: discussed
+  color: "0e8a16"
+  description: Discussed at a journal club meeting
+- name: awaiting INSPIRE
+  color: "c5def5"
+  description: On arXiv but not yet on INSPIRE-HEP; the bot checks again daily
+- name: invalid arXiv ID
+  color: "e99695"
+  description: The bot could not find this ID on arXiv; edit the issue to fix it
+- name: imported
+  color: "bfd4f2"
+  description: Imported from the Google Sheet
+
+# Type
+- name: bug
+  color: "d73a4a"
+  description: Something on the site is broken
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or improvement
+- name: documentation
+  color: "0075ca"
+  description: Setup guides, README or other docs
+- name: question
+  color: "d876e3"
+  description: Further information is requested
+
+# Contributors
+- name: good first issue
+  color: "7057ff"
+  description: Small and scoped, with the files to touch and what done means
+- name: help wanted
+  color: "008672"
+  description: Outside help is welcome
+
+# Status
+- name: needs triage
+  color: "ededed"
+  description: New, not yet looked at
+- name: needs info
+  color: "fef2c0"
+  description: Waiting on the reporter
+
+# Resolution
+- name: duplicate
+  color: "cfd3d7"
+  description: Already reported or already suggested
+- name: invalid
+  color: "e4e669"
+  description: Not a problem with the site
+- name: wontfix
+  color: "ffffff"
+  description: Will not be worked on
+
+# Dependabot
+- name: dependencies
+  color: "0366d6"
+  description: Pull requests that update a dependency file
+- name: github_actions
+  color: "000000"
+  description: Pull requests that update GitHub Actions code
