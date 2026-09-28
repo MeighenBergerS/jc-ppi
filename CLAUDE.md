@@ -17,8 +17,10 @@ npm install        # first time only; wires up the pre-commit hook
 npm test           # node:test suite, no dependencies
 npm run dev        # local site on http://localhost:3000 against fixture data
 npm run refresh    # fetch fresh INSPIRE papers into *.fresh.* fixtures, then serve
-pip install -r docs/requirements.txt && mkdocs serve   # docs site on http://127.0.0.1:8000/jc-ppi/docs/
-mkdocs build --strict                                  # what CI checks for the docs
+npm run roundup -- <login> [YYYY-MM]   # print a member's monthly roundup; sends nothing
+python3 -m venv .venv && .venv/bin/pip install -r docs/requirements.txt   # first time only
+.venv/bin/mkdocs serve             # docs site on http://127.0.0.1:8000/jc-ppi/docs/
+.venv/bin/mkdocs build --strict    # what CI checks for the docs
 prettier --check "site/**/*.{html,css,js}" "scripts/**/*.js" "tests/**/*.{js,html}" "**/*.md"   # what CI lints
 ```
 
@@ -45,19 +47,19 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 ## Papers as issues
 
 `docs/MAINTAINING.md` describes the bot, labels and workflows. The code is in `scripts/papers/`,
-with tests in `tests/papers.test.js`, `tests/trending.test.js`, `tests/slack.test.js` and
-`tests/roundup.test.js`. Field
+with tests in `tests/papers.test.js`, `tests/trending.test.js`, `tests/slack.test.js`,
+`tests/roundup.test.js` and `tests/smtp.test.js`. Field
 labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in `scripts/papers/lib.js` must match.
 Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
 Google Sheet history; keep `parseImported()` and the Sheet timestamp handling working for them.
 
 ## Settings
 
-Club settings (repository, time zone, meeting, Slack reminder, Trending, Iowa page) live in
+Club settings (repository, time zone, meeting, Slack reminder, roundup, Trending, Iowa page) live in
 `CONFIG` in `site/assets/js/config.js`. It sits under `site/` because only `site/` is deployed;
 the scripts import it from there. Read settings from `CONFIG` and derive text from them (see the
 meeting helpers in `utils.js`); never repeat a value in another file. The static `#meeting-when`
-text in `site/index.html` and the crons in `slack-reminder.yml` and `trending.yml` can't import
+text in `site/index.html` and the crons in `slack-reminder.yml`, `trending.yml` and `roundup.yml` can't import
 it, so `tests/config.test.js` checks they match.
 
 `chicagoWallTime()` in `lib.js` stays on `America/Chicago` whatever `CONFIG.timezone` says: the
@@ -68,5 +70,7 @@ imported Google Sheet timestamps were recorded in Central Time.
 - Commits and PRs follow the `workflow-commits` and `workflow-pull-requests` skills.
 - Claude is never an author, co-author or signer of a commit or PR (`workflow-ai-disclosure`).
   `attribution` in `.claude/settings.json` is empty so the harness adds nothing.
+- The monthly roundups are private. Their workflow log is public, so `roundup-email.js` prints
+  counts only, never a login, an address or a roundup; keep it that way.
 - Treat every string from issues or INSPIRE as untrusted. On the site, insert it with
   `textContent` or DOM building, never `innerHTML`; in bot comments, pass it through `safeText()`.
