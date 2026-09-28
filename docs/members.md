@@ -11,7 +11,7 @@ your username if the profile has no name.
 
 2. **Submit it** with the
    [Suggest a paper issue form](https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml),
-   also linked as "Submit a Paper" on the [website](https://meighenbergers.github.io/jc-ppi/).
+   also linked as "Bring a paper" on the [website](https://meighenbergers.github.io/jc-ppi/).
    It asks for the **arXiv ID or link** (`2301.12345` or `https://arxiv.org/abs/2301.12345`) and
    **why this paper**: a sentence or two is great, and "general interest" is a fine answer. Leave
    the issue title as it is; the bot sets it.
@@ -23,6 +23,10 @@ your username if the profile has no name.
    members list yet, a maintainer approves your first paper before it shows.
 
 ### Tips for a good submission
+
+Anyone can bring a paper. You don't need to be an expert, to have read everything in the field, or
+to think a paper is important; "I don't understand this result", "I think this argument might be
+wrong" and "this just came out" are all good reasons.
 
 - Any HEP-adjacent topic is fair game: theory, experiment, phenomenology, instrumentation, or a
   review or methods paper you found useful.

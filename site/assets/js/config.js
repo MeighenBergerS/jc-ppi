@@ -17,7 +17,7 @@ export const CONFIG = {
 
   issuesRepo: REPO,
 
-  // Where "Submit a Paper" links go: the paper issue form.
+  // Where "Bring a paper" links go: the paper issue form.
   formUrl: `https://github.com/${REPO}/issues/new?template=1-paper.yml`,
 
   // Base URL of the deployed site, used in the calendar .ics file.

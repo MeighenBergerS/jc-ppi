@@ -500,24 +500,50 @@ main.prose {
   margin-bottom: 0.5rem;
 }
 
-/* ── Submit CTA ──────────────────────────────────────────── */
+/* ── Invitation to bring a paper ─────────────────────────── */
 
-.submit-cta {
+.invite {
   margin-top: 2.5rem;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 1.35rem;
   background: var(--accent-dim);
-  border-left: 3px solid var(--accent);
+  border-left: 4px solid var(--accent-btn);
   border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  font-size: 0.95rem;
 }
 
-.submit-cta p {
-  color: var(--text);
-  font-size: 0.95rem;
+.invite h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.invite-lead {
+  margin-top: 0.9rem;
+  font-weight: 600;
+}
+
+.invite-reasons {
+  list-style: none;
+  margin: 0.4rem 0 1.2rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.invite-reasons span {
+  display: inline-block;
+  width: 1.6em;
+}
+
+.invite-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.invite-how {
+  flex: 1 1 18rem;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .btn {
@@ -1035,21 +1061,6 @@ main.prose {
   font-weight: 500;
 }
 
-.meeting-info-guides {
-  margin-top: 0.55rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid #b2dfdb;
-}
-
-.meeting-info-guides ul {
-  margin: 0.25rem 0 0 1.3rem;
-  color: var(--text);
-}
-
-.meeting-info-guides li {
-  margin-bottom: 0.25rem;
-}
-
 /* ── Calendar export button ──────────────────────────────── */
 
 .cal-btn {
@@ -1411,10 +1422,5 @@ footer a:hover {
     display: block;
     padding: 0.2rem 0;
     border: none;
-  }
-
-  .submit-cta {
-    flex-direction: column;
-    text-align: center;
   }
 }
