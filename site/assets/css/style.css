@@ -6,8 +6,9 @@
   --accent: #111111; /* black — primary / header    */
   --accent-dim: #e0f5f0; /* light teal — backgrounds    */
   --accent-badge: #e7298a; /* pink  — arXiv badge         */
-  --accent-btn: #d95f02; /* orange — CTA button         */
-  --accent-sec: #7570b3; /* soft purple — secondary     */
+  --accent-btn: #d95f02; /* orange — only "Bring a paper" */
+  --accent-sec: #7570b3; /* soft purple — INSPIRE, topics */
+  --gold: #ffcd00; /* Iowa gold — logo, tagline    */
   --text: #1a1a2e;
   --muted: #6b7280;
   --border: #e5e7eb;
@@ -82,10 +83,11 @@ header h1 {
 }
 
 .tagline {
-  margin-top: 0.4rem;
-  font-size: 0.95rem;
-  opacity: 0.82;
-  font-style: italic;
+  margin-top: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--gold);
 }
 
 /* ── Nav ─────────────────────────────────────────────────── */
@@ -254,7 +256,7 @@ main {
 .card-why {
   margin-top: 0.8rem;
   padding-left: 0.8rem;
-  border-left: 3px solid var(--accent-btn);
+  border-left: 3px solid var(--gold);
   font-size: 0.92rem;
   color: var(--text);
 }
@@ -400,11 +402,12 @@ main {
   white-space: nowrap;
 }
 
+/* INSPIRE in purple: orange is kept for "Bring a paper" */
 .inspire-link {
   display: inline-block;
   font-size: 0.82rem;
-  background: #fff3e0;
-  color: var(--accent-btn);
+  background: #ede7f6;
+  color: var(--accent-sec);
   padding: 0.2em 0.55em;
   border-radius: var(--radius);
   text-decoration: none;
@@ -413,7 +416,7 @@ main {
 }
 
 .inspire-link:hover {
-  background: var(--accent-btn);
+  background: var(--accent-sec);
   color: #fff;
 }
 
@@ -671,7 +674,7 @@ main.prose {
   padding: 0.85rem 1.1rem;
   background: #fffbeb;
   border: 1px solid #fde68a;
-  border-left: 4px solid var(--accent-btn);
+  border-left: 4px solid var(--accent-sec);
   border-radius: var(--radius);
   font-size: 0.9rem;
   color: #78350f;
@@ -1265,7 +1268,7 @@ main.prose {
   margin: -0.75rem 0 2.25rem;
   padding: 1rem 1.25rem;
   background: #fff7e0;
-  border-left: 4px solid var(--accent-btn);
+  border-left: 4px solid var(--gold);
   border-radius: var(--radius);
 }
 
