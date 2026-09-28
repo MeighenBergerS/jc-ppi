@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 
 import { parseCsv, normalizeArxivId, stripVersion } from '../site/assets/js/utils.js';
 import { deduplicatePapers, weekHash } from '../site/assets/js/app.js';
-import { computeSubmissionStats, yearWeeks } from '../site/assets/js/stats.js';
+import { computeSubmissionStats, yearWeeks, clubStreak, niceMax } from '../site/assets/js/stats.js';
 import { voteLeader } from '../site/assets/js/cards.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -196,38 +196,12 @@ describe('computeSubmissionStats — member counts', () => {
   });
 });
 
-// ── computeSubmissionStats — week counts & busiest week ───────
+// ── computeSubmissionStats — week counts ──────────────────────
 
 describe('computeSubmissionStats — week aggregation', () => {
   it('weekCounts is non-empty for years with submissions', () => {
     const { weekCounts } = computeSubmissionStats(2025, allRows);
     assert.ok(weekCounts.size > 0);
-  });
-
-  it('busiestKey is null for a year with no submissions', () => {
-    const { busiestKey } = computeSubmissionStats(2019, allRows);
-    assert.equal(busiestKey, null);
-  });
-
-  it('busiestKey is non-null for years with submissions', () => {
-    for (const year of [2025, 2026]) {
-      const { busiestKey } = computeSubmissionStats(year, allRows);
-      assert.notEqual(busiestKey, null, `busiestKey should not be null for ${year}`);
-    }
-  });
-
-  it('busiestKey points to the week with the highest paper count', () => {
-    for (const year of [2025, 2026]) {
-      const { weekCounts, busiestKey } = computeSubmissionStats(year, allRows);
-      const maxCount = Math.max(...weekCounts.values());
-      assert.equal(weekCounts.get(busiestKey), maxCount, `busiestKey mismatch for ${year}`);
-    }
-  });
-
-  it('busiestKey is a parseable ISO date string', () => {
-    const { busiestKey } = computeSubmissionStats(2025, allRows);
-    const parsed = new Date(busiestKey);
-    assert.ok(!isNaN(parsed.getTime()), `busiestKey "${busiestKey}" is not parseable`);
   });
 
   it('week sums equal unique paper count for each year', () => {
@@ -343,8 +317,8 @@ describe('computeSubmissionStats — monthCounts', () => {
   it('counts suggested and discussed papers per month, after dedup', () => {
     // All DISC_ROWS are in January; 5 unique papers, 3 discussed.
     const { monthCounts } = computeSubmissionStats(2099, DISC_ROWS);
-    assert.deepEqual(monthCounts[0], { suggested: 5, discussed: 3 });
-    assert.ok(monthCounts.slice(1).every((m) => m.suggested === 0 && m.discussed === 0));
+    assert.deepEqual(monthCounts[0], { suggested: 5, discussed: 3, people: 3 });
+    assert.ok(monthCounts.slice(1).every((m) => m.suggested === 0 && m.people === 0));
   });
 
   it('puts each paper in the month it was suggested', () => {
@@ -353,8 +327,8 @@ describe('computeSubmissionStats — monthCounts', () => {
       ['2099-12-31 23:00:00', 'Bob', '9912.00001', '', 'TRUE', '', '', '0', ''],
     ];
     const { monthCounts } = computeSubmissionStats(2099, rows);
-    assert.deepEqual(monthCounts[2], { suggested: 1, discussed: 1 });
-    assert.deepEqual(monthCounts[11], { suggested: 1, discussed: 0 });
+    assert.deepEqual(monthCounts[2], { suggested: 1, discussed: 1, people: 1 });
+    assert.deepEqual(monthCounts[11], { suggested: 1, discussed: 0, people: 1 });
   });
 
   it('month totals add up to the year total in the fixture', () => {
@@ -368,7 +342,7 @@ describe('computeSubmissionStats — monthCounts', () => {
   it('rows without col 8 count as not discussed', () => {
     const shortRows = [['2099-06-01 10:00:00', 'Alice', '9901.88001', '', 'TRUE']];
     const { monthCounts } = computeSubmissionStats(2099, shortRows);
-    assert.deepEqual(monthCounts[5], { suggested: 1, discussed: 0 });
+    assert.deepEqual(monthCounts[5], { suggested: 1, discussed: 0, people: 1 });
   });
 });
 
@@ -428,5 +402,67 @@ describe('voteLeader', () => {
 
   it('is null once a paper has been discussed', () => {
     assert.equal(voteLeader([row('a', 5), row('b', 1, 'TRUE')]), null);
+  });
+});
+
+// ── computeSubmissionStats — discussed and growth ─────────────
+
+describe('computeSubmissionStats — discussed and growth', () => {
+  it('discussed is the year total, after dedup', () => {
+    assert.equal(computeSubmissionStats(2099, DISC_ROWS).discussed, 3);
+  });
+
+  it('growth has running totals, one entry per week up to now', () => {
+    const rows = [
+      ['2099-01-05 10:00:00', 'Alice', '9901.00011', '', 'TRUE', '', '', '0', 'TRUE'],
+      ['2099-01-06 10:00:00', 'Bob', '9901.00012', '', 'TRUE', '', '', '0', ''],
+      ['2099-01-20 10:00:00', 'alice', '9901.00013', '', 'TRUE', '', '', '0', ''],
+    ];
+    const now = new Date(2099, 0, 22);
+    const { growth } = computeSubmissionStats(2099, rows, now);
+    assert.ok(growth.every((g) => g.monday <= now));
+    const last = growth.at(-1);
+    assert.deepEqual([last.papers, last.discussed, last.people], [3, 1, 2]);
+    const totals = growth.map((g) => g.papers);
+    assert.ok(
+      totals.every((t, i) => i === 0 || t >= totals[i - 1]),
+      'never decreases'
+    );
+  });
+
+  it('growth stops at the week holding now', () => {
+    const now = new Date(2099, 1, 1);
+    const { growth } = computeSubmissionStats(2099, DISC_ROWS, now);
+    assert.ok(growth.length >= 5 && growth.length <= 6);
+  });
+});
+
+// ── clubStreak ──────────────────────────────────────────────
+
+describe('clubStreak', () => {
+  const at = (d) => [d, 'A', '9901.00001', '', 'TRUE', '', '', '0', ''];
+  // Mondays: 2099-01-05, 01-12, 01-19, 01-26
+  const rows = ['2099-01-06 10:00:00', '2099-01-13 10:00:00', '2099-01-21 10:00:00'].map(at);
+
+  it('counts consecutive weeks with a paper', () => {
+    assert.equal(clubStreak(rows, new Date(2099, 0, 22)), 3);
+  });
+
+  it('lets the week in progress be empty', () => {
+    assert.equal(clubStreak(rows, new Date(2099, 0, 27)), 3);
+  });
+
+  it('ends after a whole week without a paper', () => {
+    assert.equal(clubStreak(rows, new Date(2099, 1, 3)), 0);
+  });
+
+  it('is zero without papers', () => {
+    assert.equal(clubStreak([], new Date(2099, 0, 22)), 0);
+  });
+});
+
+describe('niceMax', () => {
+  it('rounds up to 5, 10, 20, 25, 50, 100, …', () => {
+    assert.deepEqual([0, 3, 7, 12, 21, 26, 60, 101].map(niceMax), [5, 5, 10, 20, 25, 50, 100, 200]);
   });
 });

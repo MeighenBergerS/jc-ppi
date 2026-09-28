@@ -1,11 +1,15 @@
 /* ============================================================
    stats.js — Statistics page entry point
    ============================================================
-   Builds four charts for the selected calendar year:
-     1. Papers each week                   (teal heat strip)
-     2. Papers each month, and discussed   (teal stacked columns)
-     3. Subfield distribution              (fixed 10-color palette)
-     4. Top keywords                       (purple gradient bars)
+   For the selected calendar year: the club's numbers, its streak
+   (current year), and these charts:
+     1. The club is growing                (SVG lines: papers,
+                                            discussed, people)
+     2. Papers each week                   (teal heat strip)
+     3. Papers each month, and discussed   (teal stacked columns)
+     4. People bringing papers each month  (purple columns)
+     5. Subfield distribution              (fixed 10-color palette)
+     6. Top keywords                       (purple gradient bars)
 
    The page describes the club, never ranks its members: no chart
    is broken down by person.
@@ -119,15 +123,15 @@ function _buildChart(title, rows, emptyMsg = 'No data yet.') {
 
 // ── Summary KPI strip ─────────────────────────────────────────
 
-function _buildSummary({ total, members, weeksActive, busiestWeek, topCat, year }) {
+function _buildSummary({ total, discussed, people, weeksActive, topCat }) {
   const strip = document.createElement('div');
   strip.className = 'stat-summary';
 
   const kpis = [
-    { value: total, label: `papers in ${year ?? ''}` },
-    { value: members, label: `active member${members !== 1 ? 's' : ''}` },
-    { value: weeksActive, label: `weeks active` },
-    { value: busiestWeek, label: 'busiest week', small: true },
+    { value: total, label: `paper${total !== 1 ? 's' : ''} suggested` },
+    { value: discussed, label: 'discussed' },
+    { value: people, label: `${people === 1 ? 'person' : 'people'} bringing papers` },
+    { value: weeksActive, label: `week${weeksActive !== 1 ? 's' : ''} active` },
     { value: topCat || '—', label: 'top subfield', small: true },
   ];
 
@@ -160,6 +164,7 @@ const MONTHS = Array.from({ length: 12 }, (_, m) =>
 );
 
 const _plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
+const _people = (n) => `${n} ${n === 1 ? 'person' : 'people'}`;
 
 function _chartSection(title) {
   const section = document.createElement('section');
@@ -232,47 +237,46 @@ function _buildWeekStrip(year, weekCounts) {
 }
 
 // ── Monthly columns ───────────────────────────────────────────
-// Papers suggested each month; the darker part was discussed.
+// One column per month, total on top, stacked from `segments`
+// (bottom last). Future months show only their label.
 
-function _buildMonthChart(year, monthCounts) {
-  const section = _chartSection(`Papers suggested each month in ${year}`);
+/**
+ * @param {number} year
+ * @param {{total: number, title: string, segments: {className: string, value: number}[]}[]} months
+ */
+function _monthColumns(year, months) {
   const today = new Date();
-  const max = Math.max(1, ...monthCounts.map((m) => m.suggested));
+  const max = Math.max(1, ...months.map((m) => m.total));
 
   const chart = document.createElement('div');
   chart.className = 'month-chart';
-  monthCounts.forEach(({ suggested, discussed }, m) => {
+  months.forEach(({ total, title, segments }, m) => {
     const col = document.createElement('div');
     col.className = 'month-col';
     const future = new Date(year, m, 1) > today;
     if (!future) {
-      col.title = `${MONTHS[m]} ${year}: ${_plural(suggested, 'paper')} suggested, ${discussed} discussed`;
+      col.title = `${MONTHS[m]} ${year}: ${title}`;
       col.setAttribute('role', 'img');
       col.setAttribute('aria-label', col.title);
     }
 
     const plot = document.createElement('div');
     plot.className = 'month-plot';
-    if (suggested > 0) {
+    if (total > 0) {
       const value = document.createElement('span');
       value.className = 'month-value';
-      value.textContent = suggested;
+      value.textContent = total;
       plot.appendChild(value);
     }
     const bar = document.createElement('div');
     bar.className = 'month-bar';
-    bar.style.height = `${(suggested / max) * 100}%`;
-    if (suggested > discussed) {
-      const rest = document.createElement('div');
-      rest.className = 'month-seg month-seg--suggested';
-      rest.style.flexGrow = String(suggested - discussed);
-      bar.appendChild(rest);
-    }
-    if (discussed > 0) {
-      const disc = document.createElement('div');
-      disc.className = 'month-seg month-seg--discussed';
-      disc.style.flexGrow = String(discussed);
-      bar.appendChild(disc);
+    bar.style.height = `${(total / max) * 100}%`;
+    for (const { className, value } of segments) {
+      if (value <= 0) continue;
+      const seg = document.createElement('div');
+      seg.className = `month-seg ${className}`;
+      seg.style.flexGrow = String(value);
+      bar.appendChild(seg);
     }
     plot.appendChild(bar);
     col.appendChild(plot);
@@ -283,7 +287,25 @@ function _buildMonthChart(year, monthCounts) {
     col.appendChild(label);
     chart.appendChild(col);
   });
-  section.appendChild(chart);
+  return chart;
+}
+
+// Papers suggested each month; the darker part was discussed.
+function _buildMonthChart(year, monthCounts) {
+  const section = _chartSection(`Papers suggested each month in ${year}`);
+  section.appendChild(
+    _monthColumns(
+      year,
+      monthCounts.map(({ suggested, discussed }) => ({
+        total: suggested,
+        title: `${_plural(suggested, 'paper')} suggested, ${discussed} discussed`,
+        segments: [
+          { className: 'month-seg--suggested', value: suggested - discussed },
+          { className: 'month-seg--discussed', value: discussed },
+        ],
+      }))
+    )
+  );
 
   const legend = document.createElement('div');
   legend.className = 'chart-legend';
@@ -291,6 +313,168 @@ function _buildMonthChart(year, monthCounts) {
   legend.appendChild(_legendSwatch('month-seg month-seg--suggested', 'Not discussed'));
   section.appendChild(legend);
   return section;
+}
+
+// How many different people brought a paper each month.
+function _buildPeopleChart(year, monthCounts) {
+  const section = _chartSection(`People bringing papers each month in ${year}`);
+  section.appendChild(
+    _monthColumns(
+      year,
+      monthCounts.map(({ people }) => ({
+        total: people,
+        title: `${_people(people)} brought papers`,
+        segments: [{ className: 'month-seg--people', value: people }],
+      }))
+    )
+  );
+  return section;
+}
+
+// ── Growth lines ──────────────────────────────────────────────
+// Running totals through the year: papers, discussed, people.
+// SVG, one line per series, labelled at its end; a hover target
+// per week shows that week's totals. The SVG is drawn at the
+// container's width so its text stays readable on a phone.
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const GROWTH_SERIES = [
+  { key: 'papers', label: 'papers', className: 'growth--papers' },
+  { key: 'discussed', label: 'discussed', className: 'growth--discussed' },
+  { key: 'people', label: 'people', className: 'growth--people' },
+];
+
+function _svg(tag, attrs = {}, text) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+  if (text != null) el.textContent = text;
+  return el;
+}
+
+/** A round axis maximum: 5, 10, 20, 25, 50, 100, … at or above `n`. */
+export function niceMax(n) {
+  if (n <= 5) return 5;
+  const pow = 10 ** Math.floor(Math.log10(n));
+  return [1, 2, 2.5, 5, 10].map((f) => f * pow).find((v) => v >= n);
+}
+
+function _buildGrowthChart(year, growth, width = 640) {
+  const section = _chartSection(`The club is growing: ${year} so far`);
+  const weeks = yearWeeks(year);
+  const W = Math.min(760, Math.max(300, Math.round(width)));
+  const H = 240;
+  const M = { left: 34, right: 96, top: 12, bottom: 26 };
+  const plotW = W - M.left - M.right;
+  const plotH = H - M.top - M.bottom;
+  const last = growth.at(-1) ?? { papers: 0, discussed: 0, people: 0 };
+  const yMax = niceMax(Math.max(last.papers, last.people, 1));
+  const x = (i) => M.left + (weeks.length > 1 ? (i / (weeks.length - 1)) * plotW : 0);
+  const y = (v) => M.top + plotH - (v / yMax) * plotH;
+
+  const svg = _svg('svg', {
+    viewBox: `0 0 ${W} ${H}`,
+    class: 'growth-chart',
+    role: 'img',
+    'aria-label':
+      `By the latest week of ${year}: ${_plural(last.papers, 'paper')} suggested, ` +
+      `${last.discussed} discussed, ${_people(last.people)}.`,
+  });
+
+  // Gridlines and y labels at 0, half and the top
+  for (const v of [0, yMax / 2, yMax]) {
+    svg.appendChild(
+      _svg('line', {
+        x1: M.left,
+        x2: M.left + plotW,
+        y1: y(v),
+        y2: y(v),
+        class: v ? 'growth-grid' : 'growth-axis',
+      })
+    );
+    svg.appendChild(
+      _svg('text', { x: M.left - 6, y: y(v) + 4, class: 'growth-tick', 'text-anchor': 'end' }, v)
+    );
+  }
+  // Month labels at the first week of each month (every other month when narrow)
+  const monthStep = plotW < 380 ? 2 : 1;
+  weeks.forEach((monday, i) => {
+    const prev = weeks[i - 1];
+    if (monday.getFullYear() !== year || (prev && prev.getMonth() === monday.getMonth())) return;
+    if (monday.getMonth() % monthStep) return;
+    svg.appendChild(
+      _svg(
+        'text',
+        { x: x(i), y: H - 8, class: 'growth-tick', 'text-anchor': 'middle' },
+        MONTHS[monday.getMonth()]
+      )
+    );
+  });
+
+  if (growth.length) {
+    // Lines, then end labels pushed apart so they never overlap
+    const ends = [];
+    for (const s of GROWTH_SERIES) {
+      const points = growth.map((g, i) => `${x(i).toFixed(1)},${y(g[s.key]).toFixed(1)}`).join(' ');
+      svg.appendChild(_svg('polyline', { points, class: `growth-line ${s.className}` }));
+      const endX = x(growth.length - 1);
+      svg.appendChild(
+        _svg('circle', { cx: endX, cy: y(last[s.key]), r: 4, class: `growth-dot ${s.className}` })
+      );
+      ends.push({ s, value: last[s.key], ty: y(last[s.key]) + 4, endX });
+    }
+    ends.sort((a, b) => a.ty - b.ty);
+    for (let i = 1; i < ends.length; i++) ends[i].ty = Math.max(ends[i].ty, ends[i - 1].ty + 15);
+    for (const e of ends) {
+      svg.appendChild(
+        _svg('text', { x: e.endX + 9, y: e.ty, class: 'growth-end' }, `${e.value} ${e.s.label}`)
+      );
+    }
+
+    // Hover targets: one column per week, with that week's totals
+    const step = weeks.length > 1 ? plotW / (weeks.length - 1) : plotW;
+    growth.forEach((g, i) => {
+      const hit = _svg('rect', {
+        x: x(i) - step / 2,
+        y: M.top,
+        width: step,
+        height: plotH,
+        class: 'growth-hit',
+      });
+      hit.appendChild(
+        _svg(
+          'title',
+          {},
+          `Week of ${g.monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ` +
+            `${_plural(g.papers, 'paper')}, ${g.discussed} discussed, ` +
+            `${_people(g.people)} so far`
+        )
+      );
+      svg.appendChild(hit);
+    });
+  }
+  section.appendChild(svg);
+
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  legend.appendChild(_legendSwatch('growth-swatch growth--papers', 'Papers suggested'));
+  legend.appendChild(_legendSwatch('growth-swatch growth--discussed', 'Discussed'));
+  legend.appendChild(_legendSwatch('growth-swatch growth--people', 'People bringing papers'));
+  section.appendChild(legend);
+  return section;
+}
+
+// ── Club streak ───────────────────────────────────────────────
+
+function _buildStreak(weeks) {
+  const box = document.createElement('div');
+  box.className = 'streak-callout';
+  const big = document.createElement('div');
+  big.className = 'streak-big';
+  big.textContent = `🔥 ${weeks}-week streak`;
+  const text = document.createElement('p');
+  text.textContent = `The club has had at least one paper every week for ${weeks} weeks.`;
+  box.append(big, text);
+  return box;
 }
 
 // ── Pure aggregation (exported for testing) ──────────────────
@@ -301,10 +485,13 @@ function _buildMonthChart(year, monthCounts) {
  *
  * @param {number} year
  * @param {string[][]} allRows - All CSV rows (already sliced past header).
- * @returns {{ papers, memberCounts, weekCounts, busiestKey, monthCounts }}
- *   monthCounts holds { suggested, discussed } for January to December.
+ * @returns {{ papers, memberCounts, weekCounts, monthCounts, discussed, growth }}
+ *   monthCounts holds { suggested, discussed, people } for January to December,
+ *   `people` counting distinct submitters. `discussed` is the year's total.
+ *   `growth` has one entry per week of the year up to `now`:
+ *   { monday, papers, discussed, people }, each counted from January 1.
  */
-export function computeSubmissionStats(year, allRows) {
+export function computeSubmissionStats(year, allRows, now = new Date()) {
   const yearRows = allRows.filter((p) => {
     const ts = new Date(p[COL.timestamp]);
     return !isNaN(ts) && ts.getFullYear() === year;
@@ -330,23 +517,74 @@ export function computeSubmissionStats(year, allRows) {
     weekCounts.set(key, (weekCounts.get(key) ?? 0) + 1);
   });
 
-  let busiestKey = null,
-    busiestN = 0;
-  weekCounts.forEach((n, k) => {
-    if (n > busiestN) {
-      busiestN = n;
-      busiestKey = k;
-    }
-  });
+  const isDiscussed = (p) => (p[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
+  const person = (p) => (p[COL.name] || '').trim().toLowerCase() || 'anonymous';
 
-  const monthCounts = Array.from({ length: 12 }, () => ({ suggested: 0, discussed: 0 }));
+  const monthPeople = Array.from({ length: 12 }, () => new Set());
+  const monthCounts = Array.from({ length: 12 }, () => ({ suggested: 0, discussed: 0, people: 0 }));
   papers.forEach((p) => {
-    const month = monthCounts[new Date(p[COL.timestamp]).getMonth()];
-    month.suggested++;
-    if ((p[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE') month.discussed++;
+    const m = new Date(p[COL.timestamp]).getMonth();
+    monthCounts[m].suggested++;
+    if (isDiscussed(p)) monthCounts[m].discussed++;
+    monthPeople[m].add(person(p));
   });
+  monthCounts.forEach((month, m) => (month.people = monthPeople[m].size));
 
-  return { papers, memberCounts, weekCounts, busiestKey, monthCounts };
+  // Running totals, week by week, up to the week holding `now`
+  const byWeek = new Map();
+  papers.forEach((p) => {
+    const key = weekStart(new Date(p[COL.timestamp])).toISOString();
+    if (!byWeek.has(key)) byWeek.set(key, []);
+    byWeek.get(key).push(p);
+  });
+  const growth = [];
+  const seenPeople = new Set();
+  let paperTotal = 0;
+  let discussedTotal = 0;
+  for (const monday of yearWeeks(year)) {
+    if (monday > now) break;
+    for (const p of byWeek.get(monday.toISOString()) ?? []) {
+      paperTotal++;
+      if (isDiscussed(p)) discussedTotal++;
+      seenPeople.add(person(p));
+    }
+    growth.push({ monday, papers: paperTotal, discussed: discussedTotal, people: seenPeople.size });
+  }
+
+  return {
+    papers,
+    memberCounts,
+    weekCounts,
+    monthCounts,
+    discussed: papers.filter(isDiscussed).length,
+    growth,
+  };
+}
+
+/**
+ * The club's streak: consecutive weeks, up to the week holding `now`, with
+ * at least one paper. The week in progress may be empty without ending it.
+ *
+ * @param {string[][]} allRows - All CSV rows.
+ * @param {Date} [now]
+ * @returns {number}
+ */
+export function clubStreak(allRows, now = new Date()) {
+  const weeks = new Set(
+    allRows
+      .map((p) => new Date(p[COL.timestamp]))
+      .filter((d) => !isNaN(d))
+      .map((d) => weekStart(d).getTime())
+  );
+  const back = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 7);
+  let week = weekStart(now);
+  if (!weeks.has(week.getTime())) week = back(week);
+  let streak = 0;
+  while (weeks.has(week.getTime())) {
+    streak++;
+    week = back(week);
+  }
+  return streak;
 }
 
 /**
@@ -376,11 +614,8 @@ async function renderStats(year, allRows) {
   const container = document.getElementById('stats-container');
   const subtitle = document.getElementById('stats-subtitle');
 
-  const { papers, memberCounts, weekCounts, busiestKey, monthCounts } = computeSubmissionStats(
-    year,
-    allRows
-  );
-  const busiestWeekLabel = busiestKey ? fmtWeekRange(new Date(busiestKey)) : '—';
+  const { papers, memberCounts, weekCounts, monthCounts, discussed, growth } =
+    computeSubmissionStats(year, allRows);
 
   const isCurrentYear = year === new Date().getFullYear();
   if (subtitle)
@@ -391,16 +626,21 @@ async function renderStats(year, allRows) {
   // Render summary with placeholder top-cat (filled in after INSPIRE)
   const summaryEl = _buildSummary({
     total: papers.length,
-    members: memberCounts.size,
+    discussed,
+    people: memberCounts.size,
     weeksActive: weekCounts.size,
-    busiestWeek: busiestWeekLabel,
     topCat: null,
-    year,
   });
   container.appendChild(summaryEl);
+
+  const streak = clubStreak(allRows);
+  if (isCurrentYear && streak >= 2) container.appendChild(_buildStreak(streak));
+
   // Time charts (CSV data only — no INSPIRE call needed)
+  container.appendChild(_buildGrowthChart(year, growth, container.clientWidth));
   container.appendChild(_buildWeekStrip(year, weekCounts));
   container.appendChild(_buildMonthChart(year, monthCounts));
+  container.appendChild(_buildPeopleChart(year, monthCounts));
 
   if (papers.length === 0) return;
 
