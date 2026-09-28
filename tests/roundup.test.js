@@ -256,6 +256,7 @@ describe('buildRoundup', () => {
     const r = buildRoundup(papers, '2026-09');
     assert.equal(r.next.length, 2);
     assert.ok(r.next[0].toGo <= r.next[1].toGo);
+    for (const m of r.next) assert.equal(m.count + m.toGo, m.tier);
   });
 
   it('works for a month without papers', () => {

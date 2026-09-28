@@ -181,7 +181,7 @@ function _lastWeekOf(key) {
  * @returns {{
  *   month, papers: object[], suggested, discussed, votes, subfields: string[],
  *   streak: {current, best}, previous: {suggested, discussed},
- *   total: number, reached: {emoji, name, tier}[], next: {emoji, name, tier, toGo}[]
+ *   total: number, reached: {emoji, name, tier}[], next: {emoji, name, tier, count, toGo}[]
  * }}
  */
 export function buildRoundup(papers, month, meta = new Map()) {
@@ -201,7 +201,13 @@ export function buildRoundup(papers, month, meta = new Map()) {
     }
     const upcoming = m.tiers.find((t) => t > countsNow[m.id]);
     if (upcoming)
-      next.push({ emoji: m.emoji, name: m.name, tier: upcoming, toGo: upcoming - countsNow[m.id] });
+      next.push({
+        emoji: m.emoji,
+        name: m.name,
+        tier: upcoming,
+        count: countsNow[m.id],
+        toGo: upcoming - countsNow[m.id],
+      });
   }
   next.sort((a, b) => a.toGo - b.toGo);
 

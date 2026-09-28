@@ -29,6 +29,7 @@ import {
   monthKey,
   previousMonth,
 } from './roundup.js';
+import { renderRoundupHtml } from './roundup-html.js';
 import { isEmail, sendMail } from './smtp.js';
 
 const send = process.env.SEND === 'true';
@@ -82,12 +83,16 @@ try {
   console.error(`INSPIRE unavailable, so no titles or subfields: ${err.message}`);
 }
 
-const messages = members.map(({ email, papers }) => ({
-  from,
-  fromName: CONFIG.clubName,
-  to: email,
-  ...renderRoundup(buildRoundup(papers, month, meta), meta),
-}));
+const messages = members.map(({ email, papers }) => {
+  const roundup = buildRoundup(papers, month, meta);
+  return {
+    from,
+    fromName: CONFIG.clubName,
+    to: email,
+    ...renderRoundup(roundup, meta),
+    html: renderRoundupHtml(roundup, meta),
+  };
+});
 
 console.log(
   `Roundup for ${month}: ${logins.length} members, ` +

@@ -1,12 +1,14 @@
 /* ============================================================
    scripts/papers/smtp.js — Minimal SMTP client for plain emails
    ============================================================
-   Sends plain-text UTF-8 emails over implicit TLS (Gmail:
+   Sends UTF-8 emails (plain text, optionally with an HTML
+   alternative) over implicit TLS (Gmail:
    smtp.gmail.com, port 465) with AUTH PLAIN, without npm
    dependencies. Used by roundup-email.js.
    ============================================================ */
 
 import { connect as tlsConnect } from 'node:tls';
+import { randomUUID } from 'node:crypto';
 
 const EMAIL_RE = /^[^\s<>()@,;:"\\]+@[^\s<>()@,;:"\\]+\.[^\s<>()@,;:"\\]+$/;
 
@@ -21,29 +23,51 @@ export function encodeHeader(text) {
   return `=?utf-8?B?${Buffer.from(text, 'utf8').toString('base64')}?=`;
 }
 
+/** A body part's text as base64 in 76-character CRLF lines. */
+function _base64(text) {
+  return Buffer.from(text.replace(/\r?\n/g, '\r\n'), 'utf8')
+    .toString('base64')
+    .replace(/.{1,76}/g, '$&\r\n');
+}
+
 /**
  * A complete message (headers and base64 body, CRLF line ends) ready for DATA.
- * @param {{from: string, fromName?: string, to: string, subject: string, text: string, date?: Date}} msg
+ * With `html`, the body is multipart/alternative: the text, then the HTML.
+ * @param {{from: string, fromName?: string, to: string, subject: string, text: string,
+ *          html?: string, date?: Date}} msg
  */
-export function formatMessage({ from, fromName = '', to, subject, text, date = new Date() }) {
+export function formatMessage({ from, fromName = '', to, subject, text, html, date = new Date() }) {
   for (const address of [from, to]) {
     if (!isEmail(address)) throw new Error('Not a plain email address');
   }
   const name = fromName.replace(/["\\\r\n]/g, '');
   const sender = /^[\x20-\x7e]*$/.test(name) ? `"${name}"` : encodeHeader(name);
-  const body = Buffer.from(text.replace(/\r?\n/g, '\r\n'), 'utf8')
-    .toString('base64')
-    .replace(/.{1,76}/g, '$&\r\n');
+  const part = (type, content) => [
+    `Content-Type: ${type}; charset=utf-8`,
+    'Content-Transfer-Encoding: base64',
+    '',
+    _base64(content),
+  ];
+  const boundary = `jc-ppi-${randomUUID()}`;
+  const body = html
+    ? [
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        '',
+        `--${boundary}`,
+        ...part('text/plain', text),
+        `--${boundary}`,
+        ...part('text/html', html),
+        `--${boundary}--`,
+        '',
+      ]
+    : part('text/plain', text);
   return [
     `From: ${name ? `${sender} ` : ''}<${from}>`,
     `To: <${to}>`,
     `Subject: ${encodeHeader(subject.replace(/[\r\n]+/g, ' '))}`,
     `Date: ${date.toUTCString()}`,
     'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
-    '',
-    body,
+    ...body,
   ].join('\r\n');
 }
 

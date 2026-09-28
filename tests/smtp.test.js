@@ -82,6 +82,20 @@ describe('formatMessage', () => {
     assert.match(data, /^Subject: Hi Bcc: x@y\.org\r$/m);
   });
 
+  it('with html, sends the text and the HTML as multipart/alternative', () => {
+    const data = formatMessage(msg({ html: '<p>Hello ✓</p>' }));
+    const boundary = data.match(/^Content-Type: multipart\/alternative; boundary="([^"]+)"\r$/m)[1];
+    const parts = data.split(`--${boundary}`);
+    assert.equal(parts.length, 4); // preamble, text, html, closing "--"
+    assert.match(parts[1], /Content-Type: text\/plain; charset=utf-8/);
+    assert.match(parts[2], /Content-Type: text\/html; charset=utf-8/);
+    const decode = (part) =>
+      Buffer.from(part.split('\r\n\r\n')[1].replace(/\s/g, ''), 'base64').toString('utf8');
+    assert.equal(decode(parts[1]), 'Hello ✓\r\nSecond line\r\n');
+    assert.equal(decode(parts[2]), '<p>Hello ✓</p>');
+    assert.equal(parts[3].trim(), '--');
+  });
+
   it('throws on an address that is not plain', () => {
     assert.throws(() => formatMessage(msg({ to: 'a@b.org\r\nBcc: x@y.org' })));
   });
