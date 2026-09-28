@@ -52,6 +52,20 @@ export const CONFIG = {
   },
 };
 
+// ── GITHUB ISSUES PREVIEW ───────────────────────────────────
+// Opening any page with ?source=issues reads papers from GitHub issues instead
+// of the Google Sheet (see docs/ISSUES-PREVIEW.md). The deploy workflow builds
+// the CSV from the issues; voting and submitting happen on GitHub.
+CONFIG.issuesRepo = 'MeighenBergerS/jc-ppi';
+CONFIG.issuesPreview =
+  typeof location !== 'undefined' &&
+  new URLSearchParams(location.search).get('source') === 'issues';
+if (CONFIG.issuesPreview) {
+  CONFIG.sheetCsvUrl = './data/papers-from-issues.csv';
+  CONFIG.mutateUrl = '';
+  CONFIG.formUrl = `https://github.com/${CONFIG.issuesRepo}/issues/new?template=paper.yml`;
+}
+
 // ── SHEET COLUMN MAP ────────────────────────────────────────
 // Columns refer to the *Public* tab (email is excluded there):
 //   A (0) Timestamp  B (1) Name  C (2) arXiv ID  D (3) Comment  E (4) Approved
@@ -209,6 +223,7 @@ export const COL = {
   editedComment: 6, // overrides comment when non-empty
   votes: 7, // running upvote count
   discussed: 8, // "TRUE" when the paper was starred as discussed at the JC meeting
+  issueUrl: 9, // GitHub issue URL; only in the ?source=issues preview data
 };
 
 // ── TRENDING TAB COLUMN MAP ─────────────────────────────────

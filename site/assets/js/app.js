@@ -21,6 +21,7 @@ import {
 import { fetchPaperMetadata } from './inspire.js';
 import { buildTable } from './table.js';
 import { renderTrending } from './trending.js';
+import './preview.js';
 
 /** Re-fetch interval for the This Week page (ms). */
 const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
@@ -164,7 +165,10 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     });
 
     container.appendChild(
-      buildTable(thisWeek, metaMap, { thisWeek: !!CONFIG.mutateUrl, previousSubmissions })
+      buildTable(thisWeek, metaMap, {
+        thisWeek: !!CONFIG.mutateUrl || CONFIG.issuesPreview,
+        previousSubmissions,
+      })
     );
 
     // ── Copy all BibTeX for this week ────────────────────────────────

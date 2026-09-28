@@ -26,3 +26,6 @@ dist/
 # Use `npm run refresh` to regenerate from live INSPIRE data.
 # Committed baseline fixtures (submissions.csv etc.) are tracked.
 tests/fixtures/*.fresh.*
+
+# ── Issues preview data (built by deploy-pages.yml) ──
+site/data/

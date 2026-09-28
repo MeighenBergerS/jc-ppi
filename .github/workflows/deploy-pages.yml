@@ -10,12 +10,20 @@ on:
       - "site/*.html"
       - "site/assets/**"
       - "site/.nojekyll"
+      - "scripts/papers/**"
+  # Paper issues feed the ?source=issues preview (docs/ISSUES-PREVIEW.md).
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  schedule:
+    # Hourly, to pick up 👍 votes: reactions don't trigger workflows.
+    - cron: "43 * * * *"
   workflow_dispatch: # allow manual deploys from the Actions tab
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  issues: read
 
 # Only one deployment at a time; skip queued runs but don't cancel in-progress.
 concurrency:
@@ -25,6 +33,12 @@ concurrency:
 jobs:
   deploy:
     name: Deploy site
+    # Issue events: only paper issues. Imported issues are skipped so the bulk import
+    # doesn't queue hundreds of deploys; the hourly run picks up their changes.
+    if: >-
+      github.event_name != 'issues' ||
+      (contains(github.event.issue.labels.*.name, 'paper') &&
+       !contains(github.event.issue.labels.*.name, 'imported'))
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,6 +47,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Build the issues preview data
+        # Never block the live site. On failure the preview shows no papers until the next run.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/papers/build-csv.js site/data/papers-from-issues.csv
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

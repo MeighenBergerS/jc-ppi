@@ -13,6 +13,7 @@
 import { CONFIG, COL, TITLE_STOP_WORDS } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
+import './preview.js';
 
 const DEFAULT_YEAR = new Date().getFullYear();
 

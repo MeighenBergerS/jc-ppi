@@ -149,12 +149,16 @@ export function buildTable(
     if (!commentText) commentSpan.style.color = 'var(--muted)';
     tdComment.appendChild(commentSpan);
 
-    // Column 4 — Actions (this week with mutateUrl configured only)
+    // Column 4 — Actions (this week only). In the GitHub issues preview this is
+    // a link to the paper's issue, where people vote with a 👍 reaction.
     if (thisWeek) {
       const tdActions = tr.insertCell();
       tdActions.className = 'actions-cell';
+      const votes = Number(paper[COL.votes] ?? 0);
       tdActions.appendChild(
-        _buildActionsCell(id, Number(paper[COL.votes] ?? 0), discussed, commentSpan, tdComment)
+        CONFIG.issuesPreview
+          ? _buildIssueLinkCell(paper[COL.issueUrl], votes)
+          : _buildActionsCell(id, votes, discussed, commentSpan, tdComment)
       );
     }
   });
@@ -163,6 +167,26 @@ export function buildTable(
 }
 
 // ── Action controls ───────────────────────────────────────────
+
+/**
+ * Builds the vote link for a this-week row in the GitHub issues preview.
+ * @param {string} issueUrl - The paper's GitHub issue.
+ * @param {number} votes    - 👍 count when the preview data was built.
+ */
+function _buildIssueLinkCell(issueUrl, votes) {
+  const container = document.createElement('div');
+  container.className = 'actions-container';
+  if (!/^https:\/\/github\.com\//.test(issueUrl ?? '')) return container;
+  const link = document.createElement('a');
+  link.className = 'action-btn action-btn--vote';
+  link.href = issueUrl;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = `▲ ${votes} · Vote`;
+  link.title = 'Vote with a 👍 reaction on the GitHub issue';
+  container.appendChild(link);
+  return container;
+}
 
 /**
  * Builds the vote / edit / remove control group for a this-week row.

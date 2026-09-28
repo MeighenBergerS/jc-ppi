@@ -172,10 +172,11 @@ This site was developed with the help of Claude, Anthropic's AI assistant, used 
 
 ## Documentation
 
-| Document                                       | Contents                                                      |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| [docs/SETUP.md](docs/SETUP.md)                 | One-time setup: Google Sheet, Form, Apps Script, GitHub Pages |
-| [docs/INTERACTIVITY.md](docs/INTERACTIVITY.md) | Vote / edit / remove feature, Apps Script doPost, date guard  |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)   | Suggesting a paper; contributing code; test guide             |
-| [docs/ARXIV-GUIDE.md](docs/ARXIV-GUIDE.md)     | Member guide to arXiv IDs and INSPIRE-HEP                     |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)       | Contributor Covenant                                          |
+| Document                                         | Contents                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------- |
+| [docs/SETUP.md](docs/SETUP.md)                   | One-time setup: Google Sheet, Form, Apps Script, GitHub Pages |
+| [docs/INTERACTIVITY.md](docs/INTERACTIVITY.md)   | Vote / edit / remove feature, Apps Script doPost, date guard  |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)     | Suggesting a paper; contributing code; test guide             |
+| [docs/ARXIV-GUIDE.md](docs/ARXIV-GUIDE.md)       | Member guide to arXiv IDs and INSPIRE-HEP                     |
+| [docs/ISSUES-PREVIEW.md](docs/ISSUES-PREVIEW.md) | Trial: paper submissions through GitHub issues                |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)         | Contributor Covenant                                          |
