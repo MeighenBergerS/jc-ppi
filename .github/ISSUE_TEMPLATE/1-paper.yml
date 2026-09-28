@@ -1,11 +1,12 @@
 name: Suggest a paper
 description: Suggest an arXiv paper for the journal club.
-title: "Paper: "
+title: "Paper: LEAVE BLANK"
 labels: [paper]
 body:
   - type: markdown
     attributes:
       value: |
+        **Leave the title above as it is.** The bot replaces it with the arXiv ID and the paper's title.
         A bot adds the title, authors, abstract and BibTeX to this issue within a few minutes.
         Vote for papers you want to discuss with a 👍 reaction on their issue.
         The site shows the name from your GitHub profile, or your username if your profile has no name.

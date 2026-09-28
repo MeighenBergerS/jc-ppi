@@ -13,7 +13,8 @@ your username if the profile has no name.
    [Suggest a paper issue form](https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml),
    also linked as "Submit a Paper" on the [website](https://meighenbergers.github.io/jc-ppi/).
    It asks for the **arXiv ID or link** (`2301.12345` or `https://arxiv.org/abs/2301.12345`) and
-   **why this paper**: a sentence or two is great, and "general interest" is a fine answer.
+   **why this paper**: a sentence or two is great, and "general interest" is a fine answer. Leave
+   the issue title as it is; the bot sets it.
 
 3. **Wait a few minutes.** A bot comments on your issue with the paper's title, authors,
    abstract, links and BibTeX, and labels it `Updated By Bot`. If the paper was suggested
