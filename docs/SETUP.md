@@ -146,6 +146,11 @@ approved member list. Create it once:
 The Apps Script can post a Thursday afternoon reminder to your Slack channel
 that lists who has submitted papers and highlights the top-voted paper.
 
+> The same reminder can run from GitHub Actions instead, with the webhook stored
+> as a repository secret. See
+> [ISSUES-PREVIEW.md](ISSUES-PREVIEW.md#weekly-slack-reminder). Use one or the
+> other, not both.
+
 1. Go to [api.slack.com/apps](https://api.slack.com/apps) → **Create New App → From scratch**.
 2. Under **Features → Incoming Webhooks**, toggle it on, then click
    **Add New Webhook to Workspace** and pick your channel.

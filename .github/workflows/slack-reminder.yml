@@ -1,0 +1,42 @@
+name: Slack reminder
+
+# Weekly reminder in the journal club Slack channel, Thursday 1 PM Central Time
+# (scripts/papers/slack-reminder.js). Scheduled runs only post when the
+# repository variable SLACK_REMINDER is "on"; otherwise they print the message.
+# The repository variable PAPERS_SOURCE picks "sheet" (default) or "issues".
+
+on:
+  schedule:
+    # Cron runs in UTC and ignores daylight saving, so there are two; the script
+    # posts from the one that is 1 PM in Iowa that day.
+    - cron: "0 18 * * 4" # 1 PM CDT (summer)
+    - cron: "0 19 * * 4" # 1 PM CST (winter)
+  workflow_dispatch:
+    inputs:
+      post:
+        description: "Post to Slack (otherwise only print the message in the log)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  remind:
+    name: Send the weekly reminder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Build and send the reminder
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_REMINDER: ${{ vars.SLACK_REMINDER }}
+          PAPERS_SOURCE: ${{ vars.PAPERS_SOURCE }}
+          SCHEDULE: ${{ github.event.schedule }}
+          POST: ${{ inputs.post }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/papers/slack-reminder.js

@@ -51,6 +51,34 @@ the imported count.
 To rerun the bot by hand, use **Actions → Papers → Run workflow**. Scope `all` also refreshes
 closed issues.
 
+## Weekly Slack reminder
+
+The Thursday reminder can run from GitHub Actions instead of the Apps Script
+(`.github/workflows/slack-reminder.yml`, `scripts/papers/slack-reminder.js`). It posts the same
+message: who submitted this week, the most-voted paper (now with its title), and the most-cited
+recent hep-ph paper per trending category, fetched from INSPIRE-HEP at send time. The meeting day
+and time come from `meeting` in `site/assets/js/config.js`.
+
+| Setting                                  | Where                                 | Values                                                         |
+| ---------------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| Webhook URL                              | Repository secret `SLACK_WEBHOOK_URL` | Set with `gh secret set SLACK_WEBHOOK_URL`                     |
+| Post on schedule (Thursday 1 PM Central) | Repository variable `SLACK_REMINDER`  | `on` to post; anything else only prints the message in the log |
+| Where this week's papers come from       | Repository variable `PAPERS_SOURCE`   | `sheet` (default) or `issues`                                  |
+
+To see this week's message without posting, use **Actions → Slack reminder → Run workflow**;
+tick "post" to send it. To switch over from the Apps Script:
+
+```sh
+gh variable set SLACK_REMINDER --body on
+```
+
+then delete the `weeklySlackReminder` trigger in the Apps Script editor, so the channel doesn't
+get two reminders. When submissions move to issues, also run
+`gh variable set PAPERS_SOURCE --body issues`.
+
+GitHub pauses scheduled workflows in a public repository after 60 days without commits, and emails
+the owner first. After a long quiet spell, re-enable the workflow under **Actions**.
+
 ## Ending the trial
 
 - **Keeping issues:** point `sheetCsvUrl` at the issues CSV permanently, then retire the Google
