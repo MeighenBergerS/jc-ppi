@@ -1,0 +1,5 @@
+# GitHub usernames whose paper issues are approved automatically, one per line.
+# Repository owners and collaborators are always approved and need not be listed.
+# Anyone else's paper issue gets the "needs approval" label until a maintainer
+# removes it.
+MeighenBergerS

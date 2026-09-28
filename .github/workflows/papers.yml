@@ -1,0 +1,46 @@
+name: Papers
+
+# The paper bot (scripts/papers/enrich.js): fills in metadata on paper issues,
+# rechecks papers not yet on INSPIRE daily, and closes last week's issues.
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+  schedule:
+    # Daily at 11:17 UTC (early morning in Iowa).
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "open: open issues and those awaiting INSPIRE. all: every paper issue."
+        type: choice
+        options: [open, all]
+        default: open
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: papers-${{ github.event.issue.number || 'sweep' }}
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    name: Update paper issues
+    # Issue events: only paper issues, and not the bulk import (the sweep handles those).
+    if: >-
+      github.event_name != 'issues' ||
+      (contains(github.event.issue.labels.*.name, 'paper') &&
+       !(github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'imported')))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run the paper bot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SCOPE: ${{ inputs.scope || 'open' }}
+        run: node scripts/papers/enrich.js
