@@ -20,7 +20,13 @@ import { dirname, join } from 'node:path';
 
 import { parseCsv, normalizeArxivId, stripVersion } from '../site/assets/js/utils.js';
 import { deduplicatePapers, weekHash } from '../site/assets/js/app.js';
-import { computeSubmissionStats, yearWeeks, clubStreak, niceMax } from '../site/assets/js/stats.js';
+import {
+  computeSubmissionStats,
+  yearWeeks,
+  clubStreak,
+  niceMax,
+  topicMonths,
+} from '../site/assets/js/stats.js';
 import { voteLeader } from '../site/assets/js/cards.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -464,5 +470,39 @@ describe('clubStreak', () => {
 describe('niceMax', () => {
   it('rounds up to 5, 10, 20, 25, 50, 100, …', () => {
     assert.deepEqual([0, 3, 7, 12, 21, 26, 60, 101].map(niceMax), [5, 5, 10, 20, 25, 50, 100, 200]);
+  });
+});
+
+// ── topicMonths ─────────────────────────────────────────────
+
+describe('topicMonths', () => {
+  const row = (ts, id) => [ts, 'A', id, '', 'TRUE', '', '', '0', ''];
+  const papers = [
+    row('2099-01-10 10:00:00', '9901.00001'),
+    row('2099-01-20 10:00:00', '9901.00002'),
+    row('2099-03-05 10:00:00', '9903.00001'),
+    row('2099-03-06 10:00:00', '9903.00002'), // no metadata: skipped
+  ];
+  const meta = new Map([
+    ['9901.00001', { title: 'Neutrino masses' }],
+    ['9901.00002', { title: 'Dark matter and neutrinos' }],
+    ['9903.00001', { title: 'Sterile neutrinos' }],
+  ]);
+
+  it('counts papers per topic per month, most papers first', () => {
+    const rows = topicMonths(papers, meta);
+    assert.deepEqual(
+      rows.map((r) => [r.label, r.total]),
+      [
+        ['Neutrinos', 3],
+        ['Dark matter', 1],
+      ]
+    );
+    assert.equal(rows[0].months[0], 2);
+    assert.equal(rows[0].months[2], 1);
+  });
+
+  it('is empty without metadata', () => {
+    assert.deepEqual(topicMonths(papers, new Map()), []);
   });
 });

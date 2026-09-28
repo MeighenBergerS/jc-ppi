@@ -837,6 +837,12 @@ main.prose {
   border: 1px solid #d1c4e9;
 }
 
+/* A club topic (CONFIG.topics), rather than a raw INSPIRE keyword */
+.kpill--club {
+  font-weight: 700;
+  border-color: var(--accent-sec);
+}
+
 /* ── Archive search ──────────────────────────────────────── */
 
 .archive-search-wrap {
@@ -1214,6 +1220,46 @@ main.prose {
   background: var(--series-people);
 }
 
+/* What we've been reading: topic × month grid */
+.topic-grid {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) repeat(12, minmax(0, 1fr)) 2.2rem;
+  gap: 3px;
+  align-items: center;
+}
+
+.topic-grid .heat-cell {
+  max-height: 1.6rem;
+}
+
+.topic-grid-head {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.topic-grid-label {
+  font-size: 0.82rem;
+  color: var(--text);
+  padding-right: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-grid-total {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.topic-grid-note {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 /* Club streak */
 .streak-callout {
   margin: -0.75rem 0 2.25rem;
@@ -1468,6 +1514,18 @@ main.prose {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+}
+
+/* Topic chips (CONFIG.topics) in the topic pills' purple */
+.sf-btn--topic:hover {
+  background: #ede7f6;
+  color: var(--accent-sec);
+  border-color: #d1c4e9;
+}
+
+.sf-btn--topic.active {
+  background: var(--accent-sec);
+  border-color: var(--accent-sec);
 }
 
 /* ── Footer ──────────────────────────────────────────────── */

@@ -29,6 +29,7 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 | `site/assets/js/app.js`             | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
 | `site/assets/js/inspire.js`         | INSPIRE-HEP API client with localStorage cache                                 |
 | `site/assets/js/table.js`           | Archive `<table>` from CSV rows + metadata; pieces shared with the cards       |
+| `site/assets/js/topics.js`          | Club topics of a paper (`CONFIG.topics`): pills, Archive filter, Stats grid    |
 | `site/assets/js/mathtext.js`        | MathML / `$…$` LaTeX in INSPIRE text → safe DOM (whitelist; never innerHTML)   |
 | `site/assets/js/cards.js`           | This Week paper cards (vote leader, discussed highlight, first names)          |
 | `site/assets/js/utils.js`           | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |

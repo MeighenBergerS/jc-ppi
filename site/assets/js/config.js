@@ -71,6 +71,70 @@ export const CONFIG = {
     ],
   },
 
+  // Topics for paper pills, the Archive filter and the Stats "What we've been
+  // reading" grid (topics.js). A paper gets a topic when `match` finds it in
+  // the title or INSPIRE keywords, or twice in the abstract; at most three per
+  // paper, the best matches first. Edit freely: order is the display order.
+  topics: [
+    {
+      label: 'Neutrinos',
+      match:
+        /neutrino|ν|sterile|IceCube|KATRIN|DUNE|Hyper-?Kamiokande|Super-?Kamiokande|JUNO|seesaw|double[- ]beta/i,
+    },
+    {
+      label: 'Dark matter',
+      match:
+        /dark matter|\bWIMPs?\b|freeze-?(?:in|out)|direct detection|relic (?:abundance|density)|dark sector|hidden sector/i,
+    },
+    {
+      label: 'Axions & light particles',
+      match: /axion|\bALPs?\b|dark photon|hidden photon|light scalar|feebly|millicharged/i,
+    },
+    {
+      label: 'Cosmology',
+      match:
+        /cosmolog|\bCMB\b|cosmic microwave|inflation|dark energy|Hubble|nucleosynthesis|\bBBN\b|baryogenesis|leptogenesis|early universe|phase transition/i,
+    },
+    {
+      label: 'Astroparticle',
+      match:
+        /cosmic[- ]rays?|gamma[- ]rays?|astrophysical|supernova|neutron stars?|multi-?messenger|blazar|galactic/i,
+    },
+    {
+      label: 'Gravity & black holes',
+      match:
+        /gravitational[- ]waves?|\bLIGO\b|\bLISA\b|pulsar timing|black holes?|general relativity/i,
+    },
+    {
+      label: 'Colliders',
+      match:
+        /\bLHC\b|collider|\bATLAS\b|\bCMS\b|\bLHCb\b|top quark|\bjets?\b|\bFCC|Drell-?Yan|four-top|di-top/i,
+    },
+    {
+      label: 'Higgs & electroweak',
+      match: /Higgs|electroweak|\b[WZ] bosons?|\bSMEFT\b/i,
+    },
+    {
+      label: 'Flavour',
+      match:
+        /flavou?r|\bB[- ]mesons?|kaons?|\bCKM\b|\bg-2\b|anomalous magnetic moment|CP violation|rare decays?/i,
+    },
+    {
+      label: 'QCD & hadrons',
+      match: /\bQCD\b|lattice|hadron|parton|gluon|nucleon|\bPDFs?\b|quarkonium|heavy[- ]ion/i,
+    },
+    {
+      label: 'Machine learning',
+      match:
+        /machine learning|neural network|deep learning|simulation-based inference|normali[sz]ing flow|transformer/i,
+    },
+    {
+      label: 'Formal theory',
+      match:
+        /supersymmetr|string theory|scattering amplitude|conformal field|holograph|\bAdS\b|swampland|modular (?:symmetr|invarian|form)/i,
+    },
+  ],
+
   // The Iowa Research page: how many weeks back to search.
   iowa: {
     lookbackWeeks: 8,

@@ -8,8 +8,9 @@
      2. Papers each week                   (teal heat strip)
      3. Papers each month, and discussed   (teal stacked columns)
      4. People bringing papers each month  (purple columns)
-     5. Subfield distribution              (fixed 10-color palette)
-     6. Top keywords                       (purple gradient bars)
+     5. What we've been reading            (topic × month teal grid)
+     6. Subfield distribution              (fixed 10-color palette)
+     7. Top keywords                       (purple gradient bars)
 
    The page describes the club, never ranks its members: no chart
    is broken down by person.
@@ -22,6 +23,7 @@ import { CONFIG, COL, TITLE_STOP_WORDS } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 import { plainText } from './mathtext.js';
+import { paperTopics } from './topics.js';
 
 const DEFAULT_YEAR = new Date().getFullYear();
 
@@ -464,6 +466,84 @@ function _buildGrowthChart(year, growth, width = 640) {
   return section;
 }
 
+// ── Topics by month ───────────────────────────────────────────
+// A row per club topic (CONFIG.topics), a cell per month shaded
+// by how many papers were about it, and the year's total.
+
+/**
+ * Papers per club topic per month, for topics with any papers.
+ * @param {string[][]} papers - One year's rows (computeSubmissionStats().papers).
+ * @param {Map} metaMap - arXiv ID → INSPIRE metadata.
+ * @returns {{label: string, months: number[], total: number}[]} Most papers first.
+ */
+export function topicMonths(papers, metaMap) {
+  const rows = new Map();
+  papers.forEach((p) => {
+    const meta = metaMap.get(stripVersion(normalizeArxivId(p[COL.arxivId])));
+    if (!meta) return;
+    const month = new Date(p[COL.timestamp]).getMonth();
+    for (const label of paperTopics(meta)) {
+      if (!rows.has(label)) rows.set(label, { label, months: Array(12).fill(0), total: 0 });
+      const row = rows.get(label);
+      row.months[month]++;
+      row.total++;
+    }
+  });
+  const order = CONFIG.topics.map((t) => t.label);
+  return [...rows.values()].sort(
+    (a, b) => b.total - a.total || order.indexOf(a.label) - order.indexOf(b.label)
+  );
+}
+
+function _buildTopicGrid(year, rows) {
+  const section = _chartSection(`What we've been reading in ${year}`);
+  if (!rows.length) {
+    const p = document.createElement('p');
+    p.className = 'stat-empty';
+    p.textContent = 'No topics yet — papers may still be indexing on INSPIRE-HEP.';
+    section.appendChild(p);
+    return section;
+  }
+  const today = new Date();
+  const grid = document.createElement('div');
+  grid.className = 'topic-grid';
+
+  const head = (text, className = 'topic-grid-head') => {
+    const span = document.createElement('span');
+    span.className = className;
+    span.textContent = text;
+    grid.appendChild(span);
+  };
+  head('');
+  MONTHS.forEach((m) => head(m[0]));
+  head('');
+
+  for (const { label, months, total } of rows) {
+    head(label, 'topic-grid-label');
+    months.forEach((n, m) => {
+      const cell = document.createElement('span');
+      cell.className = 'heat-cell';
+      if (new Date(year, m, 1) > today) {
+        cell.classList.add('heat-cell--future');
+      } else {
+        cell.dataset.level = String(Math.min(n, 4));
+        cell.title = `${label} · ${MONTHS[m]} ${year}: ${_plural(n, 'paper')}`;
+        cell.setAttribute('role', 'img');
+        cell.setAttribute('aria-label', cell.title);
+      }
+      grid.appendChild(cell);
+    });
+    head(String(total), 'topic-grid-total');
+  }
+  section.appendChild(grid);
+
+  const note = document.createElement('p');
+  note.className = 'topic-grid-note';
+  note.textContent = 'A paper can be about up to three topics. Darker means more papers.';
+  section.appendChild(note);
+  return section;
+}
+
 // ── Club streak ───────────────────────────────────────────────
 
 function _buildStreak(weeks) {
@@ -676,6 +756,8 @@ async function renderStats(year, allRows) {
     const topCatEl = summaryEl.querySelector('.stat-kpi:last-child .stat-kpi-value');
     if (topCatEl) topCatEl.textContent = catRows[0].label;
   }
+
+  container.appendChild(_buildTopicGrid(year, topicMonths(papers, metaMap)));
 
   container.appendChild(
     _buildChart(

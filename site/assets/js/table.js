@@ -11,6 +11,7 @@
 import { COL } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
 import { setRichText } from './mathtext.js';
+import { paperTopics } from './topics.js';
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -46,7 +47,9 @@ export function buildTable(papers, metaMap = new Map(), { shortName = (n) => n }
     tdName.textContent = shortName((paper[COL.name] || '').trim()) || '—';
 
     // Attach filter data attributes
+    const topics = paperTopics(meta);
     tr.dataset.categories = (meta.categories ?? []).join(',');
+    tr.dataset.topics = topics.join(',');
     const discussed = (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
     tr.dataset.discussed = discussed ? 'true' : 'false';
 
@@ -63,7 +66,7 @@ export function buildTable(papers, metaMap = new Map(), { shortName = (n) => n }
     appendText(tdPaper, meta.authors, 'paper-comment');
     appendText(tdPaper, meta.abstract, 'paper-abstract', { math: true });
     tdPaper.appendChild(buildBadgeRow(paper[COL.arxivId], id, meta));
-    appendKeywordPills(tdPaper, meta);
+    appendKeywordPills(tdPaper, meta, topics);
 
     // Column 3 — Reason for suggestion
     // Prefer the edited comment (col G) when present; fall back to original.
@@ -134,20 +137,28 @@ export function buildPreviousNote(prev) {
 }
 
 /**
- * Appends category and keyword pills to `parent`, if there are any.
+ * Appends pills to `parent`: the INSPIRE subfields, then the club topics
+ * (paperTopics()), or INSPIRE's own keywords when no topic matched.
  * @param {HTMLElement} parent
  * @param {object} meta - Metadata from fetchPaperMetadata(), or {}.
+ * @param {string[]} [topics] - Topic labels for the paper.
  */
-export function appendKeywordPills(parent, meta) {
+export function appendKeywordPills(parent, meta, topics = []) {
   const cats = meta.categories ?? [];
-  const keywords = meta.keywords ?? [];
-  if (!cats.length && !keywords.length) return;
+  const keywords = topics.length ? [] : (meta.keywords ?? []);
+  if (!cats.length && !topics.length && !keywords.length) return;
   const container = document.createElement('div');
   container.className = 'keyword-pills';
   cats.forEach((label) => {
     const span = document.createElement('span');
     span.className = 'kpill kpill--cat';
     span.textContent = label;
+    container.appendChild(span);
+  });
+  topics.forEach((topic) => {
+    const span = document.createElement('span');
+    span.className = 'kpill kpill--topic kpill--club';
+    span.textContent = topic;
     container.appendChild(span);
   });
   keywords.forEach((kw) => {

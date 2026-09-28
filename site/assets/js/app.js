@@ -42,6 +42,12 @@ const _knownCategories = new Set();
 /** Whether the archive is filtered to discussed-only papers. */
 let _discussedOnly = false;
 
+/** Currently active topic chip (CONFIG.topics label), or null for 'All'. */
+let _activeTopic = null;
+
+/** True while any Archive filter is set. */
+const _filtering = (query) => Boolean(query || _activeCategory || _activeTopic || _discussedOnly);
+
 // ── Poll change detection ──────────────────────────────────────────
 
 let _lastThisWeekHash = ''; // used to skip re-renders when nothing changed
@@ -273,7 +279,10 @@ async function renderArchive(papers, container) {
     contentDiv.className = 'archive-week-content';
     details.appendChild(contentDiv);
 
+    let loaded = false;
     const loadWeek = () => {
+      if (loaded) return;
+      loaded = true;
       contentDiv.innerHTML = `<div class="loading">Fetching paper details from INSPIRE-HEP…</div>`;
       fetchPaperMetadata(weekPapers.map((p) => p[COL.arxivId])).then((metaMap) => {
         contentDiv.innerHTML = '';
@@ -284,24 +293,21 @@ async function renderArchive(papers, container) {
         const searchInput = document.getElementById('archive-search');
         const query = (searchInput?.value ?? '').trim().toLowerCase();
         const visible = _filterTable(table, query);
-        if ((query || _activeCategory || _discussedOnly) && visible === 0)
-          details.style.display = 'none';
+        if (_filtering(query) && visible === 0) details.style.display = 'none';
         contentDiv.appendChild(table);
       });
     };
 
+    // Filters load every week (_applyAllFilters), so they search the whole archive
+    details._loadWeek = loadWeek;
     if (idx === 0) {
       // Eagerly load the most-recent past week and open it by default
       details.open = true;
       loadWeek();
     } else {
       // Lazy-load on first open
-      let loaded = false;
       details.addEventListener('toggle', () => {
-        if (details.open && !loaded) {
-          loaded = true;
-          loadWeek();
-        }
+        if (details.open) loadWeek();
       });
     }
 
@@ -312,8 +318,8 @@ async function renderArchive(papers, container) {
 // ── Archive search ────────────────────────────────────────────
 
 /**
- * Hides/shows <tr> rows in a table based on a lower-cased query
- * and the active subfield category.
+ * Hides/shows <tr> rows in a table based on a lower-cased query,
+ * the active subfield category and topic, and "Discussed only".
  * Returns the count of visible rows.
  */
 function _filterTable(table, query) {
@@ -322,8 +328,9 @@ function _filterTable(table, query) {
     const textMatch = !query || tr.textContent.toLowerCase().includes(query);
     const catMatch =
       !_activeCategory || (tr.dataset.categories || '').split(',').includes(_activeCategory);
+    const topicMatch = !_activeTopic || (tr.dataset.topics || '').split(',').includes(_activeTopic);
     const discussedMatch = !_discussedOnly || tr.dataset.discussed === 'true';
-    const match = textMatch && catMatch && discussedMatch;
+    const match = textMatch && catMatch && topicMatch && discussedMatch;
     tr.style.display = match ? '' : 'none';
     if (match) visible++;
   });
@@ -349,22 +356,46 @@ function initArchiveSearch() {
       _applyAllFilters();
     });
   }
+  _renderTopicBar();
 }
 
 /**
- * Re-applies both the text search and the active category filter
- * to every currently loaded archive table.
+ * Re-applies every filter to every loaded archive table. While a filter
+ * is set, weeks not loaded yet start loading, and are filtered when they
+ * arrive, so the filter covers the whole archive.
  */
 function _applyAllFilters() {
   const searchInput = document.getElementById('archive-search');
   const query = (searchInput?.value ?? '').trim().toLowerCase();
   document.querySelectorAll('.archive-week').forEach((details) => {
     const table = details.querySelector('table');
-    if (!table) return; // not yet loaded — filtered on load
+    if (!table) {
+      if (_filtering(query)) details._loadWeek?.();
+      return;
+    }
     const visible = _filterTable(table, query);
-    details.style.display =
-      (query || _activeCategory || _discussedOnly) && visible === 0 ? 'none' : '';
+    details.style.display = _filtering(query) && visible === 0 ? 'none' : '';
   });
+}
+
+/** Renders the topic filter chips from CONFIG.topics. */
+function _renderTopicBar() {
+  const bar = document.getElementById('topic-filter-bar');
+  if (!bar) return;
+  bar.replaceChildren();
+  const chip = (label, topic) => {
+    const btn = document.createElement('button');
+    btn.className = 'sf-btn sf-btn--topic' + (_activeTopic === topic ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      _activeTopic = topic;
+      _applyAllFilters();
+      _renderTopicBar();
+    });
+    return btn;
+  };
+  bar.appendChild(chip('All topics', null));
+  CONFIG.topics.forEach((t) => bar.appendChild(chip(t.label, t.label)));
 }
 
 /**
