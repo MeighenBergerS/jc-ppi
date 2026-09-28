@@ -29,17 +29,48 @@ import {
 // reached at each of its tiers. They repeat over the years, so a
 // grad student keeps reaching new ones.
 export const MILESTONES = [
-  { id: 'papers', emoji: '📚', name: 'papers suggested', tiers: [10, 25, 50, 100, 200] },
-  { id: 'discussed', emoji: '🗣️', name: 'papers discussed', tiers: [5, 10, 25, 50, 100] },
-  { id: 'streak', emoji: '🔥', name: 'weeks in a row with a paper', tiers: [4, 8, 12, 26, 52] },
-  { id: 'subfields', emoji: '🧭', name: 'subfields covered', tiers: [2, 4, 6, 8] },
+  {
+    id: 'papers',
+    emoji: '📚',
+    unit: 'paper',
+    goal: (t) => `${t} papers suggested`,
+    tiers: [10, 25, 50, 100, 200],
+  },
+  {
+    id: 'discussed',
+    emoji: '🗣️',
+    unit: 'paper',
+    goal: (t) => `${t} papers discussed`,
+    tiers: [5, 10, 25, 50, 100],
+  },
+  {
+    id: 'streak',
+    emoji: '🔥',
+    unit: 'week',
+    goal: (t) => `${t}-week streak`,
+    tiers: [4, 8, 12, 26, 52],
+  },
+  {
+    id: 'subfields',
+    emoji: '🧭',
+    unit: 'subfield',
+    goal: (t) => `${t} subfields covered`,
+    tiers: [2, 4, 6, 8],
+  },
   {
     id: 'fresh',
     emoji: '⚡',
-    name: 'papers suggested the month they hit arXiv',
+    unit: 'paper',
+    goal: (t) => `${t} papers suggested the month they hit arXiv`,
     tiers: [5, 20, 50, 100],
   },
-  { id: 'votes', emoji: '👍', name: 'votes on your papers', tiers: [10, 50, 100, 250, 500] },
+  {
+    id: 'votes',
+    emoji: '👍',
+    unit: 'vote',
+    goal: (t) => `${t} votes on your papers`,
+    tiers: [10, 50, 100, 250, 500],
+  },
 ];
 
 const labelSet = (issue) => new Set(issue.labels.map((l) => (typeof l === 'string' ? l : l.name)));
@@ -181,7 +212,8 @@ function _lastWeekOf(key) {
  * @returns {{
  *   month, papers: object[], suggested, discussed, votes, subfields: string[],
  *   streak: {current, best}, previous: {suggested, discussed},
- *   total: number, reached: {emoji, name, tier}[], next: {emoji, name, tier, toGo}[]
+ *   total: number, reached: {emoji, label, tier}[],
+ *   next: {emoji, label, unit, tier, count, toGo}[]
  * }}
  */
 export function buildRoundup(papers, month, meta = new Map()) {
@@ -197,11 +229,18 @@ export function buildRoundup(papers, month, meta = new Map()) {
   for (const m of MILESTONES) {
     const tier = tierReached(m, countsNow[m.id]);
     if (tier > tierReached(m, countsBefore[m.id])) {
-      reached.push({ emoji: m.emoji, name: m.name, tier });
+      reached.push({ emoji: m.emoji, label: m.goal(tier), tier });
     }
     const upcoming = m.tiers.find((t) => t > countsNow[m.id]);
     if (upcoming)
-      next.push({ emoji: m.emoji, name: m.name, tier: upcoming, toGo: upcoming - countsNow[m.id] });
+      next.push({
+        emoji: m.emoji,
+        label: m.goal(upcoming),
+        unit: m.unit,
+        tier: upcoming,
+        count: countsNow[m.id],
+        toGo: upcoming - countsNow[m.id],
+      });
   }
   next.sort((a, b) => a.toGo - b.toGo);
 
@@ -227,67 +266,109 @@ export function buildRoundup(papers, month, meta = new Map()) {
 }
 
 const _plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
+const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+
+/** "September". */
+export const monthName = (key) => monthLabel(key).split(' ')[0];
+
+/** The month's scorecard: [[4, 'papers suggested'], [1, 'discussed'], [2, 'votes']]. */
+export function scorecard(r) {
+  return [
+    [r.suggested, r.suggested === 1 ? 'paper suggested' : 'papers suggested'],
+    [r.discussed, 'discussed'],
+    [r.votes, r.votes === 1 ? 'vote' : 'votes'],
+  ];
+}
+
+/** "1 more to go", "3 more weeks to go". */
+export function toGoText(m) {
+  return m.unit === 'week' ? `${_plural(m.toGo, 'more week')} to go` : `${m.toGo} more to go`;
+}
+
+/** "Two milestones down. Two more within reach…", or '' with nothing reached. */
+export function unlockedNote(r) {
+  if (!r.reached.length) return '';
+  const word = (n) => NUMBER_WORDS[n] ?? String(n);
+  const down = `${word(r.reached.length)} milestone${r.reached.length !== 1 ? 's' : ''} down.`;
+  return r.next.length ? `${down} ${word(r.next.length)} more within reach…` : down;
+}
+
+/** The personal stats: [[value, unit, label]]. */
+export function personalStats(r) {
+  return [
+    [r.streak.current, r.streak.current === 1 ? 'week' : 'weeks', 'Current streak'],
+    [r.total, r.total === 1 ? 'paper' : 'papers', 'Suggested all time'],
+    [
+      r.previous.suggested,
+      r.previous.suggested === 1 ? 'paper' : 'papers',
+      `Suggested in ${monthName(previousMonth(r.month))}`,
+    ],
+  ];
+}
 
 /**
- * The roundup as a plain-text email: { subject, text }.
+ * The roundup as a plain-text email: { subject, text }. renderRoundupHtml()
+ * in roundup-html.js writes the same content as HTML.
  * @param {object} r - From buildRoundup().
  * @param {Map} meta - arXiv ID → INSPIRE metadata, for titles.
  */
 export function renderRoundup(r, meta = new Map()) {
-  const label = monthLabel(r.month);
-  const lines = [`Your ${label} at the ${CONFIG.clubName}`, ''];
+  const month = monthName(r.month);
+  const lines = [
+    `📚 Your ${month} at ${CONFIG.shortName}`,
+    'A little monthly recap of your journal-club activity',
+    '',
+  ];
 
   if (r.suggested) {
     lines.push(
-      `You suggested ${_plural(r.suggested, 'paper')}` +
-        (r.discussed
-          ? `, and ${r.discussed} ${r.discussed === 1 ? 'was' : 'were'} discussed.`
-          : '.')
+      scorecard(r)
+        .map(([n, label]) => `${n} ${label}`)
+        .join(' · '),
+      ''
     );
-    lines.push('');
+    lines.push('📄 YOUR PAPERS', '');
     for (const p of r.papers) {
       const title = meta.get(p.arxivId)?.title;
-      const mark = p.discussed ? '✓' : '·';
-      lines.push(`  ${mark} ${p.arxivId ?? '(no arXiv ID)'}${title ? ` — ${title}` : ''}`);
-      lines.push(`    ${p.url}`);
+      lines.push(`${p.discussed ? '⭐' : '📄'} ${p.arxivId ?? '(no arXiv ID)'}`);
+      if (title) lines.push(`   ${title}`);
+      lines.push(`   ${p.discussed ? 'Discussed' : 'Suggested'} · View discussion: ${p.url}`, '');
     }
-    lines.push('');
-    if (r.votes) lines.push(`Your papers got ${_plural(r.votes, 'vote')}.`);
-    if (r.subfields.length) lines.push(`Subfields: ${r.subfields.join(', ')}.`);
+    if (r.subfields.length) {
+      lines.push(`YOUR ${month.toUpperCase()} MIX`, r.subfields.join(' · '), '');
+    }
   } else {
-    lines.push("You didn't suggest a paper this month. There's always next week!");
-    lines.push('');
+    lines.push("No papers this month. There's always next week!", '');
   }
-
-  const prev = r.previous.suggested;
-  if (prev || r.suggested) {
-    lines.push(
-      `Last month: ${_plural(prev, 'paper')} suggested, ${r.previous.discussed} discussed.`
-    );
-  }
-  if (r.streak.current > 1) {
-    lines.push(`Current streak: ${r.streak.current} weeks in a row with a paper.`);
-  }
-  lines.push(`All time: ${_plural(r.total, 'paper')} suggested.`);
 
   if (r.reached.length) {
-    lines.push('', 'Milestones reached this month:');
-    for (const m of r.reached) lines.push(`  ${m.emoji} ${m.tier} ${m.name}`);
+    lines.push('🏆 THIS MONTH YOU UNLOCKED', '');
+    for (const m of r.reached) lines.push(`${m.emoji} ${m.label}`);
+    lines.push('', unlockedNote(r), '');
   }
+
+  lines.push('🔥 YOUR JOURNAL-CLUB STATS', '');
+  for (const [value, unit, label] of personalStats(r)) {
+    lines.push(`${`${value} ${unit}`.padEnd(11)} ${label[0].toLowerCase()}${label.slice(1)}`);
+  }
+  lines.push('');
+
   if (r.next.length) {
-    lines.push('', 'Coming up:');
-    for (const m of r.next) lines.push(`  ${m.emoji} ${m.tier} ${m.name} (${m.toGo} to go)`);
+    lines.push('🎯 ALMOST THERE…', '');
+    for (const m of r.next) lines.push(`${m.emoji} ${m.label} — ${toGoText(m)}`);
+    lines.push('');
   }
 
   lines.push(
+    `Seen something worth discussing? Suggest a paper: ${CONFIG.formUrl}`,
     '',
     '—',
-    'Only you get this email; nobody else sees your numbers.',
-    'To stop getting it, reply and say so.'
+    'Your journal-club activity is private — only you receive these numbers.',
+    'Want to stop receiving this email? Just reply and let us know.'
   );
   if (CONFIG.siteUrl) lines.push(CONFIG.siteUrl);
 
-  return { subject: `Your ${label} at journal club`, text: lines.join('\n') + '\n' };
+  return { subject: `📚 Your ${month} at ${CONFIG.shortName}`, text: lines.join('\n') + '\n' };
 }
 
 /**

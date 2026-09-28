@@ -158,17 +158,18 @@ npm test
 
 Test files live in `tests/`:
 
-| File               | Covers                                                                                        |
-| ------------------ | --------------------------------------------------------------------------------------------- |
-| `utils.test.js`    | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
-| `data.test.js`     | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`                                    |
-| `inspire.test.js`  | `parseHit`                                                                                    |
-| `papers.test.js`   | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows       |
-| `slack.test.js`    | The Slack reminder: this week's papers, schedule, message                                     |
-| `trending.test.js` | Trending papers, the Trending issue, and keeping it out of the submissions                    |
-| `roundup.test.js`  | The personal monthly roundup: a member's papers, streaks, milestones, the email text          |
-| `smtp.test.js`     | The SMTP client that sends the roundups, against a fake server                                |
-| `runner.html`      | Browser-side DOM tests for `buildTable`                                                       |
+| File                   | Covers                                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `utils.test.js`        | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
+| `data.test.js`         | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`                                    |
+| `inspire.test.js`      | `parseHit`                                                                                    |
+| `papers.test.js`       | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows       |
+| `slack.test.js`        | The Slack reminder: this week's papers, schedule, message                                     |
+| `trending.test.js`     | Trending papers, the Trending issue, and keeping it out of the submissions                    |
+| `roundup.test.js`      | The personal monthly roundup: a member's papers, streaks, milestones, the email text          |
+| `roundup-html.test.js` | The HTML roundup email: escaping, papers, milestones, an empty month                          |
+| `smtp.test.js`         | The SMTP client that sends the roundups, against a fake server                                |
+| `runner.html`          | Browser-side DOM tests for `buildTable`                                                       |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)
 runs `npm test` automatically before every commit, so the suite must be green

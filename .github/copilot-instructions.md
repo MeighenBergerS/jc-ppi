@@ -40,6 +40,7 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 | `scripts/papers/slack.js`           | The weekly Slack reminder message                                              |
 | `scripts/papers/slack-reminder.js`  | Posts it (`slack-reminder.yml`)                                                |
 | `scripts/papers/roundup.js`         | A member's private monthly roundup: papers, streak, milestones, email text     |
+| `scripts/papers/roundup-html.js`    | The roundup as an HTML email (tables, inline styles; escapes INSPIRE text)     |
 | `scripts/papers/roundup-preview.js` | Prints one member's roundup (`npm run roundup`)                                |
 | `scripts/papers/roundup-email.js`   | Emails the roundups from the club Gmail (`roundup.yml`); logs counts only      |
 | `scripts/papers/smtp.js`            | Minimal SMTP client (Gmail, TLS) for the roundup emails                        |

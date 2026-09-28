@@ -94,11 +94,14 @@ only counts, never names, addresses or roundups.
 To see a member's roundup without sending anything:
 
 ```sh
-npm run roundup -- <github-login> [YYYY-MM] [--name "Name in the Google Sheet"]
+npm run roundup -- <github-login> [YYYY-MM] [--name "Name in the Google Sheet"] [--html roundup.html]
 ```
 
 The month defaults to last month. `--name` counts the member's papers from the Google Sheet era,
 which are matched by the name typed into the Sheet; repeat it for each spelling they used.
+`--html` also writes the HTML email to a file, to open in a browser. The email carries both: the
+HTML (`scripts/papers/roundup-html.js`) and the plain text, for mail programs that don't show
+HTML.
 
 ## History from the Google Sheet
 

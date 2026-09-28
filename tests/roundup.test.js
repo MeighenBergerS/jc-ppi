@@ -6,6 +6,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
+import { CONFIG } from '../site/assets/js/config.js';
 import { FIELDS, LABELS, importedMarker } from '../scripts/papers/lib.js';
 import {
   MILESTONES,
@@ -21,6 +22,9 @@ import {
   renderRoundup,
   roundupLogins,
   parseOptOut,
+  scorecard,
+  toGoText,
+  unlockedNote,
 } from '../scripts/papers/roundup.js';
 
 const body = (arxiv, name) =>
@@ -256,6 +260,7 @@ describe('buildRoundup', () => {
     const r = buildRoundup(papers, '2026-09');
     assert.equal(r.next.length, 2);
     assert.ok(r.next[0].toGo <= r.next[1].toGo);
+    for (const m of r.next) assert.equal(m.count + m.toGo, m.tier);
   });
 
   it('works for a month without papers', () => {
@@ -275,30 +280,83 @@ describe('renderRoundup', () => {
   ];
   const meta = new Map([['2609.00001', { title: 'A neutrino paper', categories: ['Pheno'] }]]);
 
-  it('names the month in the subject', () => {
-    const { subject } = renderRoundup(buildRoundup(papers, '2026-09', meta), meta);
-    assert.equal(subject, 'Your September 2026 at journal club');
+  const render = (month) => renderRoundup(buildRoundup(papers, month, meta), meta);
+
+  it('names the month and the club in the subject', () => {
+    assert.equal(render('2026-09').subject, `📚 Your September at ${CONFIG.shortName}`);
   });
 
-  it('lists the papers with titles and marks the discussed ones', () => {
-    const { text } = renderRoundup(buildRoundup(papers, '2026-09', meta), meta);
-    assert.match(text, /You suggested 2 papers, and 1 was discussed\./);
-    assert.match(text, /✓ 2609\.00001 — A neutrino paper/);
-    assert.match(text, /· 2609\.00002\n/);
-    assert.match(text, /Your papers got 3 votes\./);
-    assert.match(text, /Subfields: Pheno\./);
+  it('opens with the scorecard', () => {
+    assert.match(render('2026-09').text, /\n2 papers suggested · 1 discussed · 3 votes\n/);
+  });
+
+  it('lists the papers with titles, marking the discussed ones', () => {
+    const { text } = render('2026-09');
+    assert.match(
+      text,
+      /⭐ 2609\.00001\n {3}A neutrino paper\n {3}Discussed · View discussion: https:/
+    );
+    assert.match(text, /📄 2609\.00002\n {3}Suggested · View discussion: https:/);
+    assert.match(text, /YOUR SEPTEMBER MIX\nPheno\n/);
+  });
+
+  it('shows the personal stats, comparing with last month', () => {
+    const { text } = render('2026-10');
+    assert.match(text, /2 papers +suggested all time/);
+    assert.match(text, /2 papers +suggested in September/);
   });
 
   it('never mentions other members and says how to stop', () => {
-    const { text } = renderRoundup(buildRoundup(papers, '2026-09', meta), meta);
-    assert.match(text, /Only you get this email/);
-    assert.match(text, /To stop getting it/);
+    const { text } = render('2026-09');
+    assert.match(text, /only you receive these numbers/);
+    assert.match(text, /Want to stop receiving this email\?/);
   });
 
   it('is kind about an empty month', () => {
-    const { text } = renderRoundup(buildRoundup(papers, '2026-10', meta), meta);
-    assert.match(text, /didn't suggest a paper this month/);
-    assert.match(text, /Last month: 2 papers suggested, 1 discussed\./);
+    const { text } = render('2026-10');
+    assert.match(text, /No papers this month\. There's always next week!/);
+    assert.doesNotMatch(text, /YOUR PAPERS/);
+  });
+});
+
+describe('roundup wording', () => {
+  const r = (over) => ({
+    suggested: 1,
+    discussed: 0,
+    votes: 1,
+    reached: [],
+    next: [],
+    ...over,
+  });
+
+  it('scorecard uses singular labels for one', () => {
+    assert.deepEqual(scorecard(r()), [
+      [1, 'paper suggested'],
+      [0, 'discussed'],
+      [1, 'vote'],
+    ]);
+  });
+
+  it('toGoText counts weeks for streaks', () => {
+    assert.equal(toGoText({ unit: 'paper', toGo: 1 }), '1 more to go');
+    assert.equal(toGoText({ unit: 'week', toGo: 1 }), '1 more week to go');
+    assert.equal(toGoText({ unit: 'week', toGo: 3 }), '3 more weeks to go');
+  });
+
+  it('unlockedNote counts milestones in words', () => {
+    assert.equal(unlockedNote(r()), '');
+    assert.equal(unlockedNote(r({ reached: [{}], next: [] })), 'One milestone down.');
+    assert.equal(
+      unlockedNote(r({ reached: [{}, {}], next: [{}, {}] })),
+      'Two milestones down. Two more within reach…'
+    );
+  });
+
+  it('every milestone has a unit and a goal', () => {
+    for (const m of MILESTONES) {
+      assert.ok(['paper', 'week', 'subfield', 'vote'].includes(m.unit), m.id);
+      assert.match(m.goal(m.tiers[0]), new RegExp(`^${m.tiers[0]}`), m.id);
+    }
   });
 });
 
