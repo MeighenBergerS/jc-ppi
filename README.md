@@ -127,7 +127,9 @@ scripts/papers/
   build-csv.js                 ← Builds site/data/ from the issues
   trending-issue.js            ← Opens the Trending issue
   slack-reminder.js            ← Posts the weekly Slack reminder
-  lib.js, trending.js, slack.js← Shared helpers
+  roundup-preview.js           ← Prints a member's monthly roundup
+  lib.js, trending.js, slack.js,
+  roundup.js                   ← Shared helpers
 .github/
   ISSUE_TEMPLATE/              ← Suggest a paper, bug report, feature request, documentation
   workflows/                   ← papers, deploy, trending, Slack reminder, keep-alive, labels, checks

@@ -166,6 +166,7 @@ Test files live in `tests/`:
 | `papers.test.js`   | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows       |
 | `slack.test.js`    | The Slack reminder: this week's papers, schedule, message                                     |
 | `trending.test.js` | Trending papers, the Trending issue, and keeping it out of the submissions                    |
+| `roundup.test.js`  | The personal monthly roundup: a member's papers, streaks, milestones, the email text          |
 | `runner.html`      | Browser-side DOM tests for `buildTable`                                                       |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)

@@ -45,7 +45,8 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 ## Papers as issues
 
 `docs/MAINTAINING.md` describes the bot, labels and workflows. The code is in `scripts/papers/`,
-with tests in `tests/papers.test.js`, `tests/trending.test.js` and `tests/slack.test.js`. Field
+with tests in `tests/papers.test.js`, `tests/trending.test.js`, `tests/slack.test.js` and
+`tests/roundup.test.js`. Field
 labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in `scripts/papers/lib.js` must match.
 Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
 Google Sheet history; keep `parseImported()` and the Sheet timestamp handling working for them.
