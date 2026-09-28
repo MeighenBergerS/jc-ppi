@@ -17,6 +17,8 @@ npm install        # first time only; wires up the pre-commit hook
 npm test           # node:test suite, no dependencies
 npm run dev        # local site on http://localhost:3000 against fixture data
 npm run refresh    # fetch fresh INSPIRE papers into *.fresh.* fixtures, then serve
+pip install -r docs/requirements.txt && mkdocs serve   # docs site on http://127.0.0.1:8000/jc-ppi/docs/
+mkdocs build --strict                                  # what CI checks for the docs
 prettier --check "site/**/*.{html,css,js}" "scripts/**/*.js" "tests/**/*.{js,html}" "**/*.md"   # what CI lints
 ```
 
@@ -26,10 +28,15 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 ## Deploying
 
 - `deploy-pages.yml` builds `site/data/papers.csv` and `trending.csv` from the issues
-  (`scripts/papers/build-csv.js`), then deploys `site/` to GitHub Pages. It runs on pushes to
-  `main` that touch `site/` or `scripts/papers/`, on paper-issue changes, and hourly (for 👍
-  votes). If the data build fails, nothing deploys. `site/data/` is not committed; locally, use
-  `npm run dev`, which serves the fixtures there.
+  (`scripts/papers/build-csv.js`) and the docs site from `docs/` into `site/docs/` (MkDocs,
+  `mkdocs.yml`), then deploys `site/` to GitHub Pages. It runs on pushes to
+  `main` that touch `site/`, `scripts/papers/` or the docs, on paper-issue changes, and hourly
+  (for 👍 votes). If the data or docs build fails, nothing deploys. `site/data/` and `site/docs/`
+  are not committed; locally, `npm run dev` serves the fixtures as `site/data/`, and serves
+  `site/docs/` once `mkdocs build` has run.
+- The docs pages in `docs/` are both the docs site and Markdown read on GitHub. Keep lists free of
+  indented blocks (tables, code): Prettier indents them by 3 spaces, and MkDocs' Markdown needs 4,
+  so they fall out of the list.
 - Workflow actions taken with the workflow token don't start other workflows; `trending.yml`
   dispatches the deploy explicitly for that reason.
 - Pages serves with `Cache-Control: max-age=600`. After a deploy, the old page can show for up to

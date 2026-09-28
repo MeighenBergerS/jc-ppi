@@ -29,3 +29,6 @@ tests/fixtures/*.fresh.*
 
 # ── Site data (built from the issues by deploy-pages.yml) ──
 site/data/
+
+# ── Docs site (built from docs/ by mkdocs, deployed with the site) ──
+site/docs/

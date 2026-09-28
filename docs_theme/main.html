@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{#
+The readthedocs theme swaps the site name out for the logo. Keep both: the
+logo above, the name under it, so the sidebar still says what the site is.
+#}
+{% block site_name %}
+  <a href="{{ nav.homepage.url|url }}">
+    <img src="{{ config.theme.logo|url }}" class="logo" alt="{% trans %}Logo{% endtrans %}"/>
+    <span class="site-name">{{ config.site_name }}</span>
+  </a>
+{% endblock %}

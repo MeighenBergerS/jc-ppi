@@ -110,6 +110,7 @@ site/                          ← everything GitHub Pages serves
   iowa.html                    ← Recent papers with University of Iowa authors
   resources.html               ← arXiv & INSPIRE-HEP guide for members
   data/                        ← papers.csv and trending.csv, built at deploy (not committed)
+  docs/                        ← The documentation site, built from docs/ at deploy (not committed)
   assets/
     css/style.css              ← All styling
     js/
@@ -133,11 +134,15 @@ scripts/papers/
   labels.yml                   ← The repository's labels
   paper-members.txt            ← Members whose papers are approved automatically
   paper-maintainers.txt        ← Maintainers, told about papers waiting for approval
-docs/
-  SETUP.md                     ← Deploying your own instance
-  MAINTAINING.md               ← Running the journal club, and how each piece works
-  CONTRIBUTING.md              ← Suggesting a paper; contributing code; test guide
+docs/                          ← The documentation site's pages (MkDocs, see mkdocs.yml)
+  index.md                     ← Documentation home
+  members.md                   ← Suggesting and voting
   ARXIV-GUIDE.md               ← Guide to arXiv and INSPIRE-HEP for members
+  MAINTAINING.md               ← Running the journal club, and how each piece works
+  SETUP.md                     ← Deploying your own instance
+  CONTRIBUTING.md              ← Contributing code; docs site; test guide
+docs_theme/                    ← MkDocs theme override (logo and site name)
+mkdocs.yml                     ← Documentation site configuration
 tests/                         ← node:test suites, fixtures and the local dev server
 ```
 
@@ -151,10 +156,14 @@ This site was developed with the help of Claude, Anthropic's AI assistant, used 
 
 ## Documentation
 
-| Document                                     | Contents                                                     |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| [docs/MAINTAINING.md](docs/MAINTAINING.md)   | Submitting, voting, approving; how the bot and workflows run |
-| [docs/SETUP.md](docs/SETUP.md)               | Deploying your own instance                                  |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Suggesting a paper; contributing code; test guide            |
-| [docs/ARXIV-GUIDE.md](docs/ARXIV-GUIDE.md)   | Member guide to arXiv IDs and INSPIRE-HEP                    |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)     | Contributor Covenant                                         |
+The documentation site is at <https://meighenbergers.github.io/jc-ppi/docs/> (the
+**Documentation** tab on the site), built from these files:
+
+| Document                                     | Contents                                            |
+| -------------------------------------------- | --------------------------------------------------- |
+| [docs/members.md](docs/members.md)           | Suggesting a paper, voting, editing and withdrawing |
+| [docs/ARXIV-GUIDE.md](docs/ARXIV-GUIDE.md)   | Member guide to arXiv IDs and INSPIRE-HEP           |
+| [docs/MAINTAINING.md](docs/MAINTAINING.md)   | Approving, settings; how the bot and workflows run  |
+| [docs/SETUP.md](docs/SETUP.md)               | Deploying your own instance                         |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Contributing code; the docs site; test guide        |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)     | Contributor Covenant                                |

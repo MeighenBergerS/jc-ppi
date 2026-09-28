@@ -14,17 +14,17 @@ first, often months before the journal version.
 
 ### Finding a paper
 
-- **Search** at [arxiv.org](https://arxiv.org) by title, author, or keyword.
-- The most relevant categories for this journal club are:
+**Search** at [arxiv.org](https://arxiv.org) by title, author, or keyword. The most relevant
+categories for this journal club are:
 
-  | Category      | Description                         |
-  | ------------- | ----------------------------------- |
-  | `hep-ph`      | High Energy Physics – Phenomenology |
-  | `hep-ex`      | High Energy Physics – Experiment    |
-  | `hep-th`      | High Energy Physics – Theory        |
-  | `nucl-th`     | Nuclear Theory                      |
-  | `nucl-ex`     | Nuclear Experiment                  |
-  | `astro-ph.HE` | High Energy Astrophysical Phenomena |
+| Category      | Description                         |
+| ------------- | ----------------------------------- |
+| `hep-ph`      | High Energy Physics – Phenomenology |
+| `hep-ex`      | High Energy Physics – Experiment    |
+| `hep-th`      | High Energy Physics – Theory        |
+| `nucl-th`     | Nuclear Theory                      |
+| `nucl-ex`     | Nuclear Experiment                  |
+| `astro-ph.HE` | High Energy Astrophysical Phenomena |
 
 ### The arXiv ID
 

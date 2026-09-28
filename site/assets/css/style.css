@@ -112,6 +112,17 @@ nav a.active {
   color: var(--accent);
 }
 
+/* Six tabs don't fit on a phone: let them wrap. */
+@media (max-width: 600px) {
+  nav {
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    padding: 0.45rem 0.7rem;
+  }
+}
+
 /* ── Main ────────────────────────────────────────────────── */
 
 main {
