@@ -13,10 +13,10 @@ what was actually done), and related issues.
 
 PR3. Review your own diff first. CI (Tests, Lint) is green, and no unrelated changes ride along.
 
-PR4. A PR that changes `docs/appscript.gs` says in its summary what must be done in the live Apps
-Script after merging (`appscript-changes`).
+PR4. A PR that changes the paper form, `.github/labels.yml` or a workflow says in its summary what
+maintainers must do after merging, if anything (e.g. rerun the Papers workflow with scope `all`).
 
 PR5. No AI attribution in the title, the body or the commits (`workflow-ai-disclosure`).
 
-PR6. Open, push or merge only when the user asks. Merging to `main` deploys the site when `site/`
-changed.
+PR6. Open, push or merge only when the user asks. Merging to `main` deploys the site when `site/` or
+`scripts/papers/` changed.

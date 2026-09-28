@@ -25,38 +25,38 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 
 ## Deploying
 
-- Pushing to `main` deploys `site/` to GitHub Pages when files under `site/` or `scripts/papers/`
-  change (`deploy-pages.yml`). It also redeploys on paper-issue changes and hourly, to refresh the
-  issues preview. Changes to `docs/`, tests or the README alone do not redeploy.
+- `deploy-pages.yml` builds `site/data/papers.csv` and `trending.csv` from the issues
+  (`scripts/papers/build-csv.js`), then deploys `site/` to GitHub Pages. It runs on pushes to
+  `main` that touch `site/` or `scripts/papers/`, on paper-issue changes, and hourly (for 👍
+  votes). If the data build fails, nothing deploys. `site/data/` is not committed; locally, use
+  `npm run dev`, which serves the fixtures there.
+- Workflow actions taken with the workflow token don't start other workflows; `trending.yml`
+  dispatches the deploy explicitly for that reason.
 - Pages serves with `Cache-Control: max-age=600`. After a deploy, the old page can show for up to
   ten minutes; check the live file with `curl` before assuming a deploy failed.
-- `docs/appscript.gs` is a reference copy. The live Apps Script runs inside the Google Sheet and
-  changes only when someone pastes the code in and redeploys. Load the `appscript-changes` skill
-  before editing that file.
 
-## GitHub issues trial
+## Papers as issues
 
-Paper submissions are on trial as GitHub issues, next to the Google Form (`docs/ISSUES-PREVIEW.md`).
-The bot and the preview data builder live in `scripts/papers/`, with tests in
-`tests/papers.test.js`. Field labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in
-`scripts/papers/lib.js` must match. Labels are defined in `.github/labels.yml`, never on GitHub.
-Any page opened with `?source=issues` reads the issues instead of the Sheet.
+`docs/MAINTAINING.md` describes the bot, labels and workflows. The code is in `scripts/papers/`,
+with tests in `tests/papers.test.js`, `tests/trending.test.js` and `tests/slack.test.js`. Field
+labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in `scripts/papers/lib.js` must match.
+Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
+Google Sheet history; keep `parseImported()` and the Sheet timestamp handling working for them.
 
 ## Settings that live in more than one place
 
 - **Meeting day and time:** `site/index.html` (static fallback text in `#meeting-when`),
   `site/assets/js/config.js` (`meeting.time`, plus `icsAnchor` and `icsDurationEnd`, which encode
-  the start and end in local time), the fallback defaults in `_downloadCalendar` in
-  `site/assets/js/app.js`, the example in `docs/SETUP.md`, and `MEETING_TIME` in
-  `docs/appscript.gs` (the Apps Script's Slack reminder text; the GitHub Actions reminder reads `config.js`). Change all of them together, and remind the user to
-  update the live Apps Script.
-- **Trending lookback and schedule:** `INSPIRE_LOOKBACK_WEEKS` and the trigger days are set in the
-  Apps Script; `site/assets/js/trending.js` repeats them in its display text.
+  the start and end in local time) and the fallback defaults in `_downloadCalendar` in
+  `site/assets/js/app.js`. Change them together. The Slack reminder reads `config.js`.
+- **Trending lookback and schedule:** `TRENDING_LOOKBACK_WEEKS` in `scripts/papers/trending.js`
+  and the cron in `.github/workflows/trending.yml`; `site/assets/js/trending.js` repeats both in
+  its display text.
 
 ## Conventions
 
 - Commits and PRs follow the `workflow-commits` and `workflow-pull-requests` skills.
 - Claude is never an author, co-author or signer of a commit or PR (`workflow-ai-disclosure`).
   `attribution` in `.claude/settings.json` is empty so the harness adds nothing.
-- Treat every string from the Google Sheet or INSPIRE as untrusted. Insert it with `textContent` or
-  DOM building, never `innerHTML`.
+- Treat every string from issues or INSPIRE as untrusted. On the site, insert it with
+  `textContent` or DOM building, never `innerHTML`; in bot comments, pass it through `safeText()`.

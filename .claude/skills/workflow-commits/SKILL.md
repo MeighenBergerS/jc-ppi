@@ -24,6 +24,3 @@ commit. Never amend or rewrite published history.
 C6. The pre-commit hook runs Prettier and `npm test`. If it fails, fix the cause and make a new
 commit; never bypass it with `--no-verify`. The hook re-stages formatted files, so review
 `git show --stat HEAD` after committing.
-
-C7. A commit that changes `docs/appscript.gs` says in its body whether the live Apps Script must be
-updated (`appscript-changes`).
