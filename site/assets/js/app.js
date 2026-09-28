@@ -142,8 +142,8 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     container.innerHTML = `
       <div class="empty-state">
         <p>📭</p>
-        <p>No papers submitted yet this week.</p>
-        <p style="margin-top:.5rem;font-size:.85rem;">Be the first — submit one using the button below!</p>
+        <p>Nothing on the table yet this week.</p>
+        <p style="margin-top:.5rem;font-size:.85rem;">Be the first to bring something!</p>
       </div>`;
   } else {
     container.innerHTML = `<div class="loading">Fetching paper details from INSPIRE-HEP…</div>`;
@@ -210,9 +210,6 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
       container.appendChild(bibBtn);
     }
   }
-
-  const cta = document.getElementById('submit-cta');
-  if (cta) cta.style.display = '';
 }
 
 // ── Archive ───────────────────────────────────────────────────
@@ -428,8 +425,8 @@ function _downloadCalendar() {
 // ── Entry point ───────────────────────────────────────────────
 
 async function init() {
-  // Point every "Submit a Paper" link at the paper issue form
-  document.querySelectorAll('#submit-link, #submit-cta-link').forEach((el) => {
+  // Point every "Bring a paper" link at the paper issue form
+  document.querySelectorAll('#submit-link, #invite-link').forEach((el) => {
     el.href = CONFIG.formUrl;
   });
 

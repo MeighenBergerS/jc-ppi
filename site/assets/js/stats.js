@@ -479,7 +479,7 @@ async function renderStats(year, allRows) {
 // ── Entry point ───────────────────────────────────────────────
 
 async function init() {
-  // Point the "Submit a Paper" link at the paper issue form
+  // Point the "Bring a paper" link at the paper issue form
   document.querySelectorAll('#submit-link').forEach((el) => {
     el.href = CONFIG.formUrl;
   });

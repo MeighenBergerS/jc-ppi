@@ -46,24 +46,13 @@
 
     <main>
       <div class="submit-top">
-        <a href="#" id="submit-link" target="_blank" rel="noopener" class="btn">Submit a Paper ↗</a>
+        <a href="#" id="submit-link" target="_blank" rel="noopener" class="btn">Bring a paper ↗</a>
       </div>
 
       <section class="week-header">
         <h2>Papers for Discussion</h2>
         <p class="week-label" id="week-label">Loading…</p>
       </section>
-
-      <div id="papers-container">
-        <div class="loading">Fetching this week's papers…</div>
-      </div>
-
-      <div class="submit-cta" id="submit-cta" style="display: none">
-        <p>Have a paper you'd like to discuss?</p>
-        <a href="#" id="submit-cta-link" target="_blank" rel="noopener" class="btn"
-          >Submit a Paper ↗</a
-        >
-      </div>
 
       <div class="meeting-info">
         <div class="meeting-info-row">
@@ -83,28 +72,48 @@
         <div class="meeting-info-row" style="margin-top: 0.3rem">
           <button id="cal-export" class="cal-btn">&#128197; Add to Calendar</button>
         </div>
-        <div class="meeting-info-guides">
-          <strong>How to submit a paper</strong>
-          <ul>
-            <li>
-              Click <em>Submit a Paper ↗</em> above and paste an arXiv ID
-              (e.g. <code>2301.12345</code>) or the full abstract URL.
-            </li>
-            <li>
-              Add a short note on why you find it interesting &mdash; it helps everyone prepare.
-            </li>
-            <li>
-              You don&rsquo;t need to present &mdash; just submit something you&rsquo;d like to
-              discuss.
-            </li>
-            <li>Students at every level are welcome and encouraged to submit!</li>
-            <li>
-              Submissions for the current week close at end of Sunday; approved papers appear here
-              within a minute.
-            </li>
-          </ul>
-        </div>
       </div>
+
+      <div id="papers-container">
+        <div class="loading">Fetching this week's papers…</div>
+      </div>
+
+      <section class="invite">
+        <h3>Anyone can bring a paper</h3>
+        <p>
+          You don&rsquo;t need to be an expert, to have read everything in the field, or to think a
+          paper is important. If you&rsquo;re curious about it, bring it. New here? Your suggestions
+          are especially welcome.
+        </p>
+        <p class="invite-lead">Any of these is a good reason:</p>
+        <ul class="invite-reasons">
+          <li>
+            <span aria-hidden="true">🔍</span> &ldquo;I don&rsquo;t understand this result.&rdquo;
+          </li>
+          <li><span aria-hidden="true">💡</span> &ldquo;This is a clever idea.&rdquo;</li>
+          <li>
+            <span aria-hidden="true">🤔</span> &ldquo;I think this argument might be wrong.&rdquo;
+          </li>
+          <li>
+            <span aria-hidden="true">🆕</span> &ldquo;This just came out and I&rsquo;d like to hear
+            what people think.&rdquo;
+          </li>
+          <li>
+            <span aria-hidden="true">🔗</span> &ldquo;This connects two things we don&rsquo;t
+            usually discuss together.&rdquo;
+          </li>
+        </ul>
+        <div class="invite-action">
+          <a href="#" id="invite-link" target="_blank" rel="noopener" class="btn"
+            >Bring a paper ↗</a
+          >
+          <p class="invite-how">
+            Paste an arXiv ID or link and say in a line why. You don&rsquo;t need to present it.
+            This week&rsquo;s list closes at the end of Sunday.
+          </p>
+        </div>
+      </section>
+
       <div id="trending"></div>
     </main>
 
