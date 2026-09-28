@@ -1,21 +1,18 @@
 name: Lint
 
+# Every pull request runs this, so it can be a required check. Checks the
+# files the pre-commit hook formats.
 on:
   push:
     branches: [main]
     paths:
-      - "site/**"
-      - "docs/**"
-      - "README.md"
+      - "**.html"
+      - "**.css"
+      - "**.js"
+      - "**.md"
       - ".prettierrc"
       - ".github/workflows/lint.yml"
   pull_request:
-    paths:
-      - "site/**"
-      - "docs/**"
-      - "README.md"
-      - ".prettierrc"
-      - ".github/workflows/lint.yml"
 
 jobs:
   prettier:
@@ -37,8 +34,7 @@ jobs:
       - name: Check formatting
         run: |
           prettier --check \
-            "site/**/*.html" \
-            "site/**/*.css" \
-            "site/**/*.js" \
-            "docs/**/*.md" \
-            "README.md"
+            "site/**/*.{html,css,js}" \
+            "scripts/**/*.js" \
+            "tests/**/*.{js,html}" \
+            "**/*.md"

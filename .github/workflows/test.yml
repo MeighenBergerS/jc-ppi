@@ -1,21 +1,18 @@
 name: Tests
 
+# Every pull request runs this, so it can be a required check.
 on:
   push:
     branches: [main]
     paths:
-      - "site/assets/js/**"
+      - "site/**"
+      - "scripts/**"
       - "tests/**"
+      - ".github/workflows/**"
+      - ".github/ISSUE_TEMPLATE/**"
       - "package.json"
       - "package-lock.json"
-      - ".github/workflows/test.yml"
   pull_request:
-    paths:
-      - "site/assets/js/**"
-      - "tests/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/test.yml"
 
 jobs:
   test:
