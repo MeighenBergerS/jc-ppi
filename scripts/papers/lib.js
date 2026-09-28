@@ -18,6 +18,8 @@ export const LABELS = {
   imported: 'imported',
   updatedByBot: 'Updated By Bot',
   submittedBefore: 'Submitted Before',
+  // The bot's twice-weekly trending list. Also labelled `paper`, but never a submission.
+  trending: 'Trending',
 };
 
 // Field labels of .github/ISSUE_TEMPLATE/paper.yml. Change both together.
@@ -159,12 +161,17 @@ export function formatDate(date, timeZone = TIMEZONE) {
 
 const labelSet = (issue) => new Set(issue.labels.map((l) => (typeof l === 'string' ? l : l.name)));
 
-/** True for approved paper issues that were not removed (closed as not planned). */
+/** True for issues that are paper submissions (not Trending lists or pull requests). */
+export function isSubmission(issue) {
+  const labels = labelSet(issue);
+  return !issue.pull_request && labels.has(LABELS.paper) && !labels.has(LABELS.trending);
+}
+
+/** True for approved paper submissions that were not removed (closed as not planned). */
 export function isVisiblePaper(issue) {
   const labels = labelSet(issue);
   return (
-    !issue.pull_request &&
-    labels.has(LABELS.paper) &&
+    isSubmission(issue) &&
     !labels.has(LABELS.needsApproval) &&
     !(issue.state === 'closed' && issue.state_reason === 'not_planned')
   );
@@ -464,20 +471,21 @@ export function issuesToRows(issues, names = new Map()) {
   return rows.map((r) => r.row);
 }
 
-/** Serialises rows as RFC 4180 CSV with a header row. */
-export function toCsv(rows) {
-  const header = [
-    'Timestamp',
-    'Name',
-    'arXiv ID',
-    'Comment',
-    'Approved',
-    'Removed',
-    'EditedComment',
-    'Votes',
-    'Discussed',
-    'Issue',
-  ];
+const PAPERS_HEADER = [
+  'Timestamp',
+  'Name',
+  'arXiv ID',
+  'Comment',
+  'Approved',
+  'Removed',
+  'EditedComment',
+  'Votes',
+  'Discussed',
+  'Issue',
+];
+
+/** Serialises rows as RFC 4180 CSV with a header row (the papers header by default). */
+export function toCsv(rows, header = PAPERS_HEADER) {
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   return [header, ...rows].map((r) => r.map(cell).join(',')).join('\n') + '\n';
 }

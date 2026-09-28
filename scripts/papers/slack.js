@@ -9,14 +9,7 @@
 import { COL } from '../../site/assets/js/config.js';
 import { normalizeArxivId, stripVersion } from '../../site/assets/js/utils.js';
 import { TIMEZONE, chicagoWallTime, weekStartDay } from './lib.js';
-
-// Trending categories, as in the Apps Script. `extra` narrows the INSPIRE search.
-export const TRENDING_CATEGORIES = [
-  { label: 'Overall hep-ph', emoji: '🔬', extra: '' },
-  { label: 'Neutrinos', emoji: '⚛️', extra: 'neutrino' },
-  { label: 'Dark Matter', emoji: '🌑', extra: '"dark matter"' },
-];
-export const TRENDING_LOOKBACK_WEEKS = 4;
+import { TRENDING_CATEGORIES, TRENDING_LOOKBACK_WEEKS } from './trending.js';
 
 // The reminder goes out at this local hour (Central Time) on the scheduled day.
 export const REMINDER_HOUR = 13;
@@ -73,65 +66,10 @@ export function isReminderSchedule(cron, now = new Date()) {
 }
 
 /**
- * The most-cited recent hep-ph paper per category on INSPIRE-HEP.
- * @returns {Promise<(object|null)[]>} one entry per category; null if unavailable.
- */
-export async function fetchTrending(now = new Date(), fetchFn = fetch) {
-  const cutoff = new Date(now.getTime() - TRENDING_LOOKBACK_WEEKS * 7 * 86400000);
-  const since = cutoff.toISOString().slice(0, 10);
-  const out = [];
-  for (const cat of TRENDING_CATEGORIES) {
-    // `de` is the arXiv (preprint) date, so papers only recently published in a
-    // journal don't count as new.
-    let q = `arxiv_eprints.categories:hep-ph and de > ${since}`;
-    if (cat.extra) q += ` and ${cat.extra}`;
-    const url =
-      'https://inspirehep.net/api/literature?sort=mostcited&size=1' +
-      '&fields=arxiv_eprints,titles,authors.full_name,authors.affiliations,collaborations,' +
-      'citation_count,citation_count_without_self_citations' +
-      `&q=${encodeURIComponent(q)}`;
-    try {
-      let res = await fetchFn(url);
-      if (res.status === 429) {
-        await new Promise((r) => setTimeout(r, 6000));
-        res = await fetchFn(url);
-      }
-      const hit = res.ok ? (await res.json()).hits?.hits?.[0]?.metadata : null;
-      out.push(hit ? parseTrendingHit(hit) : null);
-    } catch {
-      out.push(null);
-    }
-    await new Promise((r) => setTimeout(r, 1000)); // INSPIRE rate limit
-  }
-  return out;
-}
-
-/** Shapes an INSPIRE record for the reminder, as the Apps Script did. */
-export function parseTrendingHit(m) {
-  let authors = '';
-  let affiliation = '';
-  if (m.collaborations?.length) {
-    authors = `${m.collaborations[0].value} Collaboration`;
-  } else if (m.authors?.length) {
-    const names = m.authors.map((a) => (a.full_name ?? '').trim()).filter(Boolean);
-    authors = names.length <= 10 ? names.join(', ') : `${names[0]} et al.`;
-    affiliation = m.authors[0].affiliations?.[0]?.value ?? '';
-  }
-  return {
-    arxivId: m.arxiv_eprints?.[0]?.value ?? '',
-    title: m.titles?.[0]?.title?.trim() ?? '',
-    authors,
-    affiliation,
-    citations: Number(m.citation_count) || 0,
-    citationsNoSelf: Number(m.citation_count_without_self_citations) || 0,
-  };
-}
-
-/**
  * Builds the reminder text (Slack mrkdwn).
  * @param {object} p
  * @param {{name, arxivId, votes}[]} p.papers  thisWeekPapers()
- * @param {(object|null)[]} p.trending          fetchTrending()
+ * @param {(object[]|null)[]} p.trending        fetchTrending(); the first paper per category is shown
  * @param {{day, time}} p.meeting               CONFIG.meeting
  * @param {string} p.submitUrl
  * @param {object} [p.titles]                   arXiv ID → paper title, if known
@@ -178,7 +116,8 @@ export function buildReminder({ papers, trending, meeting, submitUrl, titles = {
     `➡️  Submit here: ${submitUrl}`
   );
 
-  if (trending.some(Boolean)) {
+  const tops = TRENDING_CATEGORIES.map((_, i) => trending[i]?.[0] ?? null);
+  if (tops.some(Boolean)) {
     lines.push(
       '',
       '─────────────────────────────────',
@@ -187,7 +126,7 @@ export function buildReminder({ papers, trending, meeting, submitUrl, titles = {
       ''
     );
     TRENDING_CATEGORIES.forEach((cat, i) => {
-      const t = trending[i];
+      const t = tops[i];
       lines.push(`${cat.emoji} *${cat.label}*`);
       if (!t) {
         lines.push('  _No data available._');

@@ -23,6 +23,9 @@
 - name: Updated By Bot
   color: "ededed"
   description: The paper bot added the title, abstract and links
+- name: Trending
+  color: "1d76db"
+  description: The bot's list of trending hep-ph papers; the newest one is shown on the site
 - name: Submitted Before
   color: "f9d0c4"
   description: This paper was suggested in an earlier issue; the bot links it

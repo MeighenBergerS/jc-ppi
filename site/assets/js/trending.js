@@ -35,7 +35,7 @@ export function renderTrending(state, rows, container) {
   subheading.className = 'trending-subheading';
   subheading.textContent =
     `Most-cited papers over the past ${CONFIG.inspireLookbackWeeks ?? 4} weeks, ` +
-    'ranked by citation count excluding self-citations (via INSPIRE-HEP). ' +
+    'ranked by citation count (via INSPIRE-HEP). ' +
     'Refreshed Monday & Wednesday mornings.';
   section.appendChild(subheading);
 

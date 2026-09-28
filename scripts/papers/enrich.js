@@ -36,6 +36,7 @@ import {
   earlierSubmissions,
   renderSubmittedBeforeComment,
   parseLoginList,
+  isSubmission,
   renderApprovalRequest,
   fetchInspire,
   fetchBibtex,
@@ -159,7 +160,7 @@ async function enrich(issues, allIssues, { pause = 0 } = {}) {
 
 async function handleIssueEvent(event) {
   const { action, issue } = event;
-  if (!labelNames(issue).has(LABELS.paper)) return;
+  if (!isSubmission(issue)) return;
   if (action === 'edited' && !event.changes?.body) return; // title-only edit
 
   if (action === 'opened' && !labelNames(issue).has(LABELS.imported)) {
@@ -185,9 +186,7 @@ async function handleIssueEvent(event) {
 }
 
 async function allPaperIssues() {
-  return (await api.paginate(`/issues?labels=${LABELS.paper}&state=all`)).filter(
-    (i) => !i.pull_request
-  );
+  return (await api.paginate(`/issues?labels=${LABELS.paper}&state=all`)).filter(isSubmission);
 }
 
 async function sweep(scope) {

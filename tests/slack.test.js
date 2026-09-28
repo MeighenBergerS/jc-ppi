@@ -11,10 +11,9 @@ import {
   thisWeekPapers,
   slackEscape,
   isReminderSchedule,
-  parseTrendingHit,
   buildReminder,
-  TRENDING_CATEGORIES,
 } from '../scripts/papers/slack.js';
+import { TRENDING_CATEGORIES } from '../scripts/papers/trending.js';
 
 // Thursday 2026-10-01, 1 PM in Iowa (CDT).
 const NOW = new Date('2026-10-01T18:00:00Z');
@@ -77,30 +76,6 @@ describe('slackEscape', () => {
   });
 });
 
-describe('parseTrendingHit', () => {
-  it('prefers the collaboration name', () => {
-    const t = parseTrendingHit({
-      collaborations: [{ value: 'IceCube' }],
-      authors: [{ full_name: 'A' }],
-      arxiv_eprints: [{ value: '2609.1' }],
-      citation_count: 9,
-      citation_count_without_self_citations: 4,
-    });
-    assert.equal(t.authors, 'IceCube Collaboration');
-    assert.equal(t.affiliation, '');
-    assert.equal(t.citationsNoSelf, 4);
-  });
-  it('shortens more than ten authors to "et al." and takes the first affiliation', () => {
-    const authors = Array.from({ length: 11 }, (_, i) => ({
-      full_name: `Author ${i}`,
-      affiliations: [{ value: `Uni ${i}` }],
-    }));
-    const t = parseTrendingHit({ authors });
-    assert.equal(t.authors, 'Author 0 et al.');
-    assert.equal(t.affiliation, 'Uni 0');
-  });
-});
-
 describe('buildReminder', () => {
   const meeting = { day: 'Friday', time: '3:30 PM CT' };
   const base = { trending: [], meeting, submitUrl: 'https://example.org/' };
@@ -146,21 +121,20 @@ describe('buildReminder', () => {
   });
 
   it('lists the top trending paper per category, and marks missing data', () => {
-    const trending = [
-      {
-        arxivId: '2609.1',
-        title: 'T',
-        authors: 'X',
-        affiliation: 'Iowa',
-        citations: 9,
-        citationsNoSelf: 4,
-      },
-      null,
-      null,
-    ];
+    const top = {
+      arxivId: '2609.1',
+      title: 'T',
+      authors: 'X',
+      affiliation: 'Iowa',
+      citations: 9,
+      citationsNoSelf: 4,
+    };
+    const second = { ...top, arxivId: '2609.2', authors: 'Second' };
+    const trending = [[top, second], [], null];
     const text = buildReminder({ ...base, papers: [], trending });
     assert.match(text, /\*4\* citations excl. self \/ 9 total/);
     assert.match(text, /X · Iowa/);
+    assert.doesNotMatch(text, /Second/, 'only the first paper per category is shown');
     assert.equal(text.match(/No data available/g).length, TRENDING_CATEGORIES.length - 1);
   });
 

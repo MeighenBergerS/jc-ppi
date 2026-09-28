@@ -1,0 +1,36 @@
+name: Trending
+
+# Opens a "Trending" issue with the most-cited recent hep-ph papers per category
+# and closes the previous one (scripts/papers/trending-issue.js). The site's
+# ?source=issues preview reads the newest Trending issue.
+
+on:
+  schedule:
+    # Monday and Wednesday, 12:17 UTC: early morning in Iowa.
+    - cron: "17 12 * * 1,3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write # to start the site deploy
+
+jobs:
+  trending:
+    name: Open the Trending issue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Fetch trending papers and open the issue
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/papers/trending-issue.js
+      # Issues opened with the workflow token don't trigger other workflows, so
+      # start the deploy directly to put the new list on the site.
+      - name: Redeploy the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY"

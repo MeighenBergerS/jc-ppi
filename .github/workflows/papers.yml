@@ -28,10 +28,12 @@ concurrency:
 jobs:
   enrich:
     name: Update paper issues
-    # Issue events: only paper issues, and not the bulk import (the sweep handles those).
+    # Issue events: only paper submissions, not Trending lists or the bulk import
+    # (the sweep handles those).
     if: >-
       github.event_name != 'issues' ||
       (contains(github.event.issue.labels.*.name, 'paper') &&
+       !contains(github.event.issue.labels.*.name, 'Trending') &&
        !(github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'imported')))
     runs-on: ubuntu-latest
     steps:

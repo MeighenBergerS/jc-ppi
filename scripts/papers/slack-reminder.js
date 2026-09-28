@@ -17,7 +17,8 @@
 import { CONFIG } from '../../site/assets/js/config.js';
 import { parseCsv } from '../../site/assets/js/utils.js';
 import { LABELS, github, issuesToRows, fetchProfileNames, fetchInspire } from './lib.js';
-import { thisWeekPapers, fetchTrending, buildReminder, isReminderSchedule } from './slack.js';
+import { thisWeekPapers, buildReminder, isReminderSchedule } from './slack.js';
+import { fetchTrending } from './trending.js';
 
 const SITE_URL = 'https://meighenbergers.github.io/jc-ppi/';
 const source = process.env.PAPERS_SOURCE === 'issues' ? 'issues' : 'sheet';
@@ -52,7 +53,7 @@ try {
 } catch (err) {
   console.error(`Paper titles unavailable: ${err.message}`);
 }
-const trending = await fetchTrending();
+const trending = await fetchTrending({ size: 1 });
 const text = buildReminder({ papers, trending, meeting: CONFIG.meeting, submitUrl, titles });
 
 console.log(`Source: ${source}. Papers this week: ${papers.length}.\n`);

@@ -55,13 +55,15 @@ export const CONFIG = {
 // ── GITHUB ISSUES PREVIEW ───────────────────────────────────
 // Opening any page with ?source=issues reads papers from GitHub issues instead
 // of the Google Sheet (see docs/ISSUES-PREVIEW.md). The deploy workflow builds
-// the CSV from the issues; voting and submitting happen on GitHub.
+// the papers CSV from the paper issues and the trending CSV from the newest
+// Trending issue; voting and submitting happen on GitHub.
 CONFIG.issuesRepo = 'MeighenBergerS/jc-ppi';
 CONFIG.issuesPreview =
   typeof location !== 'undefined' &&
   new URLSearchParams(location.search).get('source') === 'issues';
 if (CONFIG.issuesPreview) {
   CONFIG.sheetCsvUrl = './data/papers-from-issues.csv';
+  CONFIG.trendingCsvUrl = './data/trending.csv';
   CONFIG.mutateUrl = '';
   CONFIG.formUrl = `https://github.com/${CONFIG.issuesRepo}/issues/new?template=paper.yml`;
 }
