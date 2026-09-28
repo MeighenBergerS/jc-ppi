@@ -13,6 +13,7 @@
 import { COL } from './config.js';
 import { normalizeArxivId, stripVersion } from './utils.js';
 import { setRichText } from './mathtext.js';
+import { paperTopics } from './topics.js';
 import {
   appendText,
   appendKeywordPills,
@@ -65,7 +66,9 @@ export function buildCards(
 
     const card = document.createElement('article');
     card.className = 'paper-card';
+    const topics = paperTopics(meta);
     card.dataset.categories = (meta.categories ?? []).join(',');
+    card.dataset.topics = topics.join(',');
     card.dataset.discussed = discussed ? 'true' : 'false';
 
     // Status tag: discussed after the meeting, or leading the vote before it
@@ -92,7 +95,7 @@ export function buildCards(
     }
     card.appendChild(title);
     appendText(card, meta.authors, 'card-authors');
-    appendKeywordPills(card, meta);
+    appendKeywordPills(card, meta, topics);
 
     // Why it was brought, and by whom
     const name = shortName((paper[COL.name] || '').trim());

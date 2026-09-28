@@ -52,6 +52,15 @@ Suggesting, voting, editing and withdrawing papers are covered in
 To rerun the bot by hand, use **Actions → Papers → Run workflow**. Scope `all` also refreshes
 closed issues.
 
+## Topics
+
+Papers get up to three club topics (Neutrinos, Dark matter, Cosmology, …), shown as purple pills
+on This Week and the Archive, as a filter in the Archive, and in the Stats page's "What we've been
+reading" grid. The list is `topics` in `CONFIG` (`site/assets/js/config.js`): a label and a
+pattern each, in display order. A paper gets a topic when the pattern matches its title or
+INSPIRE keywords, or matches its abstract twice. Add, rename or remove topics freely; the site
+picks them up on the next deploy.
+
 ## Slack reminder
 
 | Setting                                  | Where                                 | Values                                                         |

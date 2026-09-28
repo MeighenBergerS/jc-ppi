@@ -41,6 +41,7 @@ check always passes.
 | `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction                                               |
 | `site/assets/js/table.js`              | Archive table builder, and the pieces the cards share                                                      |
 | `site/assets/js/cards.js`              | This Week paper cards                                                                                      |
+| `site/assets/js/topics.js`             | Which club topics (`CONFIG.topics`) a paper is about                                                       |
 | `site/assets/js/mathtext.js`           | Renders MathML and `$…$` LaTeX in INSPIRE titles and abstracts, safely                                     |
 | `site/assets/js/app.js`                | Page renderers and entry point                                                                             |
 | `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                                                            |
@@ -161,19 +162,20 @@ npm test
 
 Test files live in `tests/`:
 
-| File                   | Covers                                                                                                      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `utils.test.js`        | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId`, `shortNamer` |
-| `data.test.js`         | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`, `clubStreak`, `niceMax`, `voteLeader`           |
-| `inspire.test.js`      | `parseHit`                                                                                                  |
-| `papers.test.js`       | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows                     |
-| `slack.test.js`        | The Slack reminder: this week's papers, schedule, message                                                   |
-| `trending.test.js`     | Trending papers, the Trending issue, and keeping it out of the submissions                                  |
-| `roundup.test.js`      | The personal monthly roundup: a member's papers, streaks, milestones, the email text                        |
-| `roundup-html.test.js` | The HTML roundup email: escaping, papers, milestones, an empty month                                        |
-| `mathtext.test.js`     | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                   |
-| `smtp.test.js`         | The SMTP client that sends the roundups, against a fake server                                              |
-| `runner.html`          | Browser-side DOM tests for `buildTable`, `buildCards` and `setRichText`                                     |
+| File                   | Covers                                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `utils.test.js`        | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId`, `shortNamer`      |
+| `data.test.js`         | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`, `clubStreak`, `niceMax`, `topicMonths`, `voteLeader` |
+| `inspire.test.js`      | `parseHit`                                                                                                       |
+| `papers.test.js`       | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows                          |
+| `slack.test.js`        | The Slack reminder: this week's papers, schedule, message                                                        |
+| `trending.test.js`     | Trending papers, the Trending issue, and keeping it out of the submissions                                       |
+| `roundup.test.js`      | The personal monthly roundup: a member's papers, streaks, milestones, the email text                             |
+| `roundup-html.test.js` | The HTML roundup email: escaping, papers, milestones, an empty month                                             |
+| `topics.test.js`       | `CONFIG.topics` and matching papers to topics                                                                    |
+| `mathtext.test.js`     | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                        |
+| `smtp.test.js`         | The SMTP client that sends the roundups, against a fake server                                                   |
+| `runner.html`          | Browser-side DOM tests for `buildTable`, `buildCards` and `setRichText`                                          |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)
 runs `npm test` automatically before every commit, so the suite must be green
