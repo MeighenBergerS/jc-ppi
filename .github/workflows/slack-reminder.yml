@@ -1,7 +1,8 @@
 name: Slack reminder
 
 # Weekly reminder in the journal club Slack channel, Thursday 1 PM Central Time
-# (scripts/papers/slack-reminder.js). Scheduled runs only post when the
+# (CONFIG.slackReminder in site/assets/js/config.js; tests/config.test.js checks
+# the crons match it; scripts/papers/slack-reminder.js). Scheduled runs only post when the
 # repository variable SLACK_REMINDER is "on"; otherwise they print the message.
 
 on:

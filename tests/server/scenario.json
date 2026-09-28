@@ -43,13 +43,5 @@
 
   "totalPapers": 500,
   "recentPapers": 50,
-  "recentWeeks": 4,
-
-  "trendingCategories": [
-    { "label": "Overall hep-ph", "extra": "" },
-    { "label": "Neutrinos",      "extra": "neutrino" },
-    { "label": "Dark Matter",    "extra": "\"dark matter\"" }
-  ],
-  "trendingResultsPerCategory": 3,
-  "trendingLookbackWeeks": 4
+  "recentWeeks": 4
 }

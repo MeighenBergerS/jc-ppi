@@ -12,6 +12,10 @@ import {
   normalizeArxivId,
   stripVersion,
   isValidArxivId,
+  weekdayIndex,
+  clockTime,
+  meetingTime,
+  meetingIcs,
 } from '../site/assets/js/utils.js';
 
 // ── weekStart ─────────────────────────────────────────────────
@@ -335,5 +339,57 @@ describe('isValidArxivId', () => {
     assert.ok(!isValidArxivId(original), 'original should be invalid');
     const padded = /^\d{3}\./.test(original) ? '0' + original : null;
     assert.equal(padded, null, 'should not attempt padding for non-3-digit prefix');
+  });
+});
+
+// ── Meeting ───────────────────────────────────────────────────
+
+describe('weekdayIndex', () => {
+  it('counts from Monday', () => {
+    assert.equal(weekdayIndex('Monday'), 0);
+    assert.equal(weekdayIndex('Sunday'), 6);
+  });
+
+  it('throws on an unknown day', () => {
+    assert.throws(() => weekdayIndex('friday'), /Unknown weekday/);
+  });
+});
+
+describe('clockTime', () => {
+  it('formats afternoon, noon, midnight and morning', () => {
+    assert.equal(clockTime('15:30'), '3:30 PM');
+    assert.equal(clockTime('12:00'), '12:00 PM');
+    assert.equal(clockTime('00:05'), '12:05 AM');
+    assert.equal(clockTime('9:00'), '9:00 AM');
+  });
+});
+
+describe('meeting text and calendar', () => {
+  const config = {
+    clubName: 'Test Club',
+    timezone: 'America/Chicago',
+    timezoneAbbr: 'CT',
+    meeting: { day: 'Friday', start: '15:30', end: '17:00' },
+  };
+
+  it('shows the start time with the zone', () => {
+    assert.equal(meetingTime(config), '3:30 PM CT');
+  });
+
+  it('builds a weekly event on the meeting day', () => {
+    const ics = meetingIcs(config, 'https://example.org/');
+    assert.match(ics, /\r\nDTSTART;TZID=America\/Chicago:20260306T153000\r\n/);
+    assert.match(ics, /\r\nDTEND;TZID=America\/Chicago:20260306T170000\r\n/);
+    assert.match(ics, /\r\nRRULE:FREQ=WEEKLY;BYDAY=FR\r\n/);
+    assert.match(ics, /\r\nSUMMARY:Test Club\r\n/);
+    assert.match(ics, /Submit papers at https:\/\/example\.org\//);
+  });
+
+  it('puts the first occurrence on the meeting day', () => {
+    const ics = meetingIcs({ ...config, meeting: { ...config.meeting, day: 'Monday' } }, '');
+    assert.match(ics, /DTSTART;TZID=America\/Chicago:20260302T153000/);
+    assert.match(ics, /BYDAY=MO/);
+    // 2026-03-02 is a Monday.
+    assert.equal(new Date('2026-03-02T12:00:00Z').getUTCDay(), 1);
   });
 });

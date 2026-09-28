@@ -6,7 +6,8 @@ name: Trending
 
 on:
   schedule:
-    # Monday and Wednesday, 12:17 UTC: early morning in Iowa.
+    # Monday and Wednesday, 12:17 UTC: early morning in Iowa. The days must match
+    # CONFIG.trending.refreshDays in site/assets/js/config.js (tests/config.test.js).
     - cron: "17 12 * * 1,3"
   workflow_dispatch:
 

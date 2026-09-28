@@ -1,47 +1,71 @@
 /* ============================================================
-   config.js — Site configuration and column mapping
+   config.js — Club settings and column maps
    ============================================================
-   The only file you should ever need to edit after initial setup.
+   The one place for the club's settings: the site, the paper
+   bot, the Trending issue and the Slack reminder all read them
+   from here. Things that can't import this file (the workflow
+   crons, the static text in site/index.html) are checked
+   against it by tests/config.test.js.
    ============================================================ */
 
-// ── DATA SOURCES ────────────────────────────────────────────
-// Papers are GitHub issues labelled "paper"; see docs/SETUP.md.
-// The deploy workflow (scripts/papers/build-csv.js) writes both CSVs
-// into site/data/ before every deploy.
+// The GitHub repository whose issues hold the paper submissions.
+const REPO = 'MeighenBergerS/jc-ppi';
 
 export const CONFIG = {
-  // The GitHub repository whose issues hold the paper submissions.
-  issuesRepo: 'MeighenBergerS/jc-ppi',
+  clubName: 'Iowa Particles & Plots Journal Club',
 
-  // Approved paper issues, one row per submission (see COL below).
-  papersCsvUrl: './data/papers.csv',
-
-  // The newest "Trending" issue, one row per trending paper (see COL_TREND below).
-  trendingCsvUrl: './data/trending.csv',
+  issuesRepo: REPO,
 
   // Where "Submit a Paper" links go: the paper issue form.
-  formUrl: 'https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml',
+  formUrl: `https://github.com/${REPO}/issues/new?template=1-paper.yml`,
 
-  // How many weeks back to search for Iowa-affiliated papers on the Iowa Research tab.
-  iowaLookbackWeeks: 8,
-
-  // Base URL of the deployed site — used in the calendar .ics file description.
-  // Leave blank to derive from window.location automatically (correct for most deployments).
-  // Set explicitly if the auto-detected URL is wrong for your setup.
+  // Base URL of the deployed site, used in the calendar .ics file.
+  // Leave blank to derive it from window.location (right for most deployments).
   siteUrl: '',
 
-  // Meeting schedule — update these if the day, time, or location changes.
-  // day/time/timezoneLabel/timezone appear in the "When" block on the home page.
-  // icsAnchor/icsDurationEnd/icsDayCode drive the "Add to Calendar" download.
+  // Data the deploy workflow (scripts/papers/build-csv.js) writes into site/data/.
+  papersCsvUrl: './data/papers.csv', // approved paper issues (see COL below)
+  trendingCsvUrl: './data/trending.csv', // the newest Trending issue (see COL_TREND below)
+
+  // The club's time zone: the meeting, the Slack reminder, and the weeks the
+  // bot and the reminder count in. (The site counts weeks in the visitor's time.)
+  timezone: 'America/Chicago', // IANA name
+  timezoneLabel: 'Central Time',
+  timezoneAbbr: 'CT',
+
+  // The weekly meeting. Times are 24-hour, in `timezone`.
   meeting: {
     day: 'Friday',
-    time: '3:30 PM CT',
-    timezoneLabel: 'Central Time', // human-readable label shown next to the time
-    timezone: 'America/Chicago', // IANA timezone name used in the .ics file
-    icsAnchor: '20260306T153000', // DTSTART of a known occurrence — update if time changes
-    icsDurationEnd: '20260306T170000', // DTEND of that same occurrence
-    icsDayCode: 'FR', // RRULE BYDAY value (FR=Friday, TH=Thursday, etc.)
-    slackUrl: '', // Slack channel URL — leave '' to show plain text
+    start: '15:30',
+    end: '17:00',
+    slackUrl: '', // Slack channel URL; leave '' to show plain text
+  },
+
+  // The weekly Slack reminder (scripts/papers/slack-reminder.js). The crons in
+  // .github/workflows/slack-reminder.yml must match; tests/config.test.js checks.
+  slackReminder: {
+    day: 'Thursday',
+    hour: 13, // 24-hour, in `timezone`
+  },
+
+  // The Trending issue (scripts/papers/trending.js). The cron in
+  // .github/workflows/trending.yml must match `refreshDays`.
+  trending: {
+    arxivCategory: 'hep-ph',
+    lookbackWeeks: 4,
+    perCategory: 3,
+    refreshDays: ['Monday', 'Wednesday'],
+    // `extra` narrows the INSPIRE search for that category.
+    categories: [
+      { label: 'Overall hep-ph', emoji: '🔬', extra: '' },
+      { label: 'Neutrinos', emoji: '⚛️', extra: 'neutrino' },
+      { label: 'Dark Matter', emoji: '🌑', extra: '"dark matter"' },
+    ],
+  },
+
+  // The Iowa Research page: how many weeks back to search.
+  iowa: {
+    lookbackWeeks: 8,
   },
 };
 

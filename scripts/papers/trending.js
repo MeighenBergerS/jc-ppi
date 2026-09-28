@@ -1,22 +1,17 @@
 /* ============================================================
-   scripts/papers/trending.js — Trending hep-ph papers
+   scripts/papers/trending.js — Trending papers
    ============================================================
-   Looks up the most-cited recent hep-ph papers per category on
+   Looks up the most-cited recent papers per category on
    INSPIRE-HEP (a port of refreshTrendingPapers in the Apps
    Script), renders them as a "Trending" issue, and reads that
    issue back into rows for the site. Used by trending-issue.js,
-   build-csv.js and the Slack reminder.
+   build-csv.js and the Slack reminder. Settings: CONFIG.trending.
    ============================================================ */
 
+import { CONFIG } from '../../site/assets/js/config.js';
 import { safeText, formatDate } from './lib.js';
 
-export const TRENDING_CATEGORIES = [
-  { label: 'Overall hep-ph', emoji: '🔬', extra: '' },
-  { label: 'Neutrinos', emoji: '⚛️', extra: 'neutrino' },
-  { label: 'Dark Matter', emoji: '🌑', extra: '"dark matter"' },
-];
-export const TRENDING_LOOKBACK_WEEKS = 4;
-export const TRENDING_PER_CATEGORY = 3;
+const { arxivCategory, lookbackWeeks, perCategory, categories } = CONFIG.trending;
 const ABSTRACT_MAX_CHARS = 500;
 
 export const TRENDING_MARKER = 'jc-ppi:trending';
@@ -49,24 +44,22 @@ export function parseTrendingHit(m) {
 }
 
 /**
- * The most-cited hep-ph papers of the last TRENDING_LOOKBACK_WEEKS, per category.
+ * The most-cited papers of the last CONFIG.trending.lookbackWeeks, per category.
  * @returns {Promise<(object[]|null)[]>} one list per category (most cited first),
  *   or null for a category INSPIRE couldn't answer.
  */
 export async function fetchTrending({
-  size = TRENDING_PER_CATEGORY,
+  size = perCategory,
   now = new Date(),
   fetchFn = fetch,
   pause = 1000,
 } = {}) {
-  const since = new Date(now.getTime() - TRENDING_LOOKBACK_WEEKS * 7 * 86400000)
-    .toISOString()
-    .slice(0, 10);
+  const since = new Date(now.getTime() - lookbackWeeks * 7 * 86400000).toISOString().slice(0, 10);
   const out = [];
-  for (const cat of TRENDING_CATEGORIES) {
+  for (const cat of categories) {
     // `de` is the arXiv (preprint) date, so papers only recently published in a
     // journal don't count as new.
-    let q = `arxiv_eprints.categories:hep-ph and de > ${since}`;
+    let q = `arxiv_eprints.categories:${arxivCategory} and de > ${since}`;
     if (cat.extra) q += ` and ${cat.extra}`;
     const url =
       `https://inspirehep.net/api/literature?sort=mostcited&size=${size}` +
@@ -94,7 +87,7 @@ export async function fetchTrending({
 
 /** Title of the Trending issue for a given day. */
 export function trendingIssueTitle(now = new Date()) {
-  return `Trending in hep-ph: ${formatDate(now)}`;
+  return `Trending in ${arxivCategory}: ${formatDate(now)}`;
 }
 
 /**
@@ -103,12 +96,12 @@ export function trendingIssueTitle(now = new Date()) {
  */
 export function renderTrendingIssue(trending, now = new Date()) {
   const lines = [
-    `The most-cited hep-ph papers first posted to arXiv in the last ${TRENDING_LOOKBACK_WEEKS} ` +
+    `The most-cited ${arxivCategory} papers first posted to arXiv in the last ${lookbackWeeks} ` +
       'weeks, per category, ranked by citation count (via INSPIRE-HEP). ' +
       `Opened automatically on ${formatDate(now)}; the next list replaces this one.`,
     '',
   ];
-  TRENDING_CATEGORIES.forEach((cat, i) => {
+  categories.forEach((cat, i) => {
     lines.push(`## ${cat.emoji} ${cat.label}`, '');
     const papers = trending[i];
     if (!papers?.length) {
@@ -162,7 +155,7 @@ export function parseTrendingIssue(body) {
  */
 export function trendingToRows(trending) {
   const rows = [];
-  TRENDING_CATEGORIES.forEach((cat, i) => {
+  categories.forEach((cat, i) => {
     (trending?.[i] ?? []).forEach((p, rank) => {
       rows.push([
         cat.label,

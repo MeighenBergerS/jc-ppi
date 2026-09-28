@@ -16,14 +16,19 @@ In a fork, open the **Actions** tab and enable workflows; GitHub turns them off 
 
 ## Step 2 — Point the code at your repository
 
-| File                                | Change                                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------------------- |
-| `site/assets/js/config.js`          | `issuesRepo` and `formUrl` (your `owner/repo`), and `meeting` (day, time, calendar times) |
-| `site/index.html`                   | The static meeting text in `#meeting-when`, and the club name wherever it appears         |
-| `.github/paper-maintainers.txt`     | Your GitHub username                                                                      |
-| `.github/paper-members.txt`         | Your members' GitHub usernames, one per line                                              |
-| `.github/workflows/check-links.yml` | The site URL (`BASE`)                                                                     |
-| `scripts/papers/trending.js`        | `TRENDING_CATEGORIES`, if you want other trending categories                              |
+`site/assets/js/config.js` holds the club's settings; the site and every script read them from
+there.
+
+| File                                | Change                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `site/assets/js/config.js`          | `REPO` (your `owner/repo`), `clubName`, the time zone, `meeting`, and the other settings |
+| `site/index.html`                   | The static meeting text in `#meeting-when`, and the club name wherever it appears        |
+| `.github/workflows/*.yml`           | The crons in `slack-reminder.yml` and `trending.yml`, if you changed their days or hour  |
+| `.github/paper-maintainers.txt`     | Your GitHub username                                                                     |
+| `.github/paper-members.txt`         | Your members' GitHub usernames, one per line                                             |
+| `.github/workflows/check-links.yml` | The site URL (`BASE`)                                                                    |
+
+`npm test` fails if the static meeting text or the crons disagree with `config.js`.
 
 ## Step 3 — Create the labels
 

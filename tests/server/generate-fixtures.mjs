@@ -22,6 +22,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { CONFIG } from '../../site/assets/js/config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT      = join(__dirname, '..', '..');
@@ -39,7 +40,7 @@ const {
 } = scenario;
 
 const INSPIRE_BASE = 'https://inspirehep.net/api/literature';
-const LOOKBACK_WEEKS = 4; // mirrors TRENDING_LOOKBACK_WEEKS in scripts/papers/trending.js
+const ARXIV_CATEGORY = CONFIG.trending.arxivCategory;
 
 // ── Date helpers ──────────────────────────────────────────────────
 
@@ -109,7 +110,7 @@ console.log(`Fetching ${recentPapers} recent papers (de > ${recentDateStr})…`)
   while (allPapers.length < recentPapers) {
     if (page > 1) await sleep(700);
     const url = INSPIRE_BASE
-      + `?q=${encodeURIComponent(`arxiv_eprints.categories:hep-ph and de > ${recentDateStr}`)}`
+      + `?q=${encodeURIComponent(`arxiv_eprints.categories:${ARXIV_CATEGORY} and de > ${recentDateStr}`)}`
       + `&sort=mostcited&size=25&page=${page}`
       + '&fields=arxiv_eprints,titles,abstracts,authors,collaborations,citation_count,citation_count_without_self_citations';
 
@@ -146,7 +147,7 @@ for (let i = 0; i < batches && allPapers.length < totalPapers; i++) {
   const toStr   = yearMax.toISOString().slice(0, 10);
 
   const url = INSPIRE_BASE
-    + `?q=${encodeURIComponent(`arxiv_eprints.categories:hep-ph and de > ${fromStr} and de < ${toStr}`)}`
+    + `?q=${encodeURIComponent(`arxiv_eprints.categories:${ARXIV_CATEGORY} and de > ${fromStr} and de < ${toStr}`)}`
     + `&sort=mostcited&size=25&page=${(i % 4) + 1}`
     + '&fields=arxiv_eprints,titles,abstracts,authors,collaborations,citation_count,citation_count_without_self_citations';
 
@@ -260,9 +261,9 @@ const inspireFixture = { hits: { total: hits.length, hits } };
 
 console.log('\n── Step 4: Building trending CSV fixture ─────────────────────');
 
-const TREND_CATEGORIES    = scenario.trendingCategories ?? [{ label: 'Overall hep-ph', extra: '' }];
-const PER_CAT             = scenario.trendingResultsPerCategory ?? 3;
-const TREND_LOOKBACK_WEEKS = scenario.trendingLookbackWeeks ?? 4;
+const TREND_CATEGORIES     = CONFIG.trending.categories;
+const PER_CAT              = CONFIG.trending.perCategory;
+const TREND_LOOKBACK_WEEKS = CONFIG.trending.lookbackWeeks;
 
 const trendCutoff  = new Date();
 trendCutoff.setDate(trendCutoff.getDate() - TREND_LOOKBACK_WEEKS * 7);
@@ -274,7 +275,7 @@ for (let ci = 0; ci < TREND_CATEGORIES.length; ci++) {
   const cat = TREND_CATEGORIES[ci];
   if (ci > 0) await sleep(1000);
 
-  let query = `arxiv_eprints.categories:hep-ph and de > ${trendDateStr}`;
+  let query = `arxiv_eprints.categories:${ARXIV_CATEGORY} and de > ${trendDateStr}`;
   if (cat.extra) query += ` and ${cat.extra}`;
 
   const url = INSPIRE_BASE
