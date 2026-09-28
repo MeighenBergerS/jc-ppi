@@ -118,7 +118,8 @@ site/                          ← everything GitHub Pages serves
       config.js                ← ✏️  All settings: repository, meeting, reminder, trending
       utils.js                 ← Week math, CSV parser, arXiv ID helpers
       inspire.js               ← INSPIRE-HEP API client + arXiv validation
-      table.js                 ← DOM table builder
+      table.js                 ← Archive table builder
+      cards.js                 ← This Week paper cards
       app.js                   ← This Week / Archive renderers and entry point
       stats.js                 ← Stats page
       iowa.js                  ← Iowa Research page

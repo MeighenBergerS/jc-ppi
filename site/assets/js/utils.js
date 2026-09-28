@@ -144,6 +144,35 @@ export function arxivLink(raw) {
   return a;
 }
 
+// ── NAMES ───────────────────────────────────────────────────
+
+/**
+ * Short display names for submitters: each person's first name, or first
+ * name and last initial ("Alex K.") when two people share a first name.
+ * One-word names, such as GitHub usernames, stay whole.
+ *
+ * @param {string[]} names - Every submitter name in the data.
+ * @returns {(name: string) => string} Maps a full name to its short form.
+ */
+export function shortNamer(names) {
+  const clean = (n) => (n ?? '').trim().replace(/\s+/g, ' ');
+  const people = [...new Set(names.map(clean).filter(Boolean))];
+  const firstCount = new Map();
+  for (const n of people) {
+    const first = n.split(' ')[0].toLowerCase();
+    firstCount.set(first, (firstCount.get(first) ?? 0) + 1);
+  }
+  const short = new Map();
+  for (const n of people) {
+    const parts = n.split(' ');
+    if (parts.length === 1) short.set(n, n);
+    else if (firstCount.get(parts[0].toLowerCase()) > 1)
+      short.set(n, `${parts[0]} ${parts.at(-1)[0]}.`);
+    else short.set(n, parts[0]);
+  }
+  return (name) => short.get(clean(name)) ?? clean(name);
+}
+
 // ── MEETING ─────────────────────────────────────────────────
 // Text and calendar data derived from CONFIG (config.js), passed in so
 // this file stays free of imports.

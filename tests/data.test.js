@@ -21,6 +21,7 @@ import { dirname, join } from 'node:path';
 import { parseCsv, normalizeArxivId, stripVersion } from '../site/assets/js/utils.js';
 import { deduplicatePapers, weekHash } from '../site/assets/js/app.js';
 import { computeSubmissionStats, yearWeeks } from '../site/assets/js/stats.js';
+import { voteLeader } from '../site/assets/js/cards.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CSV = readFileSync(join(__dirname, 'fixtures', 'submissions.csv'), 'utf8');
@@ -393,5 +394,39 @@ describe('yearWeeks', () => {
     const keys = new Set(yearWeeks(2025).map((d) => d.toISOString()));
     const { weekCounts } = computeSubmissionStats(2025, allRows);
     for (const key of weekCounts.keys()) assert.ok(keys.has(key), `${key} not a week of 2025`);
+  });
+});
+
+// ── voteLeader ──────────────────────────────────────────────
+
+describe('voteLeader', () => {
+  const row = (id, votes, discussed = '') => [
+    'ts',
+    'n',
+    id,
+    '',
+    'TRUE',
+    '',
+    '',
+    String(votes),
+    discussed,
+  ];
+
+  it('is the paper with the most votes', () => {
+    const lead = row('b', 3);
+    assert.equal(voteLeader([row('a', 1), lead, row('c', 0)]), lead);
+  });
+
+  it('is null on a tie for the most votes', () => {
+    assert.equal(voteLeader([row('a', 2), row('b', 2)]), null);
+  });
+
+  it('is null without votes or papers', () => {
+    assert.equal(voteLeader([row('a', 0)]), null);
+    assert.equal(voteLeader([]), null);
+  });
+
+  it('is null once a paper has been discussed', () => {
+    assert.equal(voteLeader([row('a', 5), row('b', 1, 'TRUE')]), null);
   });
 });

@@ -3,7 +3,9 @@
    ============================================================
    Turns an array of CSV paper rows + an INSPIRE metadata map
    into a fully populated <table> element ready to insert into
-   the page.
+   the page (the Archive). Also exports the pieces the This Week
+   cards (cards.js) share with it: the badge row, the keyword
+   pills, the vote link and the re-submission note.
    ============================================================ */
 
 import { COL } from './config.js';
@@ -14,25 +16,20 @@ import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
  *
  * @param {string[][]} papers  - Array of CSV row arrays.
  * @param {Map}        metaMap - Result of fetchPaperMetadata().
+ * @param {object}     [options]
+ * @param {Function}   [options.shortName] - Full name → name to show (shortNamer()).
  * @returns {HTMLTableElement}
  */
-export function buildTable(
-  papers,
-  metaMap = new Map(),
-  { thisWeek = false, previousSubmissions = new Map() } = {}
-) {
+export function buildTable(papers, metaMap = new Map(), { shortName = (n) => n } = {}) {
   const table = document.createElement('table');
   table.className = 'papers-table';
 
   // ── Header ──────────────────────────────────────────────
   const thead = table.createTHead();
   const hRow = thead.insertRow();
-  const headers = ['Submitted by', 'Paper', 'Why they suggest it'];
-  if (thisWeek) headers.push('');
-  headers.forEach((label) => {
+  ['Submitted by', 'Paper', 'Why they suggest it'].forEach((label) => {
     const th = document.createElement('th');
     th.textContent = label;
-    if (!label) th.className = 'actions-col';
     hRow.appendChild(th);
   });
 
@@ -45,7 +42,7 @@ export function buildTable(
 
     // Column 1 — Submitter name
     const tdName = tr.insertCell();
-    tdName.textContent = (paper[COL.name] || '').trim() || '—';
+    tdName.textContent = shortName((paper[COL.name] || '').trim()) || '—';
 
     // Attach filter data attributes
     tr.dataset.categories = (meta.categories ?? []).join(',');
@@ -54,45 +51,18 @@ export function buildTable(
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
     const tdPaper = tr.insertCell();
-    // Discussed star badge — visible in both This Week and Archive
+    // Discussed star badge
     if (discussed) {
       const star = document.createElement('div');
       star.className = 'paper-discussed';
       star.textContent = '\u2605 Discussed at JC';
       tdPaper.appendChild(star);
     }
-    _appendText(tdPaper, meta.title, 'paper-title');
-    _appendText(tdPaper, meta.authors, 'paper-comment');
-    _appendText(tdPaper, meta.abstract, 'paper-abstract');
-    tdPaper.appendChild(_buildBadgeRow(paper[COL.arxivId], id, meta));
-    _appendKeywordPills(tdPaper, meta);
-
-    // If this is the This Week view and there was a previous submission
-    // of the same paper in an earlier week, show a short note with the
-    // most-recent previous submission date.
-    if (thisWeek && previousSubmissions && previousSubmissions.has(id)) {
-      const prev = previousSubmissions.get(id);
-      try {
-        const prevDate = prev instanceof Date ? prev : new Date(prev);
-        if (!isNaN(prevDate)) {
-          const note = document.createElement('div');
-          note.className = 'previous-submission';
-          note.innerHTML =
-            `<span class="note-icon">!</span>` +
-            `<span class="note-text"><strong>Note:</strong> Previously submitted on ${prevDate.toLocaleDateString(
-              'en-US',
-              {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              }
-            )}</span>`;
-          tdPaper.appendChild(note);
-        }
-      } catch (e) {
-        // ignore formatting errors — do not block rendering
-      }
-    }
+    appendText(tdPaper, meta.title, 'paper-title');
+    appendText(tdPaper, meta.authors, 'paper-comment');
+    appendText(tdPaper, meta.abstract, 'paper-abstract');
+    tdPaper.appendChild(buildBadgeRow(paper[COL.arxivId], id, meta));
+    appendKeywordPills(tdPaper, meta);
 
     // Column 3 — Reason for suggestion
     // Prefer the edited comment (col G) when present; fall back to original.
@@ -103,16 +73,6 @@ export function buildTable(
     commentSpan.textContent = commentText || '—';
     if (!commentText) commentSpan.style.color = 'var(--muted)';
     tdComment.appendChild(commentSpan);
-
-    // Column 4 — This week only: a link to the paper's issue, where people
-    // vote with a 👍 reaction.
-    if (thisWeek) {
-      const tdActions = tr.insertCell();
-      tdActions.className = 'actions-cell';
-      tdActions.appendChild(
-        _buildIssueLinkCell(paper[COL.issueUrl], Number(paper[COL.votes] ?? 0))
-      );
-    }
   });
 
   return table;
@@ -121,11 +81,13 @@ export function buildTable(
 // ── Action controls ───────────────────────────────────────────
 
 /**
- * Builds the vote link for a this-week row.
+ * Builds the vote link for a this-week paper: "▲ 3 · Vote", to the issue
+ * where people vote with a 👍 reaction.
  * @param {string} issueUrl - The paper's GitHub issue.
  * @param {number} votes    - 👍 count when the site data was last built.
+ * @returns {HTMLDivElement}
  */
-function _buildIssueLinkCell(issueUrl, votes) {
+export function buildVoteLink(issueUrl, votes) {
   const container = document.createElement('div');
   container.className = 'actions-container';
   if (!/^https:\/\/github\.com\//.test(issueUrl ?? '')) return container;
@@ -142,8 +104,40 @@ function _buildIssueLinkCell(issueUrl, votes) {
 
 // ── Helpers ───────────────────────────────────────────────────
 
-/** Appends keyword and category pills to a cell, if available. */
-function _appendKeywordPills(parent, meta) {
+/**
+ * A note that the paper was submitted before, on `prev`, or null if the
+ * date is not valid.
+ * @param {Date|string} prev
+ * @returns {HTMLDivElement|null}
+ */
+export function buildPreviousNote(prev) {
+  const prevDate = prev instanceof Date ? prev : new Date(prev);
+  if (isNaN(prevDate)) return null;
+  const note = document.createElement('div');
+  note.className = 'previous-submission';
+  const icon = document.createElement('span');
+  icon.className = 'note-icon';
+  icon.textContent = '!';
+  const text = document.createElement('span');
+  text.className = 'note-text';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Note:';
+  const when = prevDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  text.append(strong, ` Previously submitted on ${when}`);
+  note.append(icon, text);
+  return note;
+}
+
+/**
+ * Appends category and keyword pills to `parent`, if there are any.
+ * @param {HTMLElement} parent
+ * @param {object} meta - Metadata from fetchPaperMetadata(), or {}.
+ */
+export function appendKeywordPills(parent, meta) {
   const cats = meta.categories ?? [];
   const keywords = meta.keywords ?? [];
   if (!cats.length && !keywords.length) return;
@@ -164,8 +158,13 @@ function _appendKeywordPills(parent, meta) {
   parent.appendChild(container);
 }
 
-/** Appends a <div class=className> with text, only if text is non-empty. */
-function _appendText(parent, text, className) {
+/**
+ * Appends a <div class=className> with text, only if text is non-empty.
+ * @param {HTMLElement} parent
+ * @param {string} text
+ * @param {string} className
+ */
+export function appendText(parent, text, className) {
   if (!text) return;
   const div = document.createElement('div');
   div.className = className;
@@ -181,10 +180,9 @@ function _appendText(parent, text, className) {
  * @param {string} cleanId    - The normalised, version-stripped ID (empty if unparseable).
  * @param {object} meta       - Metadata from fetchPaperMetadata(), or {}.
  */
-function _buildBadgeRow(rawArxivId, cleanId, meta) {
+export function buildBadgeRow(rawArxivId, cleanId, meta) {
   const row = document.createElement('div');
-  row.style.cssText =
-    'margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;';
+  row.className = 'badge-row';
 
   // arXiv badge — use the corrected (zero-padded) ID if the original was auto-fixed
   const displayArxivId = meta.correctedId ?? rawArxivId;

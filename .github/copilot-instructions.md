@@ -28,7 +28,8 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 | `site/assets/js/config.js`          | **All club settings** (repo, time zone, meeting, reminder, trending), columns  |
 | `site/assets/js/app.js`             | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
 | `site/assets/js/inspire.js`         | INSPIRE-HEP API client with localStorage cache                                 |
-| `site/assets/js/table.js`           | DOM builder; turns CSV rows + metadata into `<table>`                          |
+| `site/assets/js/table.js`           | Archive `<table>` from CSV rows + metadata; pieces shared with the cards       |
+| `site/assets/js/cards.js`           | This Week paper cards (vote leader, discussed highlight, first names)          |
 | `site/assets/js/utils.js`           | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
 | `site/assets/js/trending.js`        | Trending section renderer                                                      |
 | `site/assets/js/stats.js`           | Stats page charts                                                              |
