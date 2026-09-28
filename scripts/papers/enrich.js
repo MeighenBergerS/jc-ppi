@@ -3,8 +3,9 @@
    ============================================================
    Run by .github/workflows/papers.yml.
 
-   On a new or edited paper issue: approves it (or labels it
-   "needs approval"), looks the paper up on INSPIRE-HEP (or on
+   On a new or edited paper issue: approves it, or labels it
+   "needs approval" and mentions and assigns the maintainers in
+   .github/paper-maintainers.txt, so GitHub emails them. Then looks the paper up on INSPIRE-HEP (or on
    arXiv if INSPIRE doesn't have it yet), posts or updates one
    metadata comment, renames the issue to "<ID>: <title>", and
    sets the "awaiting INSPIRE" / "invalid arXiv ID" labels. It
@@ -34,6 +35,8 @@ import {
   fetchProfileNames,
   earlierSubmissions,
   renderSubmittedBeforeComment,
+  parseLoginList,
+  renderApprovalRequest,
   fetchInspire,
   fetchBibtex,
   fetchArxiv,
@@ -50,14 +53,9 @@ const api = github(process.env.GITHUB_TOKEN, process.env.GITHUB_REPOSITORY);
 const today = new Date().toISOString().slice(0, 10);
 const labelNames = (issue) => new Set(issue.labels.map((l) => l.name));
 
-function readMembers() {
-  const path = new URL('../../.github/paper-members.txt', import.meta.url);
-  return new Set(
-    readFileSync(path, 'utf8')
-      .split('\n')
-      .map((l) => l.replace(/#.*/, '').trim().toLowerCase())
-      .filter(Boolean)
-  );
+/** Usernames from a list file in .github/, e.g. paper-members.txt. */
+function readLogins(file) {
+  return parseLoginList(readFileSync(new URL(`../../.github/${file}`, import.meta.url), 'utf8'));
 }
 
 /** Adds or removes a label, keeping `issue.labels` in step. */
@@ -166,15 +164,20 @@ async function handleIssueEvent(event) {
 
   if (action === 'opened' && !labelNames(issue).has(LABELS.imported)) {
     const login = issue.user.login;
+    const maintainers = readLogins('paper-maintainers.txt');
     const approved =
-      APPROVED_ASSOCIATIONS.has(issue.author_association) || readMembers().has(login.toLowerCase());
+      APPROVED_ASSOCIATIONS.has(issue.author_association) ||
+      [...readLogins('paper-members.txt'), ...maintainers].some(
+        (m) => m.toLowerCase() === login.toLowerCase()
+      );
     if (!approved) {
       await setLabel(issue, LABELS.needsApproval, true);
+      // The mention and the assignment both make GitHub email the maintainers.
       await api.request('POST', `/issues/${issue.number}/comments`, {
-        body:
-          `Thanks for the suggestion, @${login}! A maintainer will approve it shortly; ` +
-          `until then it doesn't show on the website.`,
+        body: renderApprovalRequest(login, maintainers),
       });
+      await api.request('POST', `/issues/${issue.number}/assignees`, { assignees: maintainers });
+      console.log(`#${issue.number}: from non-member ${login}; asked ${maintainers.join(', ')}`);
     }
   }
   const all = await allPaperIssues();

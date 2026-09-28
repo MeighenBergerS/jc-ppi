@@ -1,0 +1,5 @@
+# GitHub usernames of the journal club maintainers, one per line.
+# When someone not on paper-members.txt suggests a paper, the bot mentions and
+# assigns these people on the issue, so GitHub emails them to approve it.
+# Maintainers' own papers are approved automatically.
+MeighenBergerS

@@ -30,6 +30,8 @@ import {
   earlierSubmissions,
   renderSubmittedBeforeComment,
   SUBMITTED_BEFORE_MARKER,
+  parseLoginList,
+  renderApprovalRequest,
 } from '../scripts/papers/lib.js';
 import { parseCsv } from '../site/assets/js/utils.js';
 
@@ -473,5 +475,28 @@ describe('renderSubmittedBeforeComment', () => {
     ]);
     assert.ok(body.startsWith(SUBMITTED_BEFORE_MARKER));
     assert.match(body, /- #5, Sep 4, 2026, by Sudipta \(discussed\)/);
+  });
+});
+
+// ── Approval ─────────────────────────────────────────────────
+
+describe('parseLoginList', () => {
+  it('reads one login per line, skipping comments and blanks', () => {
+    assert.deepEqual(parseLoginList('# header\nalice\n\nbob # Bob B.\n  carol  \n'), [
+      'alice',
+      'bob',
+      'carol',
+    ]);
+  });
+});
+
+describe('renderApprovalRequest', () => {
+  const body = renderApprovalRequest('newbie', ['maint1', 'maint2']);
+  it('thanks the submitter', () => assert.match(body, /@newbie!/));
+  it('mentions every maintainer, so GitHub emails them', () =>
+    assert.match(body, /@maint1 @maint2:/));
+  it('says how to approve', () => {
+    assert.match(body, /remove the `needs approval` label/);
+    assert.match(body, /`newbie` to `.github\/paper-members.txt`/);
   });
 });

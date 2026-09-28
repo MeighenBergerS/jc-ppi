@@ -232,6 +232,31 @@ export function renderSubmittedBeforeComment(earlier) {
   return [SUBMITTED_BEFORE_MARKER, `This paper was suggested before:`, '', ...lines].join('\n');
 }
 
+// ── Approval ─────────────────────────────────────────────────
+
+/** Reads a list of GitHub usernames, one per line, "#" comments allowed. */
+export function parseLoginList(text) {
+  return (text ?? '')
+    .split('\n')
+    .map((l) => l.replace(/#.*/, '').trim())
+    .filter(Boolean);
+}
+
+/**
+ * The bot's reply to a paper from a non-member. It @mentions the maintainers,
+ * which makes GitHub email them.
+ */
+export function renderApprovalRequest(login, maintainers) {
+  const who = maintainers.map((m) => `@${m}`).join(' ');
+  return [
+    `Thanks for the suggestion, @${login}! It shows on the website once a maintainer approves it.`,
+    '',
+    `${who}: this paper is from someone not on the members list. To approve it, remove the ` +
+      '`needs approval` label. To approve their future papers too, add ' +
+      `\`${login}\` to \`.github/paper-members.txt\`.`,
+  ].join('\n');
+}
+
 // ── Markdown safety ──────────────────────────────────────────
 
 /**

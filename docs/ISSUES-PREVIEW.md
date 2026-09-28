@@ -19,9 +19,15 @@ preview reads the issues.
 
 ## For maintainers
 
-- **Approving.** Repository collaborators and the usernames in `.github/paper-members.txt` are
-  approved automatically. Anyone else's issue gets the `needs approval` label and stays off the
-  site; remove the label to approve it.
+- **Approving.** Repository collaborators and the usernames in `.github/paper-members.txt` and
+  `.github/paper-maintainers.txt` are approved automatically. Anyone else's issue gets the
+  `needs approval` label and stays off the site; remove the label to approve it.
+- **Getting told about new submitters.** For a paper from a non-member, the bot mentions and
+  assigns everyone in `.github/paper-maintainers.txt`. GitHub emails them, as long as email is on
+  for "Participating, @mentions and custom" in their
+  [notification settings](https://github.com/settings/notifications). That is GitHub's default.
+- **Handing over.** Put the new lead in `.github/paper-maintainers.txt` and give them write access
+  to the repository.
 - **Marking discussed.** Add the `discussed` label.
 - **Weeks.** Issues are closed as completed on the first daily run after their week ends
   (Monday to Sunday, Central Time), so the open issues are this week's papers.
