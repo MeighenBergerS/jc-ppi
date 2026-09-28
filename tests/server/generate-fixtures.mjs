@@ -39,7 +39,7 @@ const {
 } = scenario;
 
 const INSPIRE_BASE = 'https://inspirehep.net/api/literature';
-const LOOKBACK_WEEKS = 4; // mirrors INSPIRE_LOOKBACK_WEEKS in appscript.gs
+const LOOKBACK_WEEKS = 4; // mirrors TRENDING_LOOKBACK_WEEKS in scripts/papers/trending.js
 
 // ── Date helpers ──────────────────────────────────────────────────
 
@@ -254,7 +254,7 @@ const inspireFixture = { hits: { total: hits.length, hits } };
 
 // ── Step 4: Build trending CSV fixture ───────────────────────────
 //
-// Mirrors what refreshTrendingPapers() does in appscript.gs:
+// Mirrors what fetchTrending() does in scripts/papers/trending.js:
 // one INSPIRE query per category, using `de > cutoff` (preprint date)
 // and the category-specific `extra` search term.
 

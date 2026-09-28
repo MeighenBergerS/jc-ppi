@@ -1,8 +1,9 @@
 /* ============================================================
    app.js — Page renderers and entry point
    ============================================================
-   Loads submissions from Google Sheets, fetches paper metadata
-   from INSPIRE-HEP, and renders the This Week / Archive pages.
+   Loads submissions from data/papers.csv (built from the paper
+   issues on every deploy), fetches paper metadata from
+   INSPIRE-HEP, and renders the This Week / Archive pages.
 
    This Week polls for new submissions every POLL_INTERVAL ms.
    Archive groups by week and lazy-loads metadata on first open.
@@ -21,7 +22,6 @@ import {
 import { fetchPaperMetadata } from './inspire.js';
 import { buildTable } from './table.js';
 import { renderTrending } from './trending.js';
-import './preview.js';
 
 /** Re-fetch interval for the This Week page (ms). */
 const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
@@ -51,9 +51,9 @@ export function weekHash(papers) {
     .join(';');
 }
 
-/** Fetch and parse all paper rows from the Google Sheet CSV. */
+/** Fetch and parse all paper rows from the papers CSV. */
 async function fetchPapers() {
-  const res = await fetch(CONFIG.sheetCsvUrl, { cache: 'no-cache' });
+  const res = await fetch(CONFIG.papersCsvUrl, { cache: 'no-cache' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   const rows = parseCsv(text);
@@ -166,7 +166,7 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
 
     container.appendChild(
       buildTable(thisWeek, metaMap, {
-        thisWeek: !!CONFIG.mutateUrl || CONFIG.issuesPreview,
+        thisWeek: true,
         previousSubmissions,
       })
     );
@@ -451,14 +451,9 @@ function _downloadCalendar() {
 // ── Entry point ───────────────────────────────────────────────
 
 async function init() {
-  // Wire up the Google Form link wherever it appears on the page
+  // Point every "Submit a Paper" link at the paper issue form
   document.querySelectorAll('#submit-link, #submit-cta-link').forEach((el) => {
-    if (CONFIG.formUrl && CONFIG.formUrl !== 'PASTE_YOUR_GOOGLE_FORM_URL_HERE') {
-      el.href = CONFIG.formUrl;
-    } else {
-      el.textContent = 'Submit a Paper (not configured yet)';
-      el.removeAttribute('href');
-    }
+    el.href = CONFIG.formUrl;
   });
 
   // Populate meeting info block from CONFIG.meeting
@@ -478,16 +473,8 @@ async function init() {
   }
 
   const container = document.getElementById('papers-container');
-
-  if (!CONFIG.sheetCsvUrl || CONFIG.sheetCsvUrl === 'PASTE_YOUR_SHEET_CSV_URL_HERE') {
-    container.innerHTML = `<div class="error">
-      ⚠️ <strong>Not configured yet.</strong>
-      Open <code>site/assets/js/config.js</code> and fill in
-      <code>sheetCsvUrl</code> and <code>formUrl</code>.
-      See the README for instructions.
-    </div>`;
-    return;
-  }
+  // Pages without a paper list (Resources) only need the links above.
+  if (!container) return;
 
   const page = window.location.pathname.includes('archive') ? 'archive' : 'index';
 
@@ -517,18 +504,6 @@ async function init() {
       // Render trending section
       const trendingContainer = document.getElementById('trending');
       if (trendingContainer) {
-        if (trendingResult.state === 'empty' && CONFIG.mutateUrl) {
-          // Attempt to trigger a refresh server-side, then show static message
-          try {
-            await fetch(CONFIG.mutateUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain' },
-              body: JSON.stringify({ action: 'triggerTrendingRefresh' }),
-            });
-          } catch {
-            // Ignore — the static message handles both trigger-succeeded and trigger-failed
-          }
-        }
         renderTrending(trendingResult.state, trendingResult.rows, trendingContainer);
       }
     }
@@ -540,10 +515,9 @@ async function init() {
   } catch (err) {
     console.error(err);
     container.innerHTML = `<div class="error">
-      ⚠️ <strong>Could not load papers.</strong> The most likely cause is the
-      Google Sheet CSV being unpublished or expired. In the sheet go to
-      <strong>File \u2192 Share \u2192 Publish to web</strong>, select the <em>Public</em>
-      tab as CSV, and click Publish (or re-publish).<br>
+      ⚠️ <strong>Could not load papers.</strong> Try reloading the page. If it keeps
+      failing, the last site deploy may not have built <code>data/papers.csv</code>;
+      check the <em>Deploy to GitHub Pages</em> runs under the repository's Actions tab.<br>
       <small>${err.message}</small>
     </div>`;
   }

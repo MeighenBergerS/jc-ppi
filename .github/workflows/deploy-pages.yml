@@ -11,7 +11,7 @@ on:
       - "site/assets/**"
       - "site/.nojekyll"
       - "scripts/papers/**"
-  # Paper issues feed the ?source=issues preview (docs/ISSUES-PREVIEW.md).
+  # The site's papers come from the paper issues (docs/MAINTAINING.md).
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled]
   schedule:
@@ -48,12 +48,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Build the issues preview data
-        # Never block the live site. On failure the preview shows no papers until the next run.
-        continue-on-error: true
+      # If this fails, the run stops and the previous deploy stays online.
+      - name: Build the site data from the issues
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/papers/build-csv.js site/data/papers-from-issues.csv site/data/trending.csv
+        run: node scripts/papers/build-csv.js site/data/papers.csv site/data/trending.csv
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

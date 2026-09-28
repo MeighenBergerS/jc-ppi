@@ -1,8 +1,9 @@
 /* ============================================================
    trending.js — Trending papers section renderer
    ============================================================
-   Renders the Trending section from rows fetched from the
-   Trending Google Sheet tab (published as CSV).
+   Renders the Trending section from data/trending.csv, which
+   the deploy builds from the newest "Trending" issue (opened by
+   .github/workflows/trending.yml on Monday and Wednesday).
 
    Called from app.js with one of three states:
      'ok'    — rows present, render normally

@@ -22,7 +22,7 @@ const ABSTRACT_MAX_CHARS = 500;
 export const TRENDING_MARKER = 'jc-ppi:trending';
 const TRENDING_RE = /<!-- jc-ppi:trending (\{[\s\S]*?\}) -->/;
 
-/** Shapes an INSPIRE record like the Apps Script's Trending tab rows. */
+/** Shapes an INSPIRE record into a trending paper. */
 export function parseTrendingHit(m) {
   let authors = '';
   let affiliation = '';
@@ -156,7 +156,7 @@ export function parseTrendingIssue(body) {
 }
 
 /**
- * Rows in the Apps Script's Trending tab format (COL_TREND in config.js):
+ * Rows for data/trending.csv (COL_TREND in config.js):
  * category, rank, arXiv ID, title, abstract, authors, affiliation,
  * citations, citations excluding self-citations.
  */

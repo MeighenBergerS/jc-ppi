@@ -6,14 +6,13 @@
      2. Subfield distribution              (fixed 10-color palette)
      3. Top keywords                       (purple gradient bars)
 
-   CSV data is fetched fresh; INSPIRE metadata is re-used from
-   the sessionStorage cache populated by the other pages.
+   data/papers.csv is fetched fresh; INSPIRE metadata is re-used
+   from the localStorage cache populated by the other pages.
    ============================================================ */
 
 import { CONFIG, COL, TITLE_STOP_WORDS } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
-import './preview.js';
 
 const DEFAULT_YEAR = new Date().getFullYear();
 
@@ -344,34 +343,21 @@ async function renderStats(year, allRows) {
 // ── Entry point ───────────────────────────────────────────────
 
 async function init() {
-  // Wire up the Google Form link
+  // Point the "Submit a Paper" link at the paper issue form
   document.querySelectorAll('#submit-link').forEach((el) => {
-    if (CONFIG.formUrl && CONFIG.formUrl !== 'PASTE_YOUR_GOOGLE_FORM_URL_HERE') {
-      el.href = CONFIG.formUrl;
-    } else {
-      el.textContent = 'Submit a Paper (not configured yet)';
-      el.removeAttribute('href');
-    }
+    el.href = CONFIG.formUrl;
   });
 
   const container = document.getElementById('stats-container');
 
-  if (!CONFIG.sheetCsvUrl || CONFIG.sheetCsvUrl === 'PASTE_YOUR_SHEET_CSV_URL_HERE') {
-    container.innerHTML = `<div class="error">
-      ⚠️ <strong>Not configured yet.</strong>
-      Open <code>site/assets/js/config.js</code> and fill in
-      <code>sheetCsvUrl</code> and <code>formUrl</code>.
-    </div>`;
-    return;
-  }
-
   try {
-    // ── 1. Fetch + parse the sheet ──────────────────────────
-    const res = await fetch(CONFIG.sheetCsvUrl, { cache: 'no-cache' });
+    // ── 1. Fetch + parse the papers CSV ─────────────────────
+    const res = await fetch(CONFIG.papersCsvUrl, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const allRows = parseCsv(await res.text())
       .slice(1)
       .filter((r) => r.length > COL.timestamp && r[COL.timestamp])
+      .filter((r) => (r[COL.approved] ?? '').trim().toUpperCase() === 'TRUE')
       .filter((r) => (r[COL.removed] ?? '').trim().toUpperCase() !== 'TRUE');
 
     // ── 2. Populate year selector ───────────────────────────

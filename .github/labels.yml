@@ -1,7 +1,7 @@
 # The repository's labels. Edit here, never on GitHub: workflows/labels.yml
 # syncs this file to GitHub on every change to main and deletes labels not listed.
 
-# Paper submissions (see docs/ISSUES-PREVIEW.md)
+# Paper submissions (see docs/MAINTAINING.md)
 - name: paper
   color: "e7298a"
   description: A paper suggested for the journal club

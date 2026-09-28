@@ -1,9 +1,8 @@
 /* ============================================================
    scripts/papers/slack.js — The weekly Slack reminder, as functions
    ============================================================
-   Used by slack-reminder.js. A port of weeklySlackReminder and
-   refreshTrendingPapers from docs/appscript.gs, reading papers
-   from the published Google Sheet or from GitHub issues.
+   Used by slack-reminder.js. Builds the reminder from this
+   week's paper issues and the trending papers.
    ============================================================ */
 
 import { COL } from '../../site/assets/js/config.js';
@@ -16,7 +15,7 @@ export const REMINDER_HOUR = 13;
 
 const isTrue = (v) => (v ?? '').trim().toUpperCase() === 'TRUE';
 
-/** A row timestamp as a Date: Sheet format (Central wall clock) or ISO. */
+/** A row timestamp as a Date: imported Sheet format (Central wall clock) or ISO. */
 export function rowTime(text) {
   const sheet = chicagoWallTime(text);
   return isNaN(sheet) ? new Date(text) : sheet;
@@ -24,7 +23,7 @@ export function rowTime(text) {
 
 /**
  * This week's approved, not-removed papers from rows in the Public tab format
- * (the Sheet CSV, or issuesToRows()). Oldest first.
+ * (issuesToRows()). Oldest first.
  * @returns {{name, arxivId, votes}[]}
  */
 export function thisWeekPapers(rows, now = new Date()) {

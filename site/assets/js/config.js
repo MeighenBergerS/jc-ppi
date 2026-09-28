@@ -4,30 +4,23 @@
    The only file you should ever need to edit after initial setup.
    ============================================================ */
 
-// ── GOOGLE INTEGRATION ──────────────────────────────────────
+// ── DATA SOURCES ────────────────────────────────────────────
+// Papers are GitHub issues labelled "paper"; see docs/SETUP.md.
+// The deploy workflow (scripts/papers/build-csv.js) writes both CSVs
+// into site/data/ before every deploy.
 
 export const CONFIG = {
-  // Published CSV export URL for the *Public* sheet tab.
-  // That tab mirrors all columns from the response sheet EXCEPT email.
-  // File → Share → Publish to web → choose the "Public" tab → CSV → copy URL.
-  sheetCsvUrl:
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSV30CUvQZhLXFlvt0HqGmGsMZqaapy4S_xIQAxYiJp1IBkkW515MNIdBvSnEaYRu9NQ1rOvCANW2ua/pub?gid=620589092&single=true&output=csv',
+  // The GitHub repository whose issues hold the paper submissions.
+  issuesRepo: 'MeighenBergerS/jc-ppi',
 
-  // Share link for the Google Form (the URL you give to members).
-  // Publish → link icon → copy URL.
-  formUrl: 'https://forms.gle/j88TQiKnpScU9xY28',
+  // Approved paper issues, one row per submission (see COL below).
+  papersCsvUrl: './data/papers.csv',
 
-  // Published CSV export URL for the *Trending* tab.
-  // File → Share → Publish to web → choose the "Trending" tab → CSV → copy URL.
-  // Leave blank until the Trending tab has been created and published.
-  trendingCsvUrl:
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSV30CUvQZhLXFlvt0HqGmGsMZqaapy4S_xIQAxYiJp1IBkkW515MNIdBvSnEaYRu9NQ1rOvCANW2ua/pub?gid=1574674238&single=true&output=csv',
+  // The newest "Trending" issue, one row per trending paper (see COL_TREND below).
+  trendingCsvUrl: './data/trending.csv',
 
-  // Apps Script web app URL for vote/edit/remove mutations.
-  // Deploy docs/appscript.gs as a web app (Execute as: Me, Anyone can access)
-  // and paste the /exec URL here.  Leave blank to disable interactive controls.
-  mutateUrl:
-    'https://script.google.com/macros/s/AKfycbw6pJRxEQOXgLGLL3f0ih6HL05aSkwiKLipp0sB2o7Ec906WPxxVQ4ZmKlX742Aedix/exec',
+  // Where "Submit a Paper" links go: the paper issue form.
+  formUrl: 'https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml',
 
   // How many weeks back to search for Iowa-affiliated papers on the Iowa Research tab.
   iowaLookbackWeeks: 8,
@@ -51,29 +44,6 @@ export const CONFIG = {
     slackUrl: '', // Slack channel URL — leave '' to show plain text
   },
 };
-
-// ── GITHUB ISSUES PREVIEW ───────────────────────────────────
-// Opening any page with ?source=issues reads papers from GitHub issues instead
-// of the Google Sheet (see docs/ISSUES-PREVIEW.md). The deploy workflow builds
-// the papers CSV from the paper issues and the trending CSV from the newest
-// Trending issue; voting and submitting happen on GitHub.
-CONFIG.issuesRepo = 'MeighenBergerS/jc-ppi';
-CONFIG.issuesPreview =
-  typeof location !== 'undefined' &&
-  new URLSearchParams(location.search).get('source') === 'issues';
-if (CONFIG.issuesPreview) {
-  CONFIG.sheetCsvUrl = './data/papers-from-issues.csv';
-  CONFIG.trendingCsvUrl = './data/trending.csv';
-  CONFIG.mutateUrl = '';
-  CONFIG.formUrl = `https://github.com/${CONFIG.issuesRepo}/issues/new?template=1-paper.yml`;
-}
-
-// ── SHEET COLUMN MAP ────────────────────────────────────────
-// Columns refer to the *Public* tab (email is excluded there):
-//   A (0) Timestamp  B (1) Name  C (2) arXiv ID  D (3) Comment  E (4) Approved
-//   F (5) Removed    G (6) EditedComment          H (7) Votes
-// The three new columns (F-H) are written by the Apps Script.
-// Do not change these unless you reorder the Public tab columns.
 
 // ── STATS PAGE STOP WORDS ──────────────────────────────────
 // Words excluded from the title-word frequency chart on the Stats page.
@@ -211,25 +181,27 @@ export const TITLE_STOP_WORDS = new Set([
   'mass',
 ]);
 
+// ── PAPERS CSV COLUMN MAP ───────────────────────────────────
+// Columns of papers.csv (0-indexed), written by scripts/papers/lib.js
+// issuesToRows(). The layout matches the retired Google Sheet's Public tab,
+// so the history and the test fixtures read the same way. Only approved,
+// not-removed papers are written, so Approved is always "TRUE" and Removed
+// and EditedComment are always empty.
 export const COL = {
   timestamp: 0,
   name: 1,
   arxivId: 2,
   comment: 3,
-  // Approved checkbox (column E in the Public tab, column F in the raw sheet).
-  // Ticked automatically by the Apps Script for known members;
-  // tick manually in the raw sheet for one-off approvals.
-  approved: 4,
-  // Interactivity columns (added to the Public tab; see docs/appscript.gs).
-  removed: 5, // "TRUE" when a visitor removes the entry
-  editedComment: 6, // overrides comment when non-empty
-  votes: 7, // running upvote count
-  discussed: 8, // "TRUE" when the paper was starred as discussed at the JC meeting
-  issueUrl: 9, // GitHub issue URL; only in the ?source=issues preview data
+  approved: 4, // "TRUE"
+  removed: 5, // "TRUE" when removed; never set in papers.csv
+  editedComment: 6, // overrides comment when non-empty; never set in papers.csv
+  votes: 7, // 👍 reactions on the issue (plus votes from the Google Sheet era)
+  discussed: 8, // "TRUE" when the issue has the "discussed" label
+  issueUrl: 9, // the paper's GitHub issue
 };
 
-// ── TRENDING TAB COLUMN MAP ─────────────────────────────────
-// Columns in the Trending tab CSV (0-indexed):
+// ── TRENDING CSV COLUMN MAP ─────────────────────────────────
+// Columns of trending.csv (0-indexed), written from the newest Trending issue:
 //   A (0) Category  B (1) Rank  C (2) ArxivId  D (3) Title  E (4) Abstract
 //   F (5) Authors   G (6) Affiliation  H (7) Citations  I (8) CitationsNoSelf
 export const COL_TREND = {

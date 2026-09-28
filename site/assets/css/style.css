@@ -351,60 +351,6 @@ a.action-btn {
   background: #dbeafe;
 }
 
-.action-btn--edit {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #15803d;
-}
-.action-btn--edit:hover:not(:disabled) {
-  background: #dcfce7;
-}
-
-.action-btn--remove {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #b91c1c;
-}
-.action-btn--remove:hover:not(:disabled) {
-  background: #fee2e2;
-}
-
-.action-btn--save {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #15803d;
-}
-.action-btn--save:hover:not(:disabled) {
-  background: #dcfce7;
-}
-
-.action-btn--cancel {
-  background: var(--card);
-  border-color: var(--border);
-  color: var(--muted);
-}
-.action-btn--cancel:hover:not(:disabled) {
-  background: var(--border);
-}
-
-.action-btn--discuss {
-  background: #fefce8;
-  border-color: #fde68a;
-  color: #92400e;
-}
-.action-btn--discuss:hover:not(:disabled) {
-  background: #fef9c3;
-}
-.action-btn--discuss.active {
-  background: #fef08a;
-  border-color: #f59e0b;
-  color: #78350f;
-  font-weight: 600;
-}
-.action-btn--discuss.active:hover:not(:disabled) {
-  background: #fde047;
-}
-
 .paper-discussed {
   display: inline-block;
   margin-bottom: 0.3rem;
@@ -416,31 +362,6 @@ a.action-btn {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-}
-
-.edit-textarea {
-  width: 100%;
-  padding: 0.4em 0.5em;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
-  color: var(--fg);
-  font-size: 0.9rem;
-  resize: vertical;
-  box-sizing: border-box;
-}
-.edit-textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.edit-btn-row {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
-}
-.edit-btn-row .action-btn {
-  width: auto;
 }
 
 .paper-title {
@@ -1332,15 +1253,4 @@ footer a:hover {
     flex-direction: column;
     text-align: center;
   }
-}
-
-/* ── GitHub issues preview banner (preview.js) ── */
-.preview-banner {
-  margin: 0;
-  padding: 0.5rem 1rem;
-  background: #fef3c7;
-  border-bottom: 1px solid #fcd34d;
-  color: #78350f;
-  font-size: 0.85rem;
-  text-align: center;
 }

@@ -6,49 +6,8 @@
    the page.
    ============================================================ */
 
-import { COL, CONFIG } from './config.js';
+import { COL } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
-import { vote, removeEntry, editComment, discussPaper } from './sheet.js';
-
-// ── Discussed override cache ──────────────────────────────────
-// Google Sheets' published CSV has a ~1–5 min propagation delay after
-// the Apps Script writes to the sheet.  We store the user's last known
-// discussed state in localStorage so the star survives a reload while
-// the CSV catches up.  Entries expire after 10 minutes.
-
-const _DISC_KEY = 'jc_discussed_overrides';
-const _DISC_TTL = 10 * 60 * 1000; // 10 minutes
-
-function _getDiscussedOverrides() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(_DISC_KEY) || '{}');
-    const now = Date.now();
-    // Prune expired entries
-    let pruned = false;
-    Object.keys(raw).forEach((k) => {
-      if (now - raw[k].ts >= _DISC_TTL) {
-        delete raw[k];
-        pruned = true;
-      }
-    });
-    if (pruned) localStorage.setItem(_DISC_KEY, JSON.stringify(raw));
-    return raw;
-  } catch {
-    return {};
-  }
-}
-
-function _setDiscussedOverride(cleanId, discussed) {
-  try {
-    const raw = _getDiscussedOverrides();
-    if (discussed) {
-      raw[cleanId] = { v: true, ts: Date.now() };
-    } else {
-      delete raw[cleanId]; // cleared — no need to persist false
-    }
-    localStorage.setItem(_DISC_KEY, JSON.stringify(raw));
-  } catch {}
-}
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -79,7 +38,6 @@ export function buildTable(
 
   // ── Body ─────────────────────────────────────────────────
   const tbody = table.createTBody();
-  const discussedOverrides = _getDiscussedOverrides();
   papers.forEach((paper) => {
     const tr = tbody.insertRow();
     const id = stripVersion(normalizeArxivId(paper[COL.arxivId]));
@@ -91,10 +49,7 @@ export function buildTable(
 
     // Attach filter data attributes
     tr.dataset.categories = (meta.categories ?? []).join(',');
-    // Prefer the local override (bridges the Sheets CSV propagation delay)
-    const discussed =
-      discussedOverrides[id]?.v === true ||
-      (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
+    const discussed = (paper[COL.discussed] ?? '').trim().toUpperCase() === 'TRUE';
     tr.dataset.discussed = discussed ? 'true' : 'false';
 
     // Column 2 — Paper (title, authors, abstract, badge row, keyword pills)
@@ -149,16 +104,13 @@ export function buildTable(
     if (!commentText) commentSpan.style.color = 'var(--muted)';
     tdComment.appendChild(commentSpan);
 
-    // Column 4 — Actions (this week only). In the GitHub issues preview this is
-    // a link to the paper's issue, where people vote with a 👍 reaction.
+    // Column 4 — This week only: a link to the paper's issue, where people
+    // vote with a 👍 reaction.
     if (thisWeek) {
       const tdActions = tr.insertCell();
       tdActions.className = 'actions-cell';
-      const votes = Number(paper[COL.votes] ?? 0);
       tdActions.appendChild(
-        CONFIG.issuesPreview
-          ? _buildIssueLinkCell(paper[COL.issueUrl], votes)
-          : _buildActionsCell(id, votes, discussed, commentSpan, tdComment)
+        _buildIssueLinkCell(paper[COL.issueUrl], Number(paper[COL.votes] ?? 0))
       );
     }
   });
@@ -169,9 +121,9 @@ export function buildTable(
 // ── Action controls ───────────────────────────────────────────
 
 /**
- * Builds the vote link for a this-week row in the GitHub issues preview.
+ * Builds the vote link for a this-week row.
  * @param {string} issueUrl - The paper's GitHub issue.
- * @param {number} votes    - 👍 count when the preview data was built.
+ * @param {number} votes    - 👍 count when the site data was last built.
  */
 function _buildIssueLinkCell(issueUrl, votes) {
   const container = document.createElement('div');
@@ -185,154 +137,6 @@ function _buildIssueLinkCell(issueUrl, votes) {
   link.textContent = `▲ ${votes} · Vote`;
   link.title = 'Vote with a 👍 reaction on the GitHub issue';
   container.appendChild(link);
-  return container;
-}
-
-/**
- * Builds the vote / edit / remove control group for a this-week row.
- * @param {string}      cleanId      - Normalised arXiv ID.
- * @param {number}      initialVotes - Vote count from the CSV.
- * @param {HTMLElement} commentSpan  - The <span> holding the comment text.
- * @param {HTMLElement} tdComment    - The parent <td> (swapped during editing).
- */
-function _buildActionsCell(cleanId, initialVotes, initialDiscussed, commentSpan, tdComment) {
-  const container = document.createElement('div');
-  container.className = 'actions-container';
-
-  // ── Upvote ─────────────────────────────────────────────
-  let voteCount = initialVotes;
-  const voteBtn = document.createElement('button');
-  voteBtn.className = 'action-btn action-btn--vote';
-  const _updateVote = () => {
-    voteBtn.textContent = `▲ ${voteCount}`;
-  };
-  _updateVote();
-  voteBtn.addEventListener('click', async () => {
-    voteBtn.disabled = true;
-    try {
-      const res = await vote(cleanId);
-      if (res.ok) {
-        voteCount = res.votes ?? voteCount + 1;
-        _updateVote();
-      }
-    } catch (err) {
-      console.warn('Vote failed:', err);
-    }
-    setTimeout(() => {
-      voteBtn.disabled = false;
-    }, 1000);
-  });
-
-  // ── Edit ───────────────────────────────────────────────
-  const editBtn = document.createElement('button');
-  editBtn.className = 'action-btn action-btn--edit';
-  editBtn.textContent = '✏ Edit';
-  editBtn.addEventListener('click', () => {
-    const current = commentSpan.textContent === '—' ? '' : commentSpan.textContent;
-    const textarea = document.createElement('textarea');
-    textarea.className = 'edit-textarea';
-    textarea.value = current;
-    textarea.rows = 3;
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'action-btn action-btn--save';
-    saveBtn.textContent = 'Save';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'action-btn action-btn--cancel';
-    cancelBtn.textContent = 'Cancel';
-
-    const btnRow = document.createElement('div');
-    btnRow.className = 'edit-btn-row';
-    btnRow.appendChild(saveBtn);
-    btnRow.appendChild(cancelBtn);
-
-    tdComment.innerHTML = '';
-    tdComment.appendChild(textarea);
-    tdComment.appendChild(btnRow);
-    textarea.focus();
-
-    const _restore = () => {
-      tdComment.innerHTML = '';
-      tdComment.appendChild(commentSpan);
-    };
-
-    saveBtn.addEventListener('click', async () => {
-      const newText = textarea.value.trim();
-      saveBtn.disabled = cancelBtn.disabled = true;
-      try {
-        const res = await editComment(cleanId, newText);
-        if (res.ok) {
-          commentSpan.textContent = newText || '—';
-          commentSpan.style.color = newText ? '' : 'var(--muted)';
-        }
-      } catch (err) {
-        console.warn('Edit failed:', err);
-      }
-      _restore();
-    });
-
-    cancelBtn.addEventListener('click', _restore);
-  });
-
-  // ── Remove ─────────────────────────────────────────────
-  const removeBtn = document.createElement('button');
-  removeBtn.className = 'action-btn action-btn--remove';
-  removeBtn.textContent = '✕ Remove';
-  removeBtn.addEventListener('click', async () => {
-    if (!confirm("Remove this paper from this week's list?")) return;
-    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = discussBtn.disabled = true;
-    try {
-      const res = await removeEntry(cleanId);
-      if (res.ok) {
-        removeBtn.closest('tr')?.remove();
-        return;
-      }
-    } catch (err) {
-      console.warn('Remove failed:', err);
-    }
-    removeBtn.disabled = editBtn.disabled = voteBtn.disabled = discussBtn.disabled = false;
-  });
-
-  // ── Discuss ──────────────────────────────────────────────────
-  let isDiscussed = initialDiscussed;
-  const discussBtn = document.createElement('button');
-  discussBtn.className = 'action-btn action-btn--discuss';
-  const _updateDiscuss = () => {
-    discussBtn.textContent = isDiscussed ? '\u2605 Discussed' : '\u2606 Mark discussed';
-    discussBtn.classList.toggle('active', isDiscussed);
-  };
-  _updateDiscuss();
-  discussBtn.addEventListener('click', async () => {
-    discussBtn.disabled = true;
-    try {
-      const res = await discussPaper(cleanId);
-      if (res.ok) {
-        isDiscussed = res.discussed;
-        _setDiscussedOverride(cleanId, isDiscussed);
-        _updateDiscuss();
-        // Sync the read-only star badge in the paper cell
-        const row = discussBtn.closest('tr');
-        const tdPaper = row?.cells[1];
-        if (tdPaper) {
-          const existing = tdPaper.querySelector('.paper-discussed');
-          if (isDiscussed && !existing) {
-            const star = document.createElement('div');
-            star.className = 'paper-discussed';
-            star.textContent = '\u2605 Discussed at JC';
-            tdPaper.prepend(star);
-          } else if (!isDiscussed && existing) {
-            existing.remove();
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Discuss failed:', err);
-    }
-    discussBtn.disabled = false;
-  });
-
-  container.append(voteBtn, editBtn, discussBtn, removeBtn);
   return container;
 }
 

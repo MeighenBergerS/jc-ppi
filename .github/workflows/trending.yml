@@ -2,7 +2,7 @@ name: Trending
 
 # Opens a "Trending" issue with the most-cited recent hep-ph papers per category
 # and closes the previous one (scripts/papers/trending-issue.js). The site's
-# ?source=issues preview reads the newest Trending issue.
+# Trending section shows the newest Trending issue.
 
 on:
   schedule:

@@ -1,10 +1,10 @@
 /* ============================================================
-   scripts/papers/build-csv.js — Site preview data from issues
+   scripts/papers/build-csv.js — The site's data, from issues
    ============================================================
-   Writes every approved paper issue as a CSV shaped like the
-   Google Sheet's Public tab, and the newest Trending issue as a
-   CSV shaped like its Trending tab, so the site can render them
-   with ?source=issues. Run by deploy-pages.yml before each deploy.
+   Writes every approved paper issue to data/papers.csv and the
+   newest Trending issue to data/trending.csv (see COL and
+   COL_TREND in site/assets/js/config.js). Run by deploy-pages.yml
+   before each deploy.
 
    Usage: node scripts/papers/build-csv.js <papers.csv> <trending.csv>
    Environment: GITHUB_REPOSITORY (default MeighenBergerS/jc-ppi),

@@ -86,7 +86,7 @@ const CATEGORY_LABELS = {
 
 /**
  * Fetches INSPIRE metadata for each arXiv ID in `ids`.
- * Results are batched (≤25 per request) and cached in sessionStorage.
+ * Results are batched (≤25 per request) and cached in localStorage.
  *
  * @param {string[]} ids - Array of raw arXiv IDs or URLs.
  * @returns {Promise<Map>} Map of cleanId → metadata object

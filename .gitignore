@@ -27,5 +27,5 @@ dist/
 # Committed baseline fixtures (submissions.csv etc.) are tracked.
 tests/fixtures/*.fresh.*
 
-# ── Issues preview data (built by deploy-pages.yml) ──
+# ── Site data (built from the issues by deploy-pages.yml) ──
 site/data/

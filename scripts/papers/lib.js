@@ -2,8 +2,9 @@
    scripts/papers/lib.js — Helpers for paper-submission issues
    ============================================================
    Shared by enrich.js (the bot that fills in paper metadata),
-   build-csv.js (the site preview data) and import-sheet.js
-   (the one-time Google Sheet import). Runs in Node >= 18.
+   build-csv.js (the site data) and the Slack reminder. Issues
+   labelled "imported" hold the Google Sheet history (imported once
+   in September 2026). Runs in Node >= 18.
    ============================================================ */
 
 import { normalizeArxivId, stripVersion, isValidArxivId } from '../../site/assets/js/utils.js';
@@ -434,10 +435,10 @@ export function paperIssueTitle(id, title) {
   return `${id}: ${title.replace(/\s+/g, ' ').trim()}`.slice(0, 250);
 }
 
-// ── Site preview data ────────────────────────────────────────
+// ── Site data ────────────────────────────────────────
 
 /**
- * Converts paper issues into rows shaped like the Google Sheet's Public tab
+ * Converts paper issues into rows for data/papers.csv, laid out like the retired Google Sheet's Public tab
  * (see COL in site/assets/js/config.js), plus the issue URL in column 9.
  * Unapproved and removed (closed as not planned) issues are left out.
  * `names` maps logins to profile names (fetchProfileNames).

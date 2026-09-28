@@ -1,27 +1,22 @@
 /* ============================================================
    scripts/papers/slack-reminder.js — Weekly Slack reminder
    ============================================================
-   Run by .github/workflows/slack-reminder.yml. Replaces the
-   weeklySlackReminder Apps Script trigger.
+   Run by .github/workflows/slack-reminder.yml, Thursday 1 PM
+   Central Time.
 
    Environment:
      SLACK_WEBHOOK_URL  Incoming-webhook URL (repository secret).
-     PAPERS_SOURCE      "sheet" (default): the published Google Sheet.
-                        "issues": the GitHub paper issues.
      SCHEDULE           The cron that started the run (github.event.schedule).
      SLACK_REMINDER     "on" lets scheduled runs post; otherwise they print only.
      POST               "true" on a manual run posts; otherwise it prints only.
-     GITHUB_TOKEN, GITHUB_REPOSITORY  For the issues source.
+     GITHUB_TOKEN, GITHUB_REPOSITORY  To read the paper issues.
    ============================================================ */
 
 import { CONFIG } from '../../site/assets/js/config.js';
-import { parseCsv } from '../../site/assets/js/utils.js';
 import { LABELS, github, issuesToRows, fetchProfileNames, fetchInspire } from './lib.js';
 import { thisWeekPapers, buildReminder, isReminderSchedule } from './slack.js';
 import { fetchTrending } from './trending.js';
 
-const SITE_URL = 'https://meighenbergers.github.io/jc-ppi/';
-const source = process.env.PAPERS_SOURCE === 'issues' ? 'issues' : 'sheet';
 const schedule = process.env.SCHEDULE ?? '';
 const repo = process.env.GITHUB_REPOSITORY || CONFIG.issuesRepo;
 
@@ -30,19 +25,10 @@ if (schedule && !isReminderSchedule(schedule)) {
   process.exit(0);
 }
 
-let rows;
-let submitUrl;
-if (source === 'issues') {
-  const api = github(process.env.GITHUB_TOKEN, repo);
-  const issues = await api.paginate(`/issues?labels=${LABELS.paper}&state=all`);
-  rows = issuesToRows(issues, await fetchProfileNames(api, issues));
-  submitUrl = `https://github.com/${repo}/issues/new?template=1-paper.yml`;
-} else {
-  const res = await fetch(CONFIG.sheetCsvUrl);
-  if (!res.ok) throw new Error(`Sheet CSV: HTTP ${res.status}`);
-  rows = parseCsv(await res.text()).slice(1);
-  submitUrl = SITE_URL;
-}
+const api = github(process.env.GITHUB_TOKEN, repo);
+const issues = await api.paginate(`/issues?labels=${LABELS.paper}&state=all`);
+const rows = issuesToRows(issues, await fetchProfileNames(api, issues));
+const submitUrl = CONFIG.formUrl;
 
 const papers = thisWeekPapers(rows);
 const titles = {};
@@ -56,7 +42,7 @@ try {
 const trending = await fetchTrending({ size: 1 });
 const text = buildReminder({ papers, trending, meeting: CONFIG.meeting, submitUrl, titles });
 
-console.log(`Source: ${source}. Papers this week: ${papers.length}.\n`);
+console.log(`Papers this week: ${papers.length}.\n`);
 console.log(text);
 
 const post = schedule ? process.env.SLACK_REMINDER === 'on' : process.env.POST === 'true';
