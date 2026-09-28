@@ -52,7 +52,7 @@ header {
   padding: 2.5rem 1.5rem 0.4rem;
 }
 
-/* "Bring a paper": centred under the tagline, and it stays at the top of
+/* "Bring a paper": a gold outline button centred under the tagline; it stays at the top of
    the window while scrolling (a sticky child of <body>, not of <header>) */
 .cta-bar {
   position: sticky;
@@ -66,20 +66,25 @@ header {
 
 .cta-bar-btn {
   display: inline-block;
-  padding: 0.6rem 2rem;
-  border-radius: 999px;
-  background: var(--accent-btn);
-  color: #fff;
+  /* The 2px outline comes out of the padding, so the size is unchanged */
+  padding: calc(0.6rem - 2px) calc(2rem - 2px);
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gold);
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-decoration: none;
-  box-shadow: 0 2px 10px rgba(217, 95, 2, 0.35);
-  transition: opacity 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
-.cta-bar-btn:hover {
-  opacity: 0.9;
+.cta-bar-btn:hover,
+.cta-bar-btn:focus-visible {
+  background: var(--gold);
+  color: var(--header-bg);
 }
 
 .nav-bar {
