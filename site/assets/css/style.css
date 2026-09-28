@@ -546,6 +546,46 @@ a.action-btn {
 
 /* ── Resources page ─────────────────────────────────────── */
 
+/* About page: link cards to the guides and the documentation */
+.about-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+}
+
+.res-section a.about-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-sec);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.res-section a.about-link:hover {
+  background: var(--bg-alt);
+}
+
+.about-link span {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.res-section .btn {
+  color: #fff;
+}
+
+.res-section ol {
+  margin: 0.4rem 0 0 1.3rem;
+}
+
+.res-section ol li {
+  margin-bottom: 0.45rem;
+}
+
 main.prose {
   max-width: 720px;
 }
@@ -1446,6 +1486,10 @@ footer a {
 }
 footer a:hover {
   text-decoration: underline;
+}
+
+footer p + p {
+  margin-top: 0.35rem;
 }
 
 /* ── Submit top button ───────────────────────────────────── */
