@@ -13,6 +13,11 @@
   --border: #e5e7eb;
   --bg: #ffffff;
   --bg-alt: #f9fafb;
+  /* Stats charts: one teal ramp, light to dark (papers per week, discussed) */
+  --teal-1: #72c2a5;
+  --teal-2: #3fa885;
+  --teal-3: #1b8a68;
+  --teal-4: #0f5c45;
   --radius: 6px;
   --max-width: 860px;
 }
@@ -767,7 +772,155 @@ main.prose {
   text-align: left;
 }
 
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.chart-legend .heat-cell,
+.chart-legend .month-seg {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 3px;
+}
+
+/* Weekly heat strip: a label column, then one row of weeks per quarter */
+.heat-strip {
+  display: grid;
+  grid-template-columns: 8ch 1fr;
+  align-items: center;
+  gap: 4px 0.75rem;
+}
+
+.heat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.heat-row {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 2px;
+}
+
+.heat-cell {
+  display: block;
+  aspect-ratio: 1;
+  max-height: 2rem;
+  border-radius: 4px;
+  background: var(--bg-alt);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.heat-cell[data-level='1'] {
+  background: var(--teal-1);
+  box-shadow: none;
+}
+.heat-cell[data-level='2'] {
+  background: var(--teal-2);
+  box-shadow: none;
+}
+.heat-cell[data-level='3'] {
+  background: var(--teal-3);
+  box-shadow: none;
+}
+.heat-cell[data-level='4'] {
+  background: var(--teal-4);
+  box-shadow: none;
+}
+
+.heat-cell--future {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--border);
+  opacity: 0.5;
+}
+
+/* Monthly columns: total on top, discussed at the base */
+.month-chart {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 4px;
+}
+
+.month-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.month-plot {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.month-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+
+.month-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(100%, 2.25rem);
+}
+
+.month-seg {
+  display: block;
+  min-height: 2px;
+}
+
+.month-bar .month-seg:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.month-seg--suggested {
+  background: var(--teal-1);
+}
+
+.month-seg--discussed {
+  background: var(--teal-4);
+}
+
+.month-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+.month-label--future {
+  opacity: 0.5;
+}
+
 @media (max-width: 600px) {
+  .heat-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .heat-label {
+    text-align: left;
+    margin-top: 0.3rem;
+  }
+
   .bar-row {
     grid-template-columns: 10ch 1fr 3ch;
     gap: 0.5rem;
