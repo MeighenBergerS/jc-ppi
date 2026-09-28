@@ -107,8 +107,9 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#tests) for details.
 site/                          ← everything GitHub Pages serves
   index.html                   ← This Week page
   archive.html                 ← Past submissions grouped by week
-  stats.html                   ← Submission statistics by year
+  stats.html                   ← What the club has been curious about, by year
   iowa.html                    ← Recent papers with University of Iowa authors
+  about.html                   ← About the club; links to the guide and the docs
   resources.html               ← arXiv & INSPIRE-HEP guide for members
   data/                        ← papers.csv and trending.csv, built at deploy (not committed)
   docs/                        ← The documentation site, built from docs/ at deploy (not committed)
@@ -162,8 +163,8 @@ This site was developed with the help of Claude, Anthropic's AI assistant, used 
 
 ## Documentation
 
-The documentation site is at <https://meighenbergers.github.io/jc-ppi/docs/> (the
-**Documentation** tab on the site), built from these files:
+The documentation site is at <https://meighenbergers.github.io/jc-ppi/docs/> (linked
+from the site's About page and footer), built from these files:
 
 | Document                                     | Contents                                            |
 | -------------------------------------------- | --------------------------------------------------- |

@@ -468,8 +468,11 @@ async function init() {
     updatesEl.replaceChildren('Room changes and cancellations are announced in the ', link, '.');
   }
 
+  // Calendar export (This Week and About)
+  document.getElementById('cal-export')?.addEventListener('click', _downloadCalendar);
+
   const container = document.getElementById('papers-container');
-  // Pages without a paper list (Resources) only need the links above.
+  // Pages without a paper list (About, Resources) only need the above.
   if (!container) return;
 
   const page = window.location.pathname.includes('archive') ? 'archive' : 'index';
@@ -483,9 +486,6 @@ async function init() {
 
     if (page === 'index') {
       await renderThisWeek(papers, container, { force: true });
-
-      // Wire up calendar export button
-      document.getElementById('cal-export')?.addEventListener('click', _downloadCalendar);
 
       // Poll for new This Week submissions every POLL_INTERVAL ms
       setInterval(async () => {

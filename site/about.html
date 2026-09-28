@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About — Iowa Particles &amp; Plots Journal Club</title>
+    <meta
+      name="description"
+      content="About the Iowa Particles &amp; Plots Journal Club: a weekly HEP paper discussion where anyone can bring a paper."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="About — Iowa Particles &amp; Plots Journal Club" />
+    <meta
+      property="og:description"
+      content="A weekly HEP paper discussion at the University of Iowa where anyone can bring a paper."
+    />
+    <meta property="og:url" content="https://meighenbergers.github.io/jc-ppi/about.html" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <div class="header-logo" style="display: flex; flex-direction: column; align-items: center">
+          <img
+            src="./logo.svg"
+            alt="Iowa Particles & Plots logo"
+            style="height: 64px; margin-bottom: 0.5rem"
+          />
+          <div class="header-text">
+            <span class="site-tag">jc-ppi</span>
+            <h1>Iowa Particles &amp; Plots<br />Journal Club</h1>
+            <p class="tagline">From arXiv to argument — every week.</p>
+          </div>
+        </div>
+      </div>
+      <nav>
+        <a href="./index.html">This Week</a>
+        <a href="./archive.html">Archive</a>
+        <a href="./stats.html">Stats</a>
+        <a href="./iowa.html">Iowa Research</a>
+        <a href="./about.html" class="active">About</a>
+        <a href="#" id="submit-link" target="_blank" rel="noopener">Bring a paper ↗</a>
+      </nav>
+    </header>
+
+    <main class="prose">
+      <section class="res-section">
+        <h2>From arXiv to argument</h2>
+        <p>
+          Particles &amp; Plots is a weekly high-energy physics journal club at the University of
+          Iowa. Each week members bring papers from arXiv, the group votes on what to read, and at
+          the weekly meeting we talk it through: what the paper claims, whether we believe it, and
+          what it means for the work we do.
+        </p>
+        <p>
+          Students, postdocs and faculty are all welcome, and so are papers from any corner of the
+          field: theory, phenomenology, experiment, instrumentation, or a review you found useful.
+        </p>
+      </section>
+
+      <section class="res-section">
+        <h2>Anyone can bring a paper</h2>
+        <p>
+          You don&rsquo;t need to be an expert, to have read everything in the field, or to think a
+          paper is important. If you&rsquo;re curious about it, bring it. &ldquo;I don&rsquo;t
+          understand this result&rdquo; is one of the best reasons there is. New here? Your
+          suggestions are especially welcome.
+        </p>
+        <p>
+          <a href="#" id="invite-link" target="_blank" rel="noopener" class="btn"
+            >Bring a paper ↗</a
+          >
+        </p>
+      </section>
+
+      <section class="res-section">
+        <h2>When we meet</h2>
+        <div class="meeting-info">
+          <div class="meeting-info-row">
+            <span class="meeting-tag">When</span>
+            <span id="meeting-when">Weekly</span>
+          </div>
+          <div class="meeting-info-row">
+            <span class="meeting-tag">Updates</span>
+            <span id="meeting-updates"
+              >Room changes and cancellations are announced in the
+              <strong>Slack channel</strong>.</span
+            >
+          </div>
+          <div class="meeting-info-row" style="margin-top: 0.3rem">
+            <button id="cal-export" class="cal-btn">&#128197; Add to Calendar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="res-section">
+        <h2>How it works</h2>
+        <ol>
+          <li>
+            <strong>Bring a paper</strong> with the form: an arXiv ID or link and a line on why.
+            It&rsquo;s a GitHub issue, so you need a GitHub account.
+          </li>
+          <li>
+            A bot adds the title, authors, abstract and BibTeX, and the paper appears on
+            <a href="./index.html">This Week</a>.
+          </li>
+          <li>
+            Everyone votes with a 👍 on the papers they&rsquo;d like to discuss. Voting is about
+            what to read, not whose paper it is.
+          </li>
+          <li>
+            At the meeting we discuss; the paper gets a ⭐ and moves to the
+            <a href="./archive.html">Archive</a> after Sunday.
+          </li>
+          <li>
+            Once a month you can get a short private email about your month at the club. Only you
+            see it; it goes to the public email on your GitHub profile.
+          </li>
+        </ol>
+      </section>
+
+      <section class="res-section">
+        <h2>Guides and documentation</h2>
+        <div class="about-links">
+          <a class="about-link" href="./resources.html">
+            <strong>Reading arXiv and INSPIRE</strong>
+            <span>Finding papers, arXiv IDs, INSPIRE records and what citation counts mean.</span>
+          </a>
+          <a class="about-link" href="./docs/">
+            <strong>Documentation</strong>
+            <span>How to suggest and vote, running the club, and contributing to this site.</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        <a href="./about.html">About</a>
+        &middot;
+        <a href="./resources.html">Reading arXiv &amp; INSPIRE</a>
+        &middot;
+        <a href="./docs/">Documentation</a>
+      </p>
+      <p>
+        Iowa Particles &amp; Plots Journal Club &mdash;
+        <a href="https://arxiv.org" target="_blank" rel="noopener">arXiv</a>
+        &middot;
+        <a href="https://inspirehep.net" target="_blank" rel="noopener">INSPIRE-HEP</a>
+        &middot;
+        <a href="https://github.com/MeighenBergerS/jc-ppi" target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </footer>
+
+    <script type="module" src="./assets/js/app.js"></script>
+  </body>
+</html>

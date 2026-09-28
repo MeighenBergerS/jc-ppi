@@ -47,6 +47,7 @@ check always passes.
 | `site/index.html`                      | This Week page                                                                                             |
 | `site/archive.html`                    | Archive page (with subfield filter)                                                                        |
 | `site/stats.html`                      | Submission statistics by year                                                                              |
+| `site/about.html`                      | About the club, how it works, links to the guide and the docs                                              |
 | `site/resources.html`                  | arXiv & INSPIRE-HEP guide                                                                                  |
 | `scripts/papers/`                      | The paper bot, site data builder, Trending issue and Slack reminder (see [MAINTAINING.md](MAINTAINING.md)) |
 | `docs/`, `mkdocs.yml`                  | This documentation site (see [Documentation site](#documentation-site))                                    |
