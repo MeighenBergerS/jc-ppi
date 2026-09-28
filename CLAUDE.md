@@ -48,7 +48,7 @@ Any page opened with `?source=issues` reads the issues instead of the Sheet.
   `site/assets/js/config.js` (`meeting.time`, plus `icsAnchor` and `icsDurationEnd`, which encode
   the start and end in local time), the fallback defaults in `_downloadCalendar` in
   `site/assets/js/app.js`, the example in `docs/SETUP.md`, and `MEETING_TIME` in
-  `docs/appscript.gs` (Slack reminder text). Change all of them together, and remind the user to
+  `docs/appscript.gs` (the Apps Script's Slack reminder text; the GitHub Actions reminder reads `config.js`). Change all of them together, and remind the user to
   update the live Apps Script.
 - **Trending lookback and schedule:** `INSPIRE_LOOKBACK_WEEKS` and the trigger days are set in the
   Apps Script; `site/assets/js/trending.js` repeats them in its display text.
