@@ -114,6 +114,7 @@
 
       import { buildTable } from '../site/assets/js/table.js';
       import { buildCards } from '../site/assets/js/cards.js';
+      import { setRichText } from '../site/assets/js/mathtext.js';
 
       // ── Synthetic test data ───────────────────────────────────────────────────────
 
@@ -371,6 +372,39 @@
           assertEqual(votes.length, 3);
           assertEqual(votes[0].textContent, '▲ 3 · Vote');
           assertEqual(votes[0].getAttribute('href'), 'https://github.com/o/r/issues/1');
+        });
+      });
+
+      suite('setRichText — maths in INSPIRE text', () => {
+        const MATHML_NS = 'http://www.w3.org/1998/Math/MathML';
+
+        test('MathML becomes real MathML elements', async () => {
+          const div = document.createElement('div');
+          setRichText(div, 'IBD, <math><msub><mi>ν</mi><mi>e</mi></msub></math>, is key');
+          const math = div.querySelector('math');
+          assert(math != null, 'expected a <math> element');
+          assertEqual(math.namespaceURI, MATHML_NS);
+          assertEqual(div.querySelector('msub').namespaceURI, MATHML_NS);
+          assertEqual(div.textContent, 'IBD, νe, is key');
+        });
+
+        test('$…$ LaTeX becomes MathML', async () => {
+          const div = document.createElement('div');
+          setRichText(div, 'with $m_\\nu$');
+          assertEqual(div.querySelector('math')?.namespaceURI, MATHML_NS);
+          assert(div.querySelector('msub') != null, 'expected <msub>');
+        });
+
+        test('no script, image or event handler gets through', async () => {
+          const div = document.createElement('div');
+          setRichText(
+            div,
+            '<script>alert(1)<\/script><img src=x onerror=alert(1)><math onclick="x()"><mi>a</mi></math>'
+          );
+          assertEqual(div.querySelector('script'), null);
+          assertEqual(div.querySelector('img'), null);
+          assertEqual(div.querySelector('math').getAttribute('onclick'), null);
+          assertContains(div.textContent, '<script>alert(1)<\/script>');
         });
       });
 

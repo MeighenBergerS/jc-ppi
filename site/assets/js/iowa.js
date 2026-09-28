@@ -12,6 +12,7 @@
 
 import { CONFIG } from './config.js';
 import { normalizeArxivId, stripVersion } from './utils.js';
+import { setRichText } from './mathtext.js';
 
 const CACHE_KEY = 'iowa_highlights_v2';
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -213,7 +214,7 @@ function _makeCard(paper) {
   if (paper.title) {
     const titleEl = document.createElement('div');
     titleEl.className = 'paper-title iowa-card-title';
-    titleEl.textContent = paper.title;
+    setRichText(titleEl, paper.title);
     card.appendChild(titleEl);
   }
 
@@ -237,7 +238,7 @@ function _makeCard(paper) {
   if (paper.abstract) {
     const absEl = document.createElement('div');
     absEl.className = 'paper-abstract';
-    absEl.textContent = paper.abstract;
+    setRichText(absEl, paper.abstract);
     card.appendChild(absEl);
   }
 

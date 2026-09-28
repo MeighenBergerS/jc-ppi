@@ -13,6 +13,7 @@
 
 import { CONFIG, COL_TREND } from './config.js';
 import { normalizeArxivId, stripVersion } from './utils.js';
+import { setRichText } from './mathtext.js';
 
 /**
  * Renders the trending section into `container`.
@@ -126,7 +127,7 @@ export function renderTrending(state, rows, container) {
       if (title) {
         const titleEl = document.createElement('div');
         titleEl.className = 'paper-title trending-card-title';
-        titleEl.textContent = title;
+        setRichText(titleEl, title);
         card.appendChild(titleEl);
       }
 
@@ -142,7 +143,7 @@ export function renderTrending(state, rows, container) {
       if (abstract) {
         const absEl = document.createElement('div');
         absEl.className = 'paper-abstract';
-        absEl.textContent = abstract;
+        setRichText(absEl, abstract);
         card.appendChild(absEl);
       }
 

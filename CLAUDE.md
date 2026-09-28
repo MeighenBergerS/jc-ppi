@@ -73,4 +73,6 @@ imported Google Sheet timestamps were recorded in Central Time.
 - The monthly roundups are private. Their workflow log is public, so `roundup-email.js` prints
   counts only, never a login, an address or a roundup; keep it that way.
 - Treat every string from issues or INSPIRE as untrusted. On the site, insert it with
-  `textContent` or DOM building, never `innerHTML`; in bot comments, pass it through `safeText()`.
+  `textContent` or DOM building, never `innerHTML`; titles and abstracts go through `setRichText()`
+  (`mathtext.js`), which renders MathML and `$…$` LaTeX from a whitelist. In bot comments, pass it
+  through `safeText()`.

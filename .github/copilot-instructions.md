@@ -29,6 +29,7 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 | `site/assets/js/app.js`             | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
 | `site/assets/js/inspire.js`         | INSPIRE-HEP API client with localStorage cache                                 |
 | `site/assets/js/table.js`           | Archive `<table>` from CSV rows + metadata; pieces shared with the cards       |
+| `site/assets/js/mathtext.js`        | MathML / `$…$` LaTeX in INSPIRE text → safe DOM (whitelist; never innerHTML)   |
 | `site/assets/js/cards.js`           | This Week paper cards (vote leader, discussed highlight, first names)          |
 | `site/assets/js/utils.js`           | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
 | `site/assets/js/trending.js`        | Trending section renderer                                                      |
@@ -153,7 +154,8 @@ npm test
 ## Security
 
 - Issue bodies, names and INSPIRE text are untrusted. On the site, insert them with
-  `textContent` or DOM building, never `innerHTML`. In bot comments, pass them through `safeText()`
+  `textContent` or DOM building, never `innerHTML`; titles and abstracts go through
+  `setRichText()` in `mathtext.js`, which renders their maths from a whitelist. In bot comments, pass them through `safeText()`
   (escapes HTML and stops `@` mentions).
 - Workflows read issue content from the event payload file, never by interpolating
   `${{ github.event.issue.body }}` into a `run:` script.

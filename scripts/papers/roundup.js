@@ -14,6 +14,7 @@
    ============================================================ */
 
 import { CONFIG } from '../../site/assets/js/config.js';
+import { plainText } from '../../site/assets/js/mathtext.js';
 import {
   FIELDS,
   LABELS,
@@ -329,7 +330,7 @@ export function renderRoundup(r, meta = new Map()) {
     );
     lines.push('📄 YOUR PAPERS', '');
     for (const p of r.papers) {
-      const title = meta.get(p.arxivId)?.title;
+      const title = plainText(meta.get(p.arxivId)?.title ?? '');
       lines.push(`${p.discussed ? '⭐' : '📄'} ${p.arxivId ?? '(no arXiv ID)'}`);
       if (title) lines.push(`   ${title}`);
       lines.push(`   ${p.discussed ? 'Discussed' : 'Suggested'} · View discussion: ${p.url}`, '');

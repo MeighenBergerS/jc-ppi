@@ -9,6 +9,7 @@
    ============================================================ */
 
 import { CONFIG } from '../../site/assets/js/config.js';
+import { plainText } from '../../site/assets/js/mathtext.js';
 import { monthName, scorecard, toGoText, unlockedNote, personalStats } from './roundup.js';
 
 const C = {
@@ -67,7 +68,8 @@ function _scorecard(r) {
 }
 
 function _paper(p, meta) {
-  const title = meta.get(p.arxivId)?.title || p.arxivId || 'Untitled';
+  // Mail clients don't render MathML reliably, so formulas become plain text
+  const title = plainText(meta.get(p.arxivId)?.title ?? '') || p.arxivId || 'Untitled';
   const abs = p.arxivId ? `https://arxiv.org/abs/${p.arxivId}` : p.url;
   const status = p.discussed
     ? `<span style="display:inline-block;background:${C.tealDim};color:${C.tealDark};font-weight:700;border-radius:999px;padding:2px 10px">⭐ Discussed</span>`

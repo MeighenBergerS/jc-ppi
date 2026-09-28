@@ -41,6 +41,7 @@ check always passes.
 | `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction                                               |
 | `site/assets/js/table.js`              | Archive table builder, and the pieces the cards share                                                      |
 | `site/assets/js/cards.js`              | This Week paper cards                                                                                      |
+| `site/assets/js/mathtext.js`           | Renders MathML and `$…$` LaTeX in INSPIRE titles and abstracts, safely                                     |
 | `site/assets/js/app.js`                | Page renderers and entry point                                                                             |
 | `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                                                            |
 | `site/assets/css/style.css`            | All styling                                                                                                |
@@ -170,8 +171,9 @@ Test files live in `tests/`:
 | `trending.test.js`     | Trending papers, the Trending issue, and keeping it out of the submissions                                  |
 | `roundup.test.js`      | The personal monthly roundup: a member's papers, streaks, milestones, the email text                        |
 | `roundup-html.test.js` | The HTML roundup email: escaping, papers, milestones, an empty month                                        |
+| `mathtext.test.js`     | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                   |
 | `smtp.test.js`         | The SMTP client that sends the roundups, against a fake server                                              |
-| `runner.html`          | Browser-side DOM tests for `buildTable` and `buildCards`                                                    |
+| `runner.html`          | Browser-side DOM tests for `buildTable`, `buildCards` and `setRichText`                                     |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)
 runs `npm test` automatically before every commit, so the suite must be green
