@@ -23,7 +23,7 @@ export const CONFIG = {
   // The club Gmail that .github/workflows/email-submissions.yml reads, so people
   // without GitHub can email a paper (arXiv ID as the subject, why in the body).
   // Shown on This Week and About when set; '' hides it.
-  submissionEmail: '',
+  submissionEmail: 'particles.plots.jc@gmail.com',
 
   // Base URL of the deployed site, used in the calendar .ics file.
   // Leave blank to derive it from window.location (right for most deployments).
