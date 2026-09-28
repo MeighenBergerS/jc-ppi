@@ -68,6 +68,8 @@
         failed = 0;
       let currentSuite = null;
       let suiteEl = null;
+      // Tests run async; the summary waits for all of them.
+      const pending = [];
 
       function suite(name, fn) {
         suiteEl = document.createElement('div');
@@ -78,24 +80,29 @@
         fn();
       }
 
-      async function test(name, fn) {
+      function test(name, fn) {
         total++;
-        try {
-          await fn();
-          passed++;
-          appendLine('pass', `  ✓ ${name}`);
-        } catch (err) {
-          failed++;
-          appendLine('fail', `  ✗ ${name}`);
-          appendLine('fail', `      ${err.message}`);
-        }
+        const el = suiteEl; // this test's suite, whenever it finishes
+        pending.push(
+          (async () => {
+            try {
+              await fn();
+              passed++;
+              appendLine('pass', `  ✓ ${name}`, el);
+            } catch (err) {
+              failed++;
+              appendLine('fail', `  ✗ ${name}`, el);
+              appendLine('fail', `      ${err.message}`, el);
+            }
+          })()
+        );
       }
 
-      function appendLine(cls, text) {
+      function appendLine(cls, text, parent) {
         const div = document.createElement('div');
         div.className = cls;
         div.textContent = text;
-        (suiteEl || log).appendChild(div);
+        (parent || log).appendChild(div);
       }
 
       function assert(condition, msg) {
@@ -410,6 +417,7 @@
 
       // ── Final summary ─────────────────────────────────────────────────────────────
 
+      await Promise.all(pending);
       const colour = failed > 0 ? '#f85149' : '#56d364';
       summary.innerHTML =
         `<span style="color:${colour}">` +
