@@ -2,14 +2,14 @@
    scripts/papers/roundup-html.js — The roundup email as HTML
    ============================================================
    The HTML part of the monthly roundup email; renderRoundup() in
-   roundup.js writes the plain-text part. Email clients support
-   little CSS, so this is built from tables with inline styles,
-   600px wide, in the site's colors. Titles and subfields come from
-   INSPIRE and are escaped.
+   roundup.js writes the same content as plain text. Email clients
+   support little CSS, so this is built from tables with inline
+   styles, 600px wide, in the site's colors. Titles and subfields
+   come from INSPIRE and are escaped.
    ============================================================ */
 
 import { CONFIG } from '../../site/assets/js/config.js';
-import { monthLabel, previousMonth } from './roundup.js';
+import { monthName, scorecard, toGoText, unlockedNote, personalStats } from './roundup.js';
 
 const C = {
   page: '#f4f5f7',
@@ -24,6 +24,8 @@ const C = {
   teal: '#1b8a68',
   tealDark: '#0f5c45',
   tealDim: '#e0f5f0',
+  gold: '#fff7e0',
+  goldDark: '#8a5a00',
   badge: '#e7298a',
   cta: '#d95f02',
 };
@@ -40,98 +42,113 @@ export function escapeHtml(text) {
 }
 
 const esc = escapeHtml;
-const _plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
-const monthName = (key) => monthLabel(key).split(' ')[0];
+const table = (style, rows) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${style}">${rows}</table>`;
 
 function _section(title, content) {
   return `
-<tr><td style="padding:28px 32px 0">
-  <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${C.muted};padding-bottom:8px;border-bottom:2px solid ${C.border};margin-bottom:14px">${esc(title)}</div>
+<tr><td style="padding:30px 32px 0">
+  <div style="font-size:18px;font-weight:700;color:${C.ink};padding-bottom:14px">${esc(title)}</div>
   ${content}
 </td></tr>`;
 }
 
-function _tile(value, label, note = '') {
-  return `
-<td width="25%" valign="top" style="padding:0 4px">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.tile};border:1px solid ${C.border};border-radius:8px">
-    <tr><td align="center" style="padding:14px 6px">
-      <div style="font-size:28px;font-weight:700;line-height:1.1;color:${C.ink}">${esc(value)}</div>
-      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${C.muted};padding-top:4px">${esc(label)}</div>
-      ${note ? `<div style="font-size:11px;color:${C.muted};padding-top:3px">${esc(note)}</div>` : ''}
-    </td></tr>
-  </table>
-</td>`;
+function _scorecard(r) {
+  const cells = scorecard(r)
+    .map(
+      ([n, label]) => `
+<td width="33%" align="center" style="padding:18px 4px">
+  <div style="font-size:32px;font-weight:800;line-height:1;color:${C.tealDark}">${esc(n)}</div>
+  <div style="font-size:13px;color:${C.tealDark};padding-top:6px">${esc(label)}</div>
+</td>`
+    )
+    .join('');
+  return `<tr><td style="background:${C.tealDim}">${table('', `<tr>${cells}</tr>`)}</td></tr>`;
 }
 
 function _paper(p, meta) {
   const title = meta.get(p.arxivId)?.title || p.arxivId || 'Untitled';
-  const abs = p.arxivId
-    ? `https://arxiv.org/abs/${encodeURIComponent(p.arxivId).replace(/%2F/g, '/')}`
-    : p.url;
+  const abs = p.arxivId ? `https://arxiv.org/abs/${p.arxivId}` : p.url;
   const status = p.discussed
-    ? `<span style="display:inline-block;background:${C.tealDim};color:${C.tealDark};font-weight:600;border-radius:999px;padding:2px 9px">✓ Discussed</span>`
-    : `<span style="color:${C.muted}">Not discussed yet</span>`;
-  const votes = p.votes ? ` &nbsp;·&nbsp; 👍 ${p.votes}` : '';
-  return `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;border:1px solid ${C.border};border-radius:8px">
-  <tr>
-    <td width="4" style="background:${p.discussed ? C.teal : C.border};border-radius:8px 0 0 8px">&nbsp;</td>
-    <td style="padding:12px 14px">
-      ${p.arxivId ? `<div style="font-size:12px;font-weight:700;color:${C.badge};padding-bottom:3px">arXiv:${esc(p.arxivId)}</div>` : ''}
-      <a href="${esc(abs)}" style="font-size:15px;font-weight:600;line-height:1.35;color:${C.ink};text-decoration:none">${esc(title)}</a>
-      <div style="font-size:12px;color:${C.muted};padding-top:8px">
-        ${status}${votes} &nbsp;·&nbsp; <a href="${esc(p.url)}" style="color:${C.muted}">Issue #${esc(p.number)}</a>
-      </div>
-    </td>
-  </tr>
-</table>`;
+    ? `<span style="display:inline-block;background:${C.tealDim};color:${C.tealDark};font-weight:700;border-radius:999px;padding:2px 10px">⭐ Discussed</span>`
+    : `<span style="color:${C.muted}">📄 Suggested</span>`;
+  const votes = p.votes ? ` &nbsp;·&nbsp; 👍 ${esc(p.votes)}` : '';
+  return table(
+    `margin-bottom:12px;border:1px solid ${p.discussed ? C.tealLight : C.border};border-radius:10px`,
+    `<tr><td style="padding:14px 16px">
+  ${p.arxivId ? `<div style="font-size:12px;font-weight:700;letter-spacing:.02em;color:${C.badge};padding-bottom:4px">${esc(p.arxivId)}</div>` : ''}
+  <a href="${esc(abs)}" style="font-size:15px;font-weight:600;line-height:1.4;color:${C.ink};text-decoration:none">${esc(title)}</a>
+  <div style="font-size:13px;padding-top:10px">
+    ${status}${votes} &nbsp;·&nbsp; <a href="${esc(p.url)}" style="color:${C.teal};font-weight:600;text-decoration:none">View discussion →</a>
+  </div>
+</td></tr>`
+  );
 }
 
-function _chips(items) {
+function _pills(items) {
   return items
     .map(
       (s) =>
-        `<span style="display:inline-block;background:${C.tealDim};color:${C.tealDark};font-size:12px;font-weight:600;border-radius:999px;padding:4px 11px;margin:0 6px 6px 0">${esc(s)}</span>`
+        `<span style="display:inline-block;background:${C.tealDim};color:${C.tealDark};font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:5px 12px;margin:0 6px 8px 0">${esc(s)}</span>`
     )
     .join('');
 }
 
-function _reached(list) {
-  const rows = list
+function _unlocked(r) {
+  const rows = r.reached
     .map(
       (m) => `
 <tr>
-  <td width="40" style="font-size:24px;padding:6px 0">${m.emoji}</td>
-  <td style="font-size:15px;color:${C.ink};padding:6px 0"><strong>${esc(m.tier)}</strong> ${esc(m.name)}</td>
+  <td width="44" style="font-size:26px;padding:6px 0">${m.emoji}</td>
+  <td style="font-size:16px;font-weight:600;color:${C.ink};padding:6px 0">${esc(m.label)}</td>
 </tr>`
     )
     .join('');
   return `
-<tr><td style="padding:28px 32px 0">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.tealDim};border-radius:10px">
-    <tr><td style="padding:16px 20px">
-      <div style="font-size:16px;font-weight:700;color:${C.tealDark};padding-bottom:6px">🎉 Milestones reached this month</div>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
-    </td></tr>
-  </table>
+<tr><td style="padding:30px 32px 0">
+  ${table(
+    `background:${C.gold};border-radius:12px`,
+    `<tr><td style="padding:18px 22px">
+      <div style="font-size:18px;font-weight:700;color:${C.goldDark};padding-bottom:8px">🏆 This month you unlocked</div>
+      ${table('', rows)}
+      <div style="font-size:14px;font-style:italic;color:${C.goldDark};padding-top:10px">${esc(unlockedNote(r))}</div>
+    </td></tr>`
+  )}
 </td></tr>`;
+}
+
+function _stats(r) {
+  const cells = personalStats(r)
+    .map(
+      ([value, unit, label]) => `
+<td width="33%" valign="top" style="padding:0 4px">
+  ${table(
+    `background:${C.tile};border:1px solid ${C.border};border-radius:10px`,
+    `<tr><td align="center" style="padding:16px 6px">
+      <div style="font-size:28px;font-weight:800;line-height:1.1;color:${C.ink}">${esc(value)}</div>
+      <div style="font-size:13px;font-weight:600;color:${C.ink}">${esc(unit)}</div>
+      <div style="font-size:12px;color:${C.muted};padding-top:6px">${esc(label)}</div>
+    </td></tr>`
+  )}
+</td>`
+    )
+    .join('');
+  return table('', `<tr>${cells}</tr>`);
 }
 
 function _progress(m) {
   const pct = Math.max(2, Math.min(100, Math.round((m.count / m.tier) * 100)));
-  return `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px">
-  <tr>
-    <td style="font-size:14px;color:${C.ink};padding-bottom:6px">${m.emoji} &nbsp;${esc(m.tier)} ${esc(m.name)}</td>
-    <td align="right" style="font-size:12px;color:${C.muted};padding-bottom:6px;white-space:nowrap">${esc(m.count)} / ${esc(m.tier)} · ${esc(m.toGo)} to go</td>
-  </tr>
-  <tr><td colspan="2">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.border};border-radius:999px">
-      <tr><td width="${pct}%" height="8" style="background:${C.teal};border-radius:999px;font-size:0;line-height:0">&nbsp;</td><td style="font-size:0;line-height:0">&nbsp;</td></tr>
-    </table>
-  </td></tr>
-</table>`;
+  return table(
+    'margin-bottom:16px',
+    `<tr><td style="font-size:15px;font-weight:600;color:${C.ink};padding-bottom:4px">${m.emoji} &nbsp;${esc(m.label)}</td></tr>
+  <tr><td style="font-size:13px;color:${C.muted};padding-bottom:7px">${esc(toGoText(m))} · ${esc(m.count)} of ${esc(m.tier)}</td></tr>
+  <tr><td>
+    ${table(
+      `background:${C.border};border-radius:999px`,
+      `<tr><td width="${pct}%" height="8" style="background:${C.teal};border-radius:999px;font-size:0;line-height:0">&nbsp;</td><td style="font-size:0;line-height:0">&nbsp;</td></tr>`
+    )}
+  </td></tr>`
+  );
 }
 
 function _button(href, label) {
@@ -151,43 +168,30 @@ function _button(href, label) {
 export function renderRoundupHtml(r, meta = new Map()) {
   const month = monthName(r.month);
   const year = r.month.slice(0, 4);
-  const last = monthName(previousMonth(r.month));
-
   const preheader = r.suggested
-    ? `${_plural(r.suggested, 'paper')}, ${r.discussed} discussed` +
-      (r.reached.length ? `, ${_plural(r.reached.length, 'milestone')} reached` : '')
+    ? scorecard(r)
+        .map(([n, label]) => `${n} ${label}`)
+        .join(' · ')
     : "A quiet month. There's always next week!";
 
   const parts = [];
-
-  parts.push(`
-<tr><td style="padding:24px 28px 0">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    ${_tile(r.suggested, 'Suggested', `${r.previous.suggested} in ${last}`)}
-    ${_tile(r.discussed, 'Discussed', `${r.previous.discussed} in ${last}`)}
-    ${_tile(r.votes, 'Votes', 'on these papers')}
-    ${_tile(r.streak.current, 'Week streak', `best ${r.streak.best}`)}
-  </tr></table>
-  <div style="font-size:13px;color:${C.muted};text-align:center;padding-top:12px">${esc(_plural(r.total, 'paper'))} suggested all time</div>
-</td></tr>`);
-
   if (r.suggested) {
-    parts.push(_section(`Your papers in ${month}`, r.papers.map((p) => _paper(p, meta)).join('')));
-    if (r.subfields.length) parts.push(_section('Subfields', _chips(r.subfields)));
+    parts.push(_scorecard(r));
+    parts.push(_section('📄 Your papers', r.papers.map((p) => _paper(p, meta)).join('')));
+    if (r.subfields.length) parts.push(_section(`🧭 Your ${month} mix`, _pills(r.subfields)));
   } else {
     parts.push(
       _section(
-        `Your papers in ${month}`,
+        '📄 Your papers',
         `<p style="font-size:15px;color:${C.ink};margin:0">No papers this month. There's always next week!</p>`
       )
     );
   }
-
-  if (r.reached.length) parts.push(_reached(r.reached));
-  if (r.next.length) parts.push(_section('Coming up', r.next.map(_progress).join('')));
-
+  if (r.reached.length) parts.push(_unlocked(r));
+  parts.push(_section('🔥 Your journal-club stats', _stats(r)));
+  if (r.next.length) parts.push(_section('🎯 Almost there…', r.next.map(_progress).join('')));
   parts.push(`
-<tr><td style="padding:30px 32px 32px">
+<tr><td style="padding:30px 32px 34px">
   <p style="font-size:14px;color:${C.muted};text-align:center;margin:0 0 14px">Seen something worth discussing?</p>
   ${_button(CONFIG.formUrl, 'Suggest a paper')}
 </td></tr>`);
@@ -202,28 +206,29 @@ export function renderRoundupHtml(r, meta = new Map()) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Your ${esc(month)} ${esc(year)} at journal club</title>
+<title>Your ${esc(month)} at ${esc(CONFIG.shortName)}</title>
 </head>
 <body style="margin:0;padding:0;background:${C.page}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.page}">
-<tr><td align="center" style="padding:24px 12px">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${C.card};border-radius:12px;overflow:hidden;font-family:${FONT};color:${C.ink}">
-    <tr><td style="background:${C.header};padding:28px 32px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${C.headerMuted}">${esc(CONFIG.clubName)}</div>
-      <div style="font-size:30px;font-weight:800;line-height:1.15;color:#ffffff;padding-top:10px">Your ${esc(month)}</div>
-      <div style="font-size:15px;color:${C.tealLight};padding-top:4px">${esc(year)} roundup</div>
+${table(
+  `background:${C.page}`,
+  `<tr><td align="center" style="padding:24px 12px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${C.card};border-radius:14px;overflow:hidden;font-family:${FONT};color:${C.ink}">
+    <tr><td style="background:${C.header};padding:30px 32px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:${C.headerMuted}">📚 ${esc(CONFIG.shortName)}</div>
+      <div style="font-size:32px;font-weight:800;line-height:1.15;color:#ffffff;padding-top:10px">Your ${esc(month)} ${esc(year)}</div>
+      <div style="font-size:15px;color:${C.tealLight};padding-top:6px">A little monthly recap of your journal-club activity</div>
     </td></tr>
     ${parts.join('')}
   </table>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;font-family:${FONT}">
-    <tr><td style="padding:18px 24px;font-size:12px;line-height:1.6;color:${C.muted};text-align:center">
-      Only you get this email; nobody else sees your numbers.<br>
-      To stop getting it, reply and say so.${site}
+    <tr><td style="padding:18px 24px;font-size:12px;line-height:1.7;color:${C.muted};text-align:center">
+      Your journal-club activity is private — only you receive these numbers.<br>
+      Want to stop receiving this email? Just reply and let us know.${site}
     </td></tr>
   </table>
-</td></tr>
-</table>
+</td></tr>`
+)}
 </body>
 </html>
 `;

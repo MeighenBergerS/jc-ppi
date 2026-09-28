@@ -13,6 +13,7 @@ const REPO = 'MeighenBergerS/jc-ppi';
 
 export const CONFIG = {
   clubName: 'Iowa Particles & Plots Journal Club',
+  shortName: 'Particles & Plots', // in friendly text, e.g. the monthly roundup email
 
   issuesRepo: REPO,
 

@@ -37,8 +37,10 @@ const roundup = (over = {}) => ({
   streak: { current: 3, best: 5 },
   previous: { suggested: 1, discussed: 0 },
   total: 24,
-  reached: [{ emoji: '🗣️', name: 'papers discussed', tier: 10 }],
-  next: [{ emoji: '📚', name: 'papers suggested', tier: 25, count: 24, toGo: 1 }],
+  reached: [{ emoji: '🗣️', label: '10 papers discussed', tier: 10 }],
+  next: [
+    { emoji: '📚', label: '25 papers suggested', unit: 'paper', tier: 25, count: 24, toGo: 1 },
+  ],
   ...over,
 });
 
@@ -54,55 +56,58 @@ describe('escapeHtml', () => {
 
 describe('renderRoundupHtml', () => {
   const meta = new Map([['2609.00001', { title: 'Neutrinos <b>& friends</b>' }]]);
+  const html = renderRoundupHtml(roundup(), meta);
 
   it('names the month and the club', () => {
-    const html = renderRoundupHtml(roundup(), meta);
-    assert.match(html, /Your September/);
-    assert.match(html, /2026 roundup/);
-    assert.ok(html.includes(escapeHtml(CONFIG.clubName)));
+    assert.match(html, /Your September 2026/);
+    assert.ok(html.includes(`📚 ${escapeHtml(CONFIG.shortName)}`));
+    assert.match(html, /A little monthly recap of your journal-club activity/);
+  });
+
+  it('opens with the scorecard', () => {
+    assert.match(html, />2 papers suggested · 1 discussed · 3 votes</); // the inbox preview
+    assert.match(html, />papers suggested</);
   });
 
   it('escapes titles from INSPIRE', () => {
-    const html = renderRoundupHtml(roundup(), meta);
     assert.ok(html.includes('Neutrinos &lt;b&gt;&amp; friends&lt;/b&gt;'));
     assert.ok(!html.includes('<b>& friends'));
   });
 
   it('links each paper to arXiv and its issue, and marks the discussed one', () => {
-    const html = renderRoundupHtml(roundup(), meta);
     assert.ok(html.includes('href="https://arxiv.org/abs/2609.00001"'));
     assert.ok(html.includes('href="https://github.com/o/r/issues/88"'));
-    assert.equal(html.match(/✓ Discussed/g).length, 1);
-    assert.equal(html.match(/Not discussed yet/g).length, 1);
+    assert.equal(html.match(/⭐ Discussed/g).length, 1);
+    assert.equal(html.match(/📄 Suggested/g).length, 1);
+    assert.equal(html.match(/View discussion →/g).length, 2);
   });
 
-  it('shows milestones reached and progress towards the next', () => {
-    const html = renderRoundupHtml(roundup(), meta);
-    assert.match(html, /Milestones reached this month/);
-    assert.match(html, /<strong>10<\/strong> papers discussed/);
-    assert.match(html, /24 \/ 25 · 1 to go/);
+  it('celebrates milestones and shows progress towards the next', () => {
+    assert.match(html, /🏆 This month you unlocked/);
+    assert.match(html, />10 papers discussed</);
+    assert.match(html, /One milestone down\. One more within reach…/);
+    assert.match(html, /1 more to go · 24 of 25/);
     assert.match(html, /width="96%"/);
   });
 
-  it('compares with last month and links to the form', () => {
-    const html = renderRoundupHtml(roundup(), meta);
-    assert.match(html, /1 in August/);
+  it('shows the personal stats and links to the form', () => {
+    assert.match(html, /🔥 Your journal-club stats/);
+    assert.match(html, />Suggested in August</);
     assert.ok(html.includes(`href="${escapeHtml(CONFIG.formUrl)}"`));
   });
 
   it('handles a month without papers or milestones', () => {
-    const html = renderRoundupHtml(
+    const empty = renderRoundupHtml(
       roundup({ papers: [], suggested: 0, discussed: 0, votes: 0, subfields: [], reached: [] }),
       meta
     );
-    assert.match(html, /No papers this month/);
-    assert.doesNotMatch(html, /Milestones reached/);
-    assert.doesNotMatch(html, /Subfields/);
+    assert.match(empty, /No papers this month/);
+    assert.doesNotMatch(empty, /This month you unlocked/);
+    assert.doesNotMatch(empty, /mix/);
   });
 
   it('says only the member gets it and how to stop', () => {
-    const html = renderRoundupHtml(roundup(), meta);
-    assert.match(html, /Only you get this email/);
-    assert.match(html, /To stop getting it/);
+    assert.match(html, /only you receive these numbers/);
+    assert.match(html, /Want to stop receiving this email\?/);
   });
 });
