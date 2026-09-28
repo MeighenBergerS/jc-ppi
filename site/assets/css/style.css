@@ -18,6 +18,10 @@
   --teal-2: #3fa885;
   --teal-3: #1b8a68;
   --teal-4: #0f5c45;
+  /* Stats growth lines: papers, discussed, people (validated as a set) */
+  --series-papers: #1b8a68;
+  --series-discussed: #d95f02;
+  --series-people: #7570b3;
   --radius: 6px;
   --max-width: 860px;
 }
@@ -1075,6 +1079,120 @@ main.prose {
 
 .month-seg--discussed {
   background: var(--teal-4);
+}
+
+.month-seg--people {
+  background: var(--series-people);
+}
+
+/* Growth lines (SVG) */
+.growth-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.growth-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.growth-axis {
+  stroke: #c3c2b7;
+  stroke-width: 1;
+}
+
+.growth-tick {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.growth-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.growth-dot {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.growth-end {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.growth-hit {
+  fill: transparent;
+}
+
+.growth-hit:hover {
+  fill: rgba(17, 17, 17, 0.05);
+}
+
+.growth--papers {
+  stroke: var(--series-papers);
+  fill: var(--series-papers);
+}
+
+.growth--discussed {
+  stroke: var(--series-discussed);
+  fill: var(--series-discussed);
+}
+
+.growth--people {
+  stroke: var(--series-people);
+  fill: var(--series-people);
+}
+
+.growth-line.growth--papers,
+.growth-line.growth--discussed,
+.growth-line.growth--people {
+  fill: none;
+}
+
+.chart-legend .growth-swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.growth-swatch.growth--papers {
+  background: var(--series-papers);
+}
+
+.growth-swatch.growth--discussed {
+  background: var(--series-discussed);
+}
+
+.growth-swatch.growth--people {
+  background: var(--series-people);
+}
+
+/* Club streak */
+.streak-callout {
+  margin: -0.75rem 0 2.25rem;
+  padding: 1rem 1.25rem;
+  background: #fff7e0;
+  border-left: 4px solid var(--accent-btn);
+  border-radius: var(--radius);
+}
+
+.streak-big {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #8a5a00;
+}
+
+.streak-callout p {
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+  color: var(--text);
 }
 
 .month-label {
