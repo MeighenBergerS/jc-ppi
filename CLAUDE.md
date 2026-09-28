@@ -38,7 +38,7 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 
 Paper submissions are on trial as GitHub issues, next to the Google Form (`docs/ISSUES-PREVIEW.md`).
 The bot and the preview data builder live in `scripts/papers/`, with tests in
-`tests/papers.test.js`. Field labels in `.github/ISSUE_TEMPLATE/paper.yml` and `FIELDS` in
+`tests/papers.test.js`. Field labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in
 `scripts/papers/lib.js` must match. Labels are defined in `.github/labels.yml`, never on GitHub.
 Any page opened with `?source=issues` reads the issues instead of the Sheet.
 
