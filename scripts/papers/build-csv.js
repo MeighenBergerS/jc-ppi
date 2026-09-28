@@ -12,7 +12,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { LABELS, issuesToRows, toCsv, github } from './lib.js';
+import { LABELS, issuesToRows, toCsv, github, fetchProfileNames } from './lib.js';
 
 const out = process.argv[2];
 if (!out) {
@@ -25,7 +25,7 @@ const api = github(
   process.env.GITHUB_REPOSITORY || 'MeighenBergerS/jc-ppi'
 );
 const issues = await api.paginate(`/issues?labels=${LABELS.paper}&state=all`);
-const rows = issuesToRows(issues);
+const rows = issuesToRows(issues, await fetchProfileNames(api, issues));
 
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, toCsv(rows));

@@ -20,6 +20,12 @@
 - name: imported
   color: "bfd4f2"
   description: Imported from the Google Sheet
+- name: Updated By Bot
+  color: "ededed"
+  description: The paper bot added the title, abstract and links
+- name: Submitted Before
+  color: "f9d0c4"
+  description: This paper was suggested in an earlier issue; the bot links it
 
 # Type
 - name: bug

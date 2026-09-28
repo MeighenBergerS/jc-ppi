@@ -22,6 +22,14 @@ import {
   paperIssueTitle,
   issuesToRows,
   toCsv,
+  chicagoWallTime,
+  submittedAt,
+  formatDate,
+  isVisiblePaper,
+  displayName,
+  earlierSubmissions,
+  renderSubmittedBeforeComment,
+  SUBMITTED_BEFORE_MARKER,
 } from '../scripts/papers/lib.js';
 import { parseCsv } from '../site/assets/js/utils.js';
 
@@ -39,6 +47,26 @@ const formBody = (arxiv, why, name) =>
     '',
     name,
   ].join('\n');
+
+// The current form has no name field.
+const newFormBody = (arxiv, why) =>
+  [`### ${FIELDS.arxiv}`, '', arxiv, '', `### ${FIELDS.why}`, '', why].join('\n');
+
+const paperIssue = (over = {}) => ({
+  number: 1,
+  state: 'open',
+  state_reason: null,
+  created_at: '2026-09-29T15:00:00Z',
+  html_url: 'https://github.com/o/r/issues/1',
+  user: { login: 'alice' },
+  labels: [{ name: LABELS.paper }],
+  reactions: { '+1': 0 },
+  body: newFormBody('2301.12345', 'Why.'),
+  ...over,
+});
+
+const importedBody = (timestamp, arxiv, name) =>
+  importedMarker({ timestamp, votes: 0, arxiv }) + '\n' + formBody(arxiv, 'Why.', name);
 
 // ── parseIssueForm ────────────────────────────────────────────
 
@@ -296,6 +324,16 @@ describe('issuesToRows', () => {
     assert.equal(row[1], 'alice');
   });
 
+  it('uses the GitHub profile name for issues from the current form', () => {
+    const [row] = issuesToRows(
+      [issue({ body: newFormBody('2301.12345', 'Why.') })],
+      new Map([['alice', 'Alice Liddell']])
+    );
+    assert.equal(row[1], 'Alice Liddell');
+    assert.equal(row[2], '2301.12345');
+    assert.equal(row[3], 'Why.');
+  });
+
   it('sorts oldest first so deduplication keeps the earliest submission', () => {
     const rows = issuesToRows([
       issue({ number: 2, created_at: '2026-09-30T00:00:00Z' }),
@@ -314,5 +352,126 @@ describe('toCsv', () => {
     const parsed = parseCsv(toCsv(rows));
     assert.equal(parsed[0][0], 'Timestamp');
     assert.deepEqual(parsed[1], rows[0]);
+  });
+});
+
+// ── Submission times ─────────────────────────────────────────
+
+describe('chicagoWallTime', () => {
+  it('reads a Sheet timestamp as Central Daylight Time', () => {
+    assert.equal(chicagoWallTime('9/4/2026 15:44:26').toISOString(), '2026-09-04T20:44:26.000Z');
+  });
+  it('reads a winter timestamp as Central Standard Time', () => {
+    assert.equal(chicagoWallTime('3/2/2026 9:05:00').toISOString(), '2026-03-02T15:05:00.000Z');
+  });
+  it('returns an invalid date for other formats', () => {
+    assert.ok(isNaN(chicagoWallTime('2026-09-04')));
+  });
+});
+
+describe('submittedAt and formatDate', () => {
+  it('uses the Sheet time for imported issues', () => {
+    const issue = paperIssue({ body: importedBody('9/4/2026 23:30:00', '2301.12345', 'A') });
+    // 23:30 in Iowa is already Sep 5 in UTC; the date shown must stay Sep 4.
+    assert.equal(formatDate(submittedAt(issue)), 'Sep 4, 2026');
+  });
+  it('uses the creation time otherwise', () => {
+    assert.equal(submittedAt(paperIssue()).toISOString(), '2026-09-29T15:00:00.000Z');
+  });
+});
+
+// ── Visibility and names ─────────────────────────────────────
+
+describe('isVisiblePaper', () => {
+  it('accepts an approved open paper', () => assert.ok(isVisiblePaper(paperIssue())));
+  it('rejects papers awaiting approval', () =>
+    assert.ok(
+      !isVisiblePaper(
+        paperIssue({ labels: [{ name: LABELS.paper }, { name: LABELS.needsApproval }] })
+      )
+    ));
+  it('rejects removed papers', () =>
+    assert.ok(!isVisiblePaper(paperIssue({ state: 'closed', state_reason: 'not_planned' }))));
+  it('rejects non-paper issues', () =>
+    assert.ok(!isVisiblePaper(paperIssue({ labels: [{ name: 'bug' }] }))));
+});
+
+describe('displayName', () => {
+  it('prefers the imported name', () => {
+    const issue = paperIssue({ body: importedBody('9/4/2026 12:00:00', '1', 'Hallsie') });
+    assert.equal(displayName(issue, new Map([['alice', 'Alice']])), 'Hallsie');
+  });
+  it('then the profile name, then the login', () => {
+    assert.equal(displayName(paperIssue(), new Map([['alice', 'Alice L.']])), 'Alice L.');
+    assert.equal(displayName(paperIssue()), 'alice');
+  });
+});
+
+// ── Earlier submissions ──────────────────────────────────────
+
+describe('earlierSubmissions', () => {
+  const old = paperIssue({
+    number: 5,
+    state: 'closed',
+    state_reason: 'completed',
+    labels: [{ name: LABELS.paper }, { name: LABELS.discussed }],
+    body: importedBody('9/4/2026 12:00:00', 'https://arxiv.org/abs/2301.12345v2', 'Sudipta'),
+  });
+  const now = paperIssue({ number: 9, created_at: '2026-09-29T15:00:00Z' });
+
+  it('finds an earlier issue for the same paper, whatever form the ID took', () => {
+    assert.deepEqual(
+      earlierSubmissions(now, [old, now]).map((e) => [e.number, e.name, e.discussed]),
+      [[5, 'Sudipta', true]]
+    );
+  });
+
+  it('ignores later submissions', () => {
+    assert.deepEqual(earlierSubmissions(old, [old, now]), []);
+  });
+
+  it('ignores other papers, removed issues and unapproved issues', () => {
+    const others = [
+      paperIssue({
+        number: 2,
+        created_at: '2026-01-01T00:00:00Z',
+        body: newFormBody('2301.99999', 'x'),
+      }),
+      paperIssue({
+        number: 3,
+        created_at: '2026-01-01T00:00:00Z',
+        state: 'closed',
+        state_reason: 'not_planned',
+      }),
+      paperIssue({
+        number: 4,
+        created_at: '2026-01-01T00:00:00Z',
+        labels: [{ name: LABELS.paper }, { name: LABELS.needsApproval }],
+      }),
+    ];
+    assert.deepEqual(earlierSubmissions(now, [...others, now]), []);
+  });
+
+  it('breaks exact ties by issue number', () => {
+    const twin = paperIssue({ number: 10 });
+    assert.deepEqual(
+      earlierSubmissions(twin, [now, twin]).map((e) => e.number),
+      [9]
+    );
+    assert.deepEqual(earlierSubmissions(now, [now, twin]), []);
+  });
+
+  it('returns nothing for an invalid ID', () => {
+    assert.deepEqual(earlierSubmissions(paperIssue({ body: newFormBody('oops', 'x') }), [old]), []);
+  });
+});
+
+describe('renderSubmittedBeforeComment', () => {
+  it('lists each earlier issue with its date and submitter', () => {
+    const body = renderSubmittedBeforeComment([
+      { number: 5, date: new Date('2026-09-04T17:00:00Z'), name: 'Sudipta', discussed: true },
+    ]);
+    assert.ok(body.startsWith(SUBMITTED_BEFORE_MARKER));
+    assert.match(body, /- #5, Sep 4, 2026, by Sudipta \(discussed\)/);
   });
 });

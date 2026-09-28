@@ -16,9 +16,13 @@ export const LABELS = {
   awaiting: 'awaiting INSPIRE',
   invalidId: 'invalid arXiv ID',
   imported: 'imported',
+  updatedByBot: 'Updated By Bot',
+  submittedBefore: 'Submitted Before',
 };
 
 // Field labels of .github/ISSUE_TEMPLATE/paper.yml. Change both together.
+// `name` is no longer in the form (names come from GitHub profiles); only
+// issues imported from the Google Sheet carry it.
 export const FIELDS = {
   arxiv: 'arXiv ID or link',
   why: 'Why this paper?',
@@ -26,6 +30,7 @@ export const FIELDS = {
 };
 
 export const METADATA_MARKER = '<!-- jc-ppi:paper-metadata -->';
+export const SUBMITTED_BEFORE_MARKER = '<!-- jc-ppi:submitted-before -->';
 const IMPORT_RE = /<!-- jc-ppi:imported (\{.*?\}) -->/;
 export const TIMEZONE = 'America/Chicago';
 
@@ -101,6 +106,130 @@ export function weekStartDay(date, timeZone = TIMEZONE) {
   const day = Date.UTC(+parts.year, +parts.month - 1, +parts.day) / 86400000;
   const dow = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(parts.weekday);
   return day - dow;
+}
+
+/**
+ * Reads a Google Sheet timestamp ("9/4/2026 15:44:26", Central Time wall
+ * clock) as a Date. Returns an invalid Date if the string doesn't match.
+ */
+export function chicagoWallTime(text, timeZone = TIMEZONE) {
+  const m = (text ?? '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (!m) return new Date(NaN);
+  const [, mo, d, y, h, mi, s] = m.map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi, s);
+  // Shift by the zone's offset at that moment (twice, in case it crosses a DST change).
+  let t = guess;
+  for (let i = 0; i < 2; i++) {
+    const p = Object.fromEntries(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      })
+        .formatToParts(new Date(t))
+        .map((x) => [x.type, +x.value])
+    );
+    t += guess - Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+  }
+  return new Date(t);
+}
+
+/** When a paper issue was submitted: the Sheet time for imported issues, else creation. */
+export function submittedAt(issue) {
+  const stamp = parseImported(issue.body)?.timestamp;
+  return stamp ? chicagoWallTime(stamp) : new Date(issue.created_at);
+}
+
+/** "Sep 4, 2026", in Central Time. */
+export function formatDate(date, timeZone = TIMEZONE) {
+  return date.toLocaleDateString('en-US', {
+    timeZone,
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+// ── Paper issues ─────────────────────────────────────────────
+
+const labelSet = (issue) => new Set(issue.labels.map((l) => (typeof l === 'string' ? l : l.name)));
+
+/** True for approved paper issues that were not removed (closed as not planned). */
+export function isVisiblePaper(issue) {
+  const labels = labelSet(issue);
+  return (
+    !issue.pull_request &&
+    labels.has(LABELS.paper) &&
+    !labels.has(LABELS.needsApproval) &&
+    !(issue.state === 'closed' && issue.state_reason === 'not_planned')
+  );
+}
+
+/**
+ * The name shown for a submitter: the name typed into the Google Sheet for
+ * imported issues, else the GitHub profile name, else the username.
+ * @param {Map<string,string>} names - login → profile name, from fetchProfileNames().
+ */
+export function displayName(issue, names = new Map()) {
+  const login = issue.user?.login ?? '';
+  return parseIssueForm(issue.body)[FIELDS.name] || names.get(login) || login;
+}
+
+/** Looks up GitHub profile names for the authors of non-imported issues. */
+export async function fetchProfileNames(api, issues) {
+  const logins = new Set(
+    issues.filter((i) => !parseImported(i.body) && i.user?.login).map((i) => i.user.login)
+  );
+  const names = new Map();
+  for (const login of logins) {
+    try {
+      const user = await api.request('GET', `https://api.github.com/users/${login}`);
+      if (user.name?.trim()) names.set(login, user.name.trim());
+    } catch (err) {
+      console.error(`Profile of ${login} unavailable: ${err.message}`);
+    }
+  }
+  return names;
+}
+
+/**
+ * Earlier visible submissions of the same paper, oldest first.
+ * @returns {{number, date: Date, name: string, discussed: boolean}[]}
+ */
+export function earlierSubmissions(issue, allIssues, names = new Map()) {
+  const id = cleanArxivId(parseIssueForm(issue.body)[FIELDS.arxiv]);
+  if (!id) return [];
+  const when = submittedAt(issue).getTime();
+  return allIssues
+    .filter((other) => other.number !== issue.number && isVisiblePaper(other))
+    .filter((other) => cleanArxivId(parseIssueForm(other.body)[FIELDS.arxiv]) === id)
+    .map((other) => ({ other, date: submittedAt(other) }))
+    .filter(
+      ({ other, date }) =>
+        date.getTime() < when || (date.getTime() === when && other.number < issue.number)
+    )
+    .sort((a, b) => a.date - b.date)
+    .map(({ other, date }) => ({
+      number: other.number,
+      date,
+      name: displayName(other, names),
+      discussed: labelSet(other).has(LABELS.discussed),
+    }));
+}
+
+/** The bot's comment listing earlier submissions of the same paper. */
+export function renderSubmittedBeforeComment(earlier) {
+  const lines = earlier.map(
+    (e) =>
+      `- #${e.number}, ${formatDate(e.date)}, by ${safeText(e.name)}` +
+      (e.discussed ? ' (discussed)' : '')
+  );
+  return [SUBMITTED_BEFORE_MARKER, `This paper was suggested before:`, '', ...lines].join('\n');
 }
 
 // ── Markdown safety ──────────────────────────────────────────
@@ -279,24 +408,22 @@ export function paperIssueTitle(id, title) {
  * Converts paper issues into rows shaped like the Google Sheet's Public tab
  * (see COL in site/assets/js/config.js), plus the issue URL in column 9.
  * Unapproved and removed (closed as not planned) issues are left out.
+ * `names` maps logins to profile names (fetchProfileNames).
  * Rows are sorted oldest first, which the site's deduplication relies on.
  */
-export function issuesToRows(issues) {
+export function issuesToRows(issues, names = new Map()) {
   const rows = [];
   for (const issue of issues) {
-    if (issue.pull_request) continue;
-    const labels = new Set(issue.labels.map((l) => (typeof l === 'string' ? l : l.name)));
-    if (!labels.has(LABELS.paper) || labels.has(LABELS.needsApproval)) continue;
-    if (issue.state === 'closed' && issue.state_reason === 'not_planned') continue;
-
+    if (!isVisiblePaper(issue)) continue;
+    const labels = labelSet(issue);
     const fields = parseIssueForm(issue.body);
     const imported = parseImported(issue.body);
     const votes = (imported?.votes ?? 0) + (issue.reactions?.['+1'] ?? 0);
     rows.push({
-      sortKey: new Date(imported?.timestamp ?? issue.created_at).getTime(),
+      sortKey: submittedAt(issue).getTime(),
       row: [
         imported?.timestamp ?? issue.created_at,
-        fields[FIELDS.name] || issue.user?.login || '',
+        displayName(issue, names),
         fields[FIELDS.arxiv] ?? '',
         fields[FIELDS.why] ?? '',
         'TRUE',

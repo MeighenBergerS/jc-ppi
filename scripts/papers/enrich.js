@@ -7,7 +7,10 @@
    "needs approval"), looks the paper up on INSPIRE-HEP (or on
    arXiv if INSPIRE doesn't have it yet), posts or updates one
    metadata comment, renames the issue to "<ID>: <title>", and
-   sets the "awaiting INSPIRE" / "invalid arXiv ID" labels.
+   sets the "awaiting INSPIRE" / "invalid arXiv ID" labels. It
+   labels every issue it fills in "Updated By Bot". If the same
+   paper was suggested before, it lists the earlier issues in a
+   second comment and adds "Submitted Before".
 
    On the schedule (or a manual run): does the same for every
    open paper issue and every issue still awaiting INSPIRE, then
@@ -23,10 +26,14 @@ import {
   LABELS,
   FIELDS,
   METADATA_MARKER,
+  SUBMITTED_BEFORE_MARKER,
   parseIssueForm,
-  parseImported,
   cleanArxivId,
   weekStartDay,
+  submittedAt,
+  fetchProfileNames,
+  earlierSubmissions,
+  renderSubmittedBeforeComment,
   fetchInspire,
   fetchBibtex,
   fetchArxiv,
@@ -53,27 +60,39 @@ function readMembers() {
   );
 }
 
+/** Adds or removes a label, keeping `issue.labels` in step. */
 async function setLabel(issue, name, on) {
   const has = labelNames(issue).has(name);
   if (on && !has) {
     await api.request('POST', `/issues/${issue.number}/labels`, { labels: [name] });
+    issue.labels.push({ name });
   } else if (!on && has) {
     await api.request('DELETE', `/issues/${issue.number}/labels/${encodeURIComponent(name)}`);
+    issue.labels = issue.labels.filter((l) => l.name !== name);
   }
 }
 
-async function upsertComment(issue, body) {
-  const comments = await api.paginate(`/issues/${issue.number}/comments`);
-  const mine = comments.find((c) => c.body?.startsWith(METADATA_MARKER));
-  if (!mine) {
+/**
+ * Keeps one bot comment per marker: creates, updates or (body null) deletes it.
+ * `comments` is the issue's comment list, read once per issue.
+ */
+async function syncComment(issue, comments, marker, body) {
+  const mine = comments.find((c) => c.body?.startsWith(marker));
+  if (body === null) {
+    if (mine) await api.request('DELETE', `/issues/comments/${mine.id}`);
+  } else if (!mine) {
     await api.request('POST', `/issues/${issue.number}/comments`, { body });
   } else if (comparableComment(mine.body) !== comparableComment(body)) {
     await api.request('PATCH', `/issues/comments/${mine.id}`, { body });
   }
 }
 
-/** Looks up and writes metadata for a list of paper issues. */
-async function enrich(issues, { pause = 0 } = {}) {
+/**
+ * Looks up and writes metadata for `issues`. `allIssues` (every paper issue)
+ * is used to find earlier submissions of the same paper.
+ */
+async function enrich(issues, allIssues, { pause = 0 } = {}) {
+  const names = await fetchProfileNames(api, allIssues);
   const items = issues.map((issue) => {
     const raw = parseIssueForm(issue.body)[FIELDS.arxiv] ?? '';
     return { issue, raw, id: cleanArxivId(raw) };
@@ -107,19 +126,35 @@ async function enrich(issues, { pause = 0 } = {}) {
       source = 'invalid';
     }
 
-    await upsertComment(
+    const comments = await api.paginate(`/issues/${issue.number}/comments`);
+    await syncComment(
       issue,
+      comments,
+      METADATA_MARKER,
       renderMetadataComment({ source, id: id ?? '', raw, meta, bibtex, date: today })
     );
     await setLabel(issue, LABELS.awaiting, source === 'arxiv');
     await setLabel(issue, LABELS.invalidId, source === 'invalid');
+    await setLabel(issue, LABELS.updatedByBot, true);
+
+    const earlier = earlierSubmissions(issue, allIssues, names);
+    await syncComment(
+      issue,
+      comments,
+      SUBMITTED_BEFORE_MARKER,
+      earlier.length ? renderSubmittedBeforeComment(earlier) : null
+    );
+    await setLabel(issue, LABELS.submittedBefore, earlier.length > 0);
     if (meta.title) {
       const title = paperIssueTitle(id, meta.title);
       if (issue.title !== title) {
         await api.request('PATCH', `/issues/${issue.number}`, { title });
       }
     }
-    console.log(`#${issue.number}: ${id ?? raw} → ${source}`);
+    const before = earlier.length
+      ? `, submitted before (${earlier.map((e) => '#' + e.number)})`
+      : '';
+    console.log(`#${issue.number}: ${id ?? raw} → ${source}${before}`);
     if (pause) await sleep(pause);
   }
 }
@@ -135,7 +170,6 @@ async function handleIssueEvent(event) {
       APPROVED_ASSOCIATIONS.has(issue.author_association) || readMembers().has(login.toLowerCase());
     if (!approved) {
       await setLabel(issue, LABELS.needsApproval, true);
-      issue.labels.push({ name: LABELS.needsApproval });
       await api.request('POST', `/issues/${issue.number}/comments`, {
         body:
           `Thanks for the suggestion, @${login}! A maintainer will approve it shortly; ` +
@@ -143,25 +177,29 @@ async function handleIssueEvent(event) {
       });
     }
   }
-  await enrich([issue]);
+  const all = await allPaperIssues();
+  await enrich([all.find((i) => i.number === issue.number) ?? issue], all);
+}
+
+async function allPaperIssues() {
+  return (await api.paginate(`/issues?labels=${LABELS.paper}&state=all`)).filter(
+    (i) => !i.pull_request
+  );
 }
 
 async function sweep(scope) {
-  const all = (await api.paginate(`/issues?labels=${LABELS.paper}&state=all`)).filter(
-    (i) => !i.pull_request
-  );
+  const all = await allPaperIssues();
   const targets = all.filter(
     (i) => scope === 'all' || i.state === 'open' || labelNames(i).has(LABELS.awaiting)
   );
   console.log(`Refreshing ${targets.length} of ${all.length} paper issues`);
-  await enrich(targets, { pause: 1000 });
+  await enrich(targets, all, { pause: 1000 });
 
   // Close last week's papers so the open list is this week's.
   const thisWeek = weekStartDay(new Date());
   for (const issue of all) {
     if (issue.state !== 'open') continue;
-    const submitted = new Date(parseImported(issue.body)?.timestamp ?? issue.created_at);
-    if (weekStartDay(submitted) < thisWeek) {
+    if (weekStartDay(submittedAt(issue)) < thisWeek) {
       await api.request('PATCH', `/issues/${issue.number}`, {
         state: 'closed',
         state_reason: 'completed',
