@@ -61,6 +61,23 @@ closed issues.
 To see this week's message without posting, use **Actions → Slack reminder → Run workflow**; tick
 "post" to send it.
 
+## Monthly roundups
+
+Each member can get a private monthly roundup: the papers they suggested, which were discussed,
+their weekly streak and the milestones they reached (📚 papers suggested, 🗣️ discussed, 🔥 weeks
+in a row, 🧭 subfields, ⚡ suggested the month they hit arXiv, 👍 votes). It compares a member
+only with their own earlier months; no one else sees it, and nothing personal is on the site.
+The milestone tiers are `MILESTONES` in `scripts/papers/roundup.js`.
+
+To see a member's roundup without sending anything:
+
+```sh
+npm run roundup -- <github-login> [YYYY-MM] [--name "Name in the Google Sheet"]
+```
+
+The month defaults to last month. `--name` counts the member's papers from the Google Sheet era,
+which are matched by the name typed into the Sheet; repeat it for each spelling they used.
+
 ## History from the Google Sheet
 
 Until September 2026 papers came in through a Google Form into a Google Sheet, with a Google Apps
