@@ -48,6 +48,13 @@ export const CONFIG = {
     hour: 13, // 24-hour, in `timezone`
   },
 
+  // The private monthly roundup emails (scripts/papers/roundup-email.js), sent
+  // for the month before. The cron in .github/workflows/roundup.yml must match;
+  // tests/config.test.js checks.
+  roundup: {
+    dayOfMonth: 1,
+  },
+
   // The Trending issue (scripts/papers/trending.js). The cron in
   // .github/workflows/trending.yml must match `refreshDays`.
   trending: {

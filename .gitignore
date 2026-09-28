@@ -32,3 +32,6 @@ site/data/
 
 # ── Docs site (built from docs/ by mkdocs, deployed with the site) ──
 site/docs/
+
+# ── Python virtual environment (MkDocs, see docs/requirements.txt) ──
+.venv/

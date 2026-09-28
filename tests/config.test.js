@@ -75,6 +75,12 @@ describe('CONFIG', () => {
     }
   });
 
+  it('matches the roundup cron in roundup.yml', () => {
+    const schedules = crons('roundup.yml');
+    assert.equal(schedules.length, 1);
+    assert.equal(schedules[0].split(/\s+/)[2], String(CONFIG.roundup.dayOfMonth));
+  });
+
   it('matches the Trending cron in trending.yml', () => {
     const want = CONFIG.trending.refreshDays.map(cronDay).sort().join(',');
     for (const cron of crons('trending.yml')) {

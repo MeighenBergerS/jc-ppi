@@ -5,7 +5,8 @@
    suggested, which were discussed, their weekly streak and the
    milestones they reached. Compared only with their own earlier
    months, never with other members. Pure functions; the preview
-   (roundup-preview.js) and the monthly email use them.
+   (roundup-preview.js) and the monthly email (roundup-email.js)
+   use them.
 
    A member is { login, names }: their GitHub username, and the
    names they used in the Google Sheet, which identify their
@@ -287,4 +288,29 @@ export function renderRoundup(r, meta = new Map()) {
   if (CONFIG.siteUrl) lines.push(CONFIG.siteUrl);
 
   return { subject: `Your ${label} at journal club`, text: lines.join('\n') + '\n' };
+}
+
+/**
+ * Who gets a roundup: everyone on the member lists, and everyone who has
+ * suggested a paper from their own GitHub account. Lower-case, sorted; no bots.
+ * @param {object[]} issues - Paper issues from the GitHub API.
+ * @param {string[]} listed - Logins from paper-members.txt and paper-maintainers.txt.
+ */
+export function roundupLogins(issues, listed = []) {
+  const authors = issues
+    .filter((i) => isVisiblePaper(i) && !parseImported(i.body))
+    .map((i) => i.user?.login ?? '');
+  return [...new Set([...listed, ...authors].map(norm))]
+    .filter((login) => login && !login.endsWith('[bot]'))
+    .sort();
+}
+
+/** Logins in an opt-out list: separated by spaces, commas or new lines. */
+export function parseOptOut(text) {
+  return new Set(
+    (text ?? '')
+      .split(/[\s,]+/)
+      .map(norm)
+      .filter(Boolean)
+  );
 }

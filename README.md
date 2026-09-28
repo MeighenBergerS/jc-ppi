@@ -68,6 +68,7 @@ each piece.
 | **Year selector**     | Stats page can be scoped to a specific year                                                  |
 | **Trending papers**   | Top-cited recent hep-ph papers per category, refreshed Monday and Wednesday                  |
 | **Slack reminder**    | Thursday reminder with this week's submitters, the top-voted paper and trending papers       |
+| **Monthly roundup**   | A private email to each member about their month: papers, streak, milestones                 |
 | **Calendar export**   | One-click `.ics` download for the weekly meeting                                             |
 
 ---
@@ -127,9 +128,10 @@ scripts/papers/
   build-csv.js                 ← Builds site/data/ from the issues
   trending-issue.js            ← Opens the Trending issue
   slack-reminder.js            ← Posts the weekly Slack reminder
+  roundup-email.js             ← Emails the monthly roundups
   roundup-preview.js           ← Prints a member's monthly roundup
   lib.js, trending.js, slack.js,
-  roundup.js                   ← Shared helpers
+  roundup.js, smtp.js          ← Shared helpers
 .github/
   ISSUE_TEMPLATE/              ← Suggest a paper, bug report, feature request, documentation
   workflows/                   ← papers, deploy, trending, Slack reminder, keep-alive, labels, checks

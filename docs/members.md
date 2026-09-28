@@ -41,3 +41,13 @@ your username if the profile has no name.
 
 New papers, edits and labels reach the website within a few minutes. Votes take up to an hour,
 because reactions don't start a rebuild; an hourly one picks them up.
+
+## Your monthly roundup
+
+On the 1st of each month you can get a short private email about your month at the journal club:
+the papers you suggested, which were discussed, your weekly streak and the milestones you reached.
+Nobody else sees it; it only compares you with your own earlier months.
+
+It goes to the public email on your GitHub profile. To get it, choose one under
+[Settings → Public profile → Public email](https://github.com/settings/profile); without one, you
+don't get it. To stop getting it, reply to any roundup and say so.

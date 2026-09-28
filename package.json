@@ -4,7 +4,7 @@
   "description": "Iowa Particles & Plots Journal Club",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/utils.test.js tests/data.test.js tests/inspire.test.js tests/config.test.js tests/papers.test.js tests/slack.test.js tests/trending.test.js tests/roundup.test.js",
+    "test": "node --test tests/utils.test.js tests/data.test.js tests/inspire.test.js tests/config.test.js tests/papers.test.js tests/slack.test.js tests/trending.test.js tests/roundup.test.js tests/smtp.test.js",
     "dev": "node tests/server/index.mjs",
     "refresh": "node tests/server/index.mjs --refresh",
     "roundup": "node scripts/papers/roundup-preview.js",

@@ -1,0 +1,49 @@
+name: Monthly roundup
+
+# Emails each member a private roundup of last month (scripts/papers/roundup-email.js)
+# from the club's Gmail account, to the public email on their GitHub profile.
+# Scheduled runs only send when the repository variable ROUNDUP_EMAILS is "on";
+# otherwise they only count. The log shows counts, never names or addresses.
+
+on:
+  schedule:
+    # The 1st of each month, 15:00 UTC: 9 or 10 AM in Iowa. The day must match
+    # CONFIG.roundup.dayOfMonth in site/assets/js/config.js (tests/config.test.js).
+    - cron: "0 15 1 * *"
+  workflow_dispatch:
+    inputs:
+      send:
+        description: "Send the emails (otherwise only count them)"
+        type: boolean
+        default: false
+      month:
+        description: "Month as YYYY-MM (default: last month)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: roundup
+  cancel-in-progress: false
+
+jobs:
+  roundup:
+    name: Email the monthly roundups
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Build and send the roundups
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ROUNDUP_OPTOUT: ${{ vars.ROUNDUP_OPTOUT }}
+          SEND: ${{ (github.event_name == 'schedule' && vars.ROUNDUP_EMAILS == 'on') || inputs.send == true }}
+          MONTH: ${{ inputs.month }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/papers/roundup-email.js
