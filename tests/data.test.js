@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 
 import { parseCsv, normalizeArxivId, stripVersion } from '../site/assets/js/utils.js';
 import { deduplicatePapers, weekHash } from '../site/assets/js/app.js';
-import { computeSubmissionStats } from '../site/assets/js/stats.js';
+import { computeSubmissionStats, yearWeeks } from '../site/assets/js/stats.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CSV = readFileSync(join(__dirname, 'fixtures', 'submissions.csv'), 'utf8');
@@ -305,7 +305,7 @@ describe('weekHash', () => {
   });
 });
 
-// ── computeSubmissionStats — discussedCounts ────────────────────────────
+// ── computeSubmissionStats — monthCounts ────────────────────────────────
 
 // Inline rows in year 2099 to avoid collisions with the fixture.
 // Full column set: [ts(0), name(1), arxivId(2), comment(3), approved(4),
@@ -333,43 +333,65 @@ const DISC_ROWS = [
   mkDisc('Alice Chen', '9901.00001', 'TRUE'), // duplicate — dropped by dedup
 ];
 
-describe('computeSubmissionStats — discussedCounts', () => {
-  it('counts discussed papers correctly per submitter', () => {
-    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
-    assert.equal(discussedCounts.get('Alice Chen'), 2);
-    assert.equal(discussedCounts.get('Bob Martinez'), 1);
+describe('computeSubmissionStats — monthCounts', () => {
+  it('has twelve months', () => {
+    const { monthCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.equal(monthCounts.length, 12);
   });
 
-  it('does not include submitters with no discussed papers', () => {
-    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
-    assert.ok(!discussedCounts.has('Carol Liu'), 'Carol had no discussed papers');
+  it('counts suggested and discussed papers per month, after dedup', () => {
+    // All DISC_ROWS are in January; 5 unique papers, 3 discussed.
+    const { monthCounts } = computeSubmissionStats(2099, DISC_ROWS);
+    assert.deepEqual(monthCounts[0], { suggested: 5, discussed: 3 });
+    assert.ok(monthCounts.slice(1).every((m) => m.suggested === 0 && m.discussed === 0));
   });
 
-  it('undiscussed paper by the same submitter does not inflate their count', () => {
-    // Bob has one discussed and one undiscussed paper; count should be 1, not 2
-    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
-    assert.equal(discussedCounts.get('Bob Martinez'), 1);
+  it('puts each paper in the month it was suggested', () => {
+    const rows = [
+      ['2099-03-15 10:00:00', 'Alice', '9903.00001', '', 'TRUE', '', '', '0', 'TRUE'],
+      ['2099-12-31 23:00:00', 'Bob', '9912.00001', '', 'TRUE', '', '', '0', ''],
+    ];
+    const { monthCounts } = computeSubmissionStats(2099, rows);
+    assert.deepEqual(monthCounts[2], { suggested: 1, discussed: 1 });
+    assert.deepEqual(monthCounts[11], { suggested: 1, discussed: 0 });
   });
 
-  it('dedup runs before counting: duplicate discussed paper counts once', () => {
-    // 9901.00001 appears twice in DISC_ROWS (both discussed=TRUE, both Alice).
-    // After dedup only one row survives, so Alice’s count is 2, not 3.
-    const { discussedCounts } = computeSubmissionStats(2099, DISC_ROWS);
-    assert.equal(discussedCounts.get('Alice Chen'), 2);
+  it('month totals add up to the year total in the fixture', () => {
+    for (const year of [2025, 2026]) {
+      const { papers, monthCounts } = computeSubmissionStats(year, allRows);
+      const sum = monthCounts.reduce((a, m) => a + m.suggested, 0);
+      assert.equal(sum, papers.length, `month totals mismatch for ${year}`);
+    }
   });
 
-  it('returns an empty Map when no rows have Discussed = TRUE', () => {
-    const { discussedCounts } = computeSubmissionStats(2099, [
-      mkDisc('Alice Chen', '9901.99001', ''),
-      mkDisc('Bob Martinez', '9901.99002', 'FALSE'),
-    ]);
-    assert.equal(discussedCounts.size, 0);
-  });
-
-  it('rows without col 8 produce empty discussedCounts', () => {
-    // Rows with only columns 0–4 should not crash; none are treated as discussed.
+  it('rows without col 8 count as not discussed', () => {
     const shortRows = [['2099-06-01 10:00:00', 'Alice', '9901.88001', '', 'TRUE']];
-    const { discussedCounts } = computeSubmissionStats(2099, shortRows);
-    assert.equal(discussedCounts.size, 0);
+    const { monthCounts } = computeSubmissionStats(2099, shortRows);
+    assert.deepEqual(monthCounts[5], { suggested: 1, discussed: 0 });
+  });
+});
+
+// ── yearWeeks ───────────────────────────────────────────────
+
+describe('yearWeeks', () => {
+  it('starts on the Monday of the week holding January 1', () => {
+    // 1 January 2025 is a Wednesday.
+    const [first] = yearWeeks(2025);
+    assert.equal(first.getDay(), 1);
+    assert.deepEqual([first.getFullYear(), first.getMonth(), first.getDate()], [2024, 11, 30]);
+  });
+
+  it('gives consecutive Mondays through the last one in the year', () => {
+    const weeks = yearWeeks(2025);
+    assert.equal(weeks.length, 53);
+    const last = weeks.at(-1);
+    assert.deepEqual([last.getFullYear(), last.getMonth(), last.getDate()], [2025, 11, 29]);
+    for (const monday of weeks) assert.equal(monday.getDay(), 1);
+  });
+
+  it('matches the keys in weekCounts', () => {
+    const keys = new Set(yearWeeks(2025).map((d) => d.toISOString()));
+    const { weekCounts } = computeSubmissionStats(2025, allRows);
+    for (const key of weekCounts.keys()) assert.ok(keys.has(key), `${key} not a week of 2025`);
   });
 });

@@ -161,7 +161,7 @@ Test files live in `tests/`:
 | File               | Covers                                                                                        |
 | ------------------ | --------------------------------------------------------------------------------------------- |
 | `utils.test.js`    | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
-| `data.test.js`     | `deduplicatePapers`, `computeSubmissionStats`                                                 |
+| `data.test.js`     | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`                                    |
 | `inspire.test.js`  | `parseHit`                                                                                    |
 | `papers.test.js`   | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows       |
 | `slack.test.js`    | The Slack reminder: this week's papers, schedule, message                                     |
