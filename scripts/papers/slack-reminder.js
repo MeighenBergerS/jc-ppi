@@ -1,8 +1,8 @@
 /* ============================================================
    scripts/papers/slack-reminder.js — Weekly Slack reminder
    ============================================================
-   Run by .github/workflows/slack-reminder.yml, Thursday 1 PM
-   Central Time.
+   Run by .github/workflows/slack-reminder.yml, at the day and
+   hour in CONFIG.slackReminder.
 
    Environment:
      SLACK_WEBHOOK_URL  Incoming-webhook URL (repository secret).
@@ -13,6 +13,7 @@
    ============================================================ */
 
 import { CONFIG } from '../../site/assets/js/config.js';
+import { clockTime, meetingTime } from '../../site/assets/js/utils.js';
 import { LABELS, github, issuesToRows, fetchProfileNames, fetchInspire } from './lib.js';
 import { thisWeekPapers, buildReminder, isReminderSchedule } from './slack.js';
 import { fetchTrending } from './trending.js';
@@ -21,7 +22,8 @@ const schedule = process.env.SCHEDULE ?? '';
 const repo = process.env.GITHUB_REPOSITORY || CONFIG.issuesRepo;
 
 if (schedule && !isReminderSchedule(schedule)) {
-  console.log(`Schedule "${schedule}" is not 1 PM in Iowa today; the other schedule posts.`);
+  const at = `${clockTime(`${CONFIG.slackReminder.hour}:00`)} ${CONFIG.timezoneAbbr}`;
+  console.log(`Schedule "${schedule}" is not ${at} today; the other schedule posts.`);
   process.exit(0);
 }
 
@@ -40,7 +42,8 @@ try {
   console.error(`Paper titles unavailable: ${err.message}`);
 }
 const trending = await fetchTrending({ size: 1 });
-const text = buildReminder({ papers, trending, meeting: CONFIG.meeting, submitUrl, titles });
+const meeting = { day: CONFIG.meeting.day, time: meetingTime(CONFIG) };
+const text = buildReminder({ papers, trending, meeting, submitUrl, titles });
 
 console.log(`Papers this week: ${papers.length}.\n`);
 console.log(text);

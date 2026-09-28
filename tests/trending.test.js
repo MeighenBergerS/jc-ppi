@@ -7,8 +7,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
+import { CONFIG } from '../site/assets/js/config.js';
 import {
-  TRENDING_CATEGORIES,
   parseTrendingHit,
   fetchTrending,
   renderTrendingIssue,
@@ -79,7 +79,7 @@ describe('fetchTrending', () => {
       return { ok: true, status: 200, json: async () => ({ hits: { hits: [hit, hit] } }) };
     };
     const out = await fetchTrending({ size: 2, fetchFn, pause: 0 });
-    assert.equal(out.length, TRENDING_CATEGORIES.length);
+    assert.equal(out.length, CONFIG.trending.categories.length);
     assert.equal(out[0].length, 2);
     assert.equal(out[1], null);
     assert.match(decodeURIComponent(urls[1]), /and neutrino/);

@@ -24,20 +24,21 @@ import { normalizeArxivId, stripVersion } from './utils.js';
 export function renderTrending(state, rows, container) {
   container.innerHTML = '';
 
+  const refreshDays = CONFIG.trending.refreshDays.join(' & ');
   const section = document.createElement('section');
   section.className = 'trending-section';
 
   const heading = document.createElement('h2');
   heading.className = 'trending-heading';
-  heading.textContent = '📡 Trending in hep-ph';
+  heading.textContent = `📡 Trending in ${CONFIG.trending.arxivCategory}`;
   section.appendChild(heading);
 
   const subheading = document.createElement('p');
   subheading.className = 'trending-subheading';
   subheading.textContent =
-    `Most-cited papers over the past ${CONFIG.inspireLookbackWeeks ?? 4} weeks, ` +
+    `Most-cited papers over the past ${CONFIG.trending.lookbackWeeks} weeks, ` +
     'ranked by citation count (via INSPIRE-HEP). ' +
-    'Refreshed Monday & Wednesday mornings.';
+    `Refreshed ${refreshDays} mornings.`;
   section.appendChild(subheading);
 
   if (state === 'error') {
@@ -53,8 +54,7 @@ export function renderTrending(state, rows, container) {
   if (state === 'empty') {
     const msg = document.createElement('div');
     msg.className = 'trending-message trending-message--empty';
-    msg.textContent =
-      'Trending papers are refreshed Monday and Wednesday mornings — check back soon.';
+    msg.textContent = `Trending papers are refreshed ${refreshDays} mornings — check back soon.`;
     section.appendChild(msg);
     container.appendChild(section);
     return;
@@ -81,8 +81,7 @@ export function renderTrending(state, rows, container) {
   if (categoryOrder.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'trending-message trending-message--empty';
-    msg.textContent =
-      'Trending papers are refreshed Monday and Wednesday mornings — check back soon.';
+    msg.textContent = `Trending papers are refreshed ${refreshDays} mornings — check back soon.`;
     section.appendChild(msg);
     container.appendChild(section);
     return;

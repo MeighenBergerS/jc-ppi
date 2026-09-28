@@ -13,7 +13,7 @@ import {
   isReminderSchedule,
   buildReminder,
 } from '../scripts/papers/slack.js';
-import { TRENDING_CATEGORIES } from '../scripts/papers/trending.js';
+import { CONFIG } from '../site/assets/js/config.js';
 
 // Thursday 2026-10-01, 1 PM in Iowa (CDT).
 const NOW = new Date('2026-10-01T18:00:00Z');
@@ -135,7 +135,7 @@ describe('buildReminder', () => {
     assert.match(text, /\*4\* citations excl. self \/ 9 total/);
     assert.match(text, /X · Iowa/);
     assert.doesNotMatch(text, /Second/, 'only the first paper per category is shown');
-    assert.equal(text.match(/No data available/g).length, TRENDING_CATEGORIES.length - 1);
+    assert.equal(text.match(/No data available/g).length, CONFIG.trending.categories.length - 1);
   });
 
   it('leaves out the trending section when INSPIRE returned nothing', () => {

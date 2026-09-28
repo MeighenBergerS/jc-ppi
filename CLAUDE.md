@@ -43,15 +43,17 @@ labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in `scripts/papers/l
 Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
 Google Sheet history; keep `parseImported()` and the Sheet timestamp handling working for them.
 
-## Settings that live in more than one place
+## Settings
 
-- **Meeting day and time:** `site/index.html` (static fallback text in `#meeting-when`),
-  `site/assets/js/config.js` (`meeting.time`, plus `icsAnchor` and `icsDurationEnd`, which encode
-  the start and end in local time) and the fallback defaults in `_downloadCalendar` in
-  `site/assets/js/app.js`. Change them together. The Slack reminder reads `config.js`.
-- **Trending lookback and schedule:** `TRENDING_LOOKBACK_WEEKS` in `scripts/papers/trending.js`
-  and the cron in `.github/workflows/trending.yml`; `site/assets/js/trending.js` repeats both in
-  its display text.
+Club settings (repository, time zone, meeting, Slack reminder, Trending, Iowa page) live in
+`CONFIG` in `site/assets/js/config.js`. It sits under `site/` because only `site/` is deployed;
+the scripts import it from there. Read settings from `CONFIG` and derive text from them (see the
+meeting helpers in `utils.js`); never repeat a value in another file. The static `#meeting-when`
+text in `site/index.html` and the crons in `slack-reminder.yml` and `trending.yml` can't import
+it, so `tests/config.test.js` checks they match.
+
+`chicagoWallTime()` in `lib.js` stays on `America/Chicago` whatever `CONFIG.timezone` says: the
+imported Google Sheet timestamps were recorded in Central Time.
 
 ## Conventions
 

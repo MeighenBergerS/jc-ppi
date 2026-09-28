@@ -9,6 +9,7 @@
 
 import { normalizeArxivId, stripVersion, isValidArxivId } from '../../site/assets/js/utils.js';
 import { parseHit } from '../../site/assets/js/inspire.js';
+import { CONFIG } from '../../site/assets/js/config.js';
 
 export const LABELS = {
   paper: 'paper',
@@ -35,7 +36,10 @@ export const FIELDS = {
 export const METADATA_MARKER = '<!-- jc-ppi:paper-metadata -->';
 export const SUBMITTED_BEFORE_MARKER = '<!-- jc-ppi:submitted-before -->';
 const IMPORT_RE = /<!-- jc-ppi:imported (\{.*?\}) -->/;
-export const TIMEZONE = 'America/Chicago';
+// The club's time zone, for weeks and dates.
+export const TIMEZONE = CONFIG.timezone;
+// The Google Sheet's time zone. Fixed: imported timestamps were recorded in it.
+const SHEET_TIMEZONE = 'America/Chicago';
 
 const INSPIRE_BATCH = 25;
 const INSPIRE_FIELDS =
@@ -92,7 +96,8 @@ export function cleanArxivId(raw) {
 
 /**
  * Day number (days since 1970-01-01) of the Monday that starts the week
- * containing `date`, with weeks running Monday to Sunday in `timeZone`.
+ * containing `date`, with weeks running Monday to Sunday in `timeZone`
+ * (default: the club's).
  */
 export function weekStartDay(date, timeZone = TIMEZONE) {
   const parts = Object.fromEntries(
@@ -115,7 +120,7 @@ export function weekStartDay(date, timeZone = TIMEZONE) {
  * Reads a Google Sheet timestamp ("9/4/2026 15:44:26", Central Time wall
  * clock) as a Date. Returns an invalid Date if the string doesn't match.
  */
-export function chicagoWallTime(text, timeZone = TIMEZONE) {
+export function chicagoWallTime(text, timeZone = SHEET_TIMEZONE) {
   const m = (text ?? '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
   if (!m) return new Date(NaN);
   const [, mo, d, y, h, mi, s] = m.map(Number);
@@ -148,7 +153,7 @@ export function submittedAt(issue) {
   return stamp ? chicagoWallTime(stamp) : new Date(issue.created_at);
 }
 
-/** "Sep 4, 2026", in Central Time. */
+/** "Sep 4, 2026", in the club's time zone. */
 export function formatDate(date, timeZone = TIMEZONE) {
   return date.toLocaleDateString('en-US', {
     timeZone,

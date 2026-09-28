@@ -18,6 +18,8 @@ import {
   fmtWeekRange,
   normalizeArxivId,
   stripVersion,
+  meetingTime,
+  meetingIcs,
 } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 import { buildTable } from './table.js';
@@ -405,37 +407,12 @@ function _renderSubfieldBar() {
 
 // ── Calendar export ───────────────────────────────────────────
 
-/**
- * Generates and downloads a recurring .ics calendar file for the
- * weekly Friday journal-club meeting (3:30 PM CT, America/Chicago).
- */
+/** Downloads a recurring .ics calendar file for the weekly meeting (CONFIG.meeting). */
 function _downloadCalendar() {
-  const m = CONFIG.meeting ?? {};
-  const tz = m.timezone ?? 'America/Chicago';
-  const anchor = m.icsAnchor ?? '20260306T153000';
-  const end = m.icsDurationEnd ?? '20260306T170000';
-  const dayCode = m.icsDayCode ?? 'FR';
   const siteUrl =
     CONFIG.siteUrl ||
     (typeof window !== 'undefined' ? window.location.href.replace(/[^/]*$/, '') : '');
-  const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//jc-ppi//Iowa Particles & Plots JC//EN',
-    'BEGIN:VEVENT',
-    `DTSTART;TZID=${tz}:${anchor}`,
-    `DTEND;TZID=${tz}:${end}`,
-    `RRULE:FREQ=WEEKLY;BYDAY=${dayCode}`,
-    'SUMMARY:Iowa Particles & Plots Journal Club',
-    `DESCRIPTION:Weekly HEP paper discussion.\\nSubmit papers at ${siteUrl}\\nUpdates in the group Slack channel.`,
-    'BEGIN:VALARM',
-    'TRIGGER:-PT30M',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Journal club in 30 minutes',
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ].join('\r\n');
+  const ics = meetingIcs(CONFIG, siteUrl);
 
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const a = document.createElement('a');
@@ -456,20 +433,27 @@ async function init() {
     el.href = CONFIG.formUrl;
   });
 
-  // Populate meeting info block from CONFIG.meeting
-  if (CONFIG.meeting) {
-    const { day, time, timezone, timezoneLabel, slackUrl } = CONFIG.meeting;
-    const whenEl = document.getElementById('meeting-when');
-    if (whenEl && day && time) {
-      const tzDisplay = timezoneLabel ? `${timezoneLabel} \u2014 ${timezone}` : timezone;
-      whenEl.innerHTML = `Every <strong>${day} at ${time}</strong>${tzDisplay ? ` (${tzDisplay})` : ''}`;
-    }
-    const updatesEl = document.getElementById('meeting-updates');
-    if (updatesEl && slackUrl) {
-      updatesEl.innerHTML =
-        `Room changes and cancellations are announced in the ` +
-        `<a href="${slackUrl}" target="_blank" rel="noopener"><strong>Slack channel</strong></a>.`;
-    }
+  // Meeting info block, from CONFIG
+  const whenEl = document.getElementById('meeting-when');
+  if (whenEl) {
+    const strong = document.createElement('strong');
+    strong.textContent = `${CONFIG.meeting.day} at ${meetingTime(CONFIG)}`;
+    whenEl.replaceChildren(
+      'Every ',
+      strong,
+      ` (${CONFIG.timezoneLabel} \u2014 ${CONFIG.timezone})`
+    );
+  }
+  const updatesEl = document.getElementById('meeting-updates');
+  if (updatesEl && CONFIG.meeting.slackUrl) {
+    const link = document.createElement('a');
+    link.href = CONFIG.meeting.slackUrl;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    const strong = document.createElement('strong');
+    strong.textContent = 'Slack channel';
+    link.appendChild(strong);
+    updatesEl.replaceChildren('Room changes and cancellations are announced in the ', link, '.');
   }
 
   const container = document.getElementById('papers-container');

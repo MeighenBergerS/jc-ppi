@@ -5,13 +5,9 @@
    week's paper issues and the trending papers.
    ============================================================ */
 
-import { COL } from '../../site/assets/js/config.js';
+import { CONFIG, COL } from '../../site/assets/js/config.js';
 import { normalizeArxivId, stripVersion } from '../../site/assets/js/utils.js';
-import { TIMEZONE, chicagoWallTime, weekStartDay } from './lib.js';
-import { TRENDING_CATEGORIES, TRENDING_LOOKBACK_WEEKS } from './trending.js';
-
-// The reminder goes out at this local hour (Central Time) on the scheduled day.
-export const REMINDER_HOUR = 13;
+import { chicagoWallTime, weekStartDay } from './lib.js';
 
 const isTrue = (v) => (v ?? '').trim().toUpperCase() === 'TRUE';
 
@@ -47,21 +43,22 @@ export function slackEscape(text) {
 
 /**
  * True when a run started by `cron` should post: of the two UTC schedules
- * (one per daylight-saving state), only the one landing on REMINDER_HOUR in
- * Central Time posts. Scheduled runs can start late; this uses the cron's
+ * (one per daylight-saving state), only the one landing on
+ * CONFIG.slackReminder.hour in the club's time zone posts. Scheduled runs can start late; this uses the cron's
  * hour, not the start time, so a delay can't cause a skip or a double post.
  */
 export function isReminderSchedule(cron, now = new Date()) {
+  const { timezone } = CONFIG;
   const utcHour = Number(cron.trim().split(/\s+/)[1]);
   const at = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), utcHour));
   const localHour = Number(
     new Intl.DateTimeFormat('en-US', {
-      timeZone: TIMEZONE,
+      timeZone: timezone,
       hour: 'numeric',
       hourCycle: 'h23',
     }).format(at)
   );
-  return localHour === REMINDER_HOUR;
+  return localHour === CONFIG.slackReminder.hour;
 }
 
 /**
@@ -69,7 +66,7 @@ export function isReminderSchedule(cron, now = new Date()) {
  * @param {object} p
  * @param {{name, arxivId, votes}[]} p.papers  thisWeekPapers()
  * @param {(object[]|null)[]} p.trending        fetchTrending(); the first paper per category is shown
- * @param {{day, time}} p.meeting               CONFIG.meeting
+ * @param {{day, time}} p.meeting               e.g. { day: 'Friday', time: '3:30 PM CT' }
  * @param {string} p.submitUrl
  * @param {object} [p.titles]                   arXiv ID → paper title, if known
  */
@@ -115,16 +112,17 @@ export function buildReminder({ papers, trending, meeting, submitUrl, titles = {
     `➡️  Submit here: ${submitUrl}`
   );
 
-  const tops = TRENDING_CATEGORIES.map((_, i) => trending[i]?.[0] ?? null);
+  const { arxivCategory, lookbackWeeks, categories } = CONFIG.trending;
+  const tops = categories.map((_, i) => trending[i]?.[0] ?? null);
   if (tops.some(Boolean)) {
     lines.push(
       '',
       '─────────────────────────────────',
-      `*📡 Trending in hep-ph — past ${TRENDING_LOOKBACK_WEEKS} weeks* (full list on the site ↗)`,
+      `*📡 Trending in ${arxivCategory} — past ${lookbackWeeks} weeks* (full list on the site ↗)`,
       '_Ranked by citation count (via INSPIRE-HEP)_',
       ''
     );
-    TRENDING_CATEGORIES.forEach((cat, i) => {
+    categories.forEach((cat, i) => {
       const t = tops[i];
       lines.push(`${cat.emoji} *${cat.label}*`);
       if (!t) {

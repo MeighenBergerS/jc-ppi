@@ -51,7 +51,7 @@ async function fetchIowaPapers() {
   const cached = _loadCache();
   if (cached) return cached;
 
-  const weeks = CONFIG.iowaLookbackWeeks ?? 8;
+  const weeks = CONFIG.iowa.lookbackWeeks;
   const since = new Date();
   since.setDate(since.getDate() - weeks * 7);
   const sinceStr = since.toISOString().slice(0, 10); // YYYY-MM-DD
@@ -159,7 +159,7 @@ export async function renderIowa(container) {
   if (papers.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'iowa-message iowa-message--empty';
-    const weeks = CONFIG.iowaLookbackWeeks ?? 8;
+    const weeks = CONFIG.iowa.lookbackWeeks;
     msg.textContent = `No papers with University of Iowa affiliations found in the past ${weeks} weeks on INSPIRE-HEP.`;
     section.appendChild(msg);
     container.appendChild(section);
@@ -186,7 +186,7 @@ function _makeSection() {
   heading.textContent = 'Iowa Research';
   section.appendChild(heading);
 
-  const weeks = CONFIG.iowaLookbackWeeks ?? 8;
+  const weeks = CONFIG.iowa.lookbackWeeks;
   const subheading = document.createElement('p');
   subheading.className = 'iowa-subheading';
   subheading.textContent =

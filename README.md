@@ -113,7 +113,7 @@ site/                          ← everything GitHub Pages serves
   assets/
     css/style.css              ← All styling
     js/
-      config.js                ← ✏️  Settings: repository, meeting time, column maps
+      config.js                ← ✏️  All settings: repository, meeting, reminder, trending
       utils.js                 ← Week math, CSV parser, arXiv ID helpers
       inspire.js               ← INSPIRE-HEP API client + arXiv validation
       table.js                 ← DOM table builder

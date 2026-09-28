@@ -24,11 +24,11 @@ into Node ≥ 18).
 
 | File                               | Purpose                                                                        |
 | ---------------------------------- | ------------------------------------------------------------------------------ |
-| `site/assets/js/config.js`         | **Only file to edit for setup.** Repository, data URLs, meeting, column maps   |
+| `site/assets/js/config.js`         | **All club settings** (repo, time zone, meeting, reminder, trending), columns  |
 | `site/assets/js/app.js`            | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
 | `site/assets/js/inspire.js`        | INSPIRE-HEP API client with localStorage cache                                 |
 | `site/assets/js/table.js`          | DOM builder; turns CSV rows + metadata into `<table>`                          |
-| `site/assets/js/utils.js`          | Pure helpers: week math, CSV parser, arXiv ID utilities                        |
+| `site/assets/js/utils.js`          | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
 | `site/assets/js/trending.js`       | Trending section renderer                                                      |
 | `site/assets/js/stats.js`          | Stats page charts                                                              |
 | `scripts/papers/lib.js`            | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client   |
@@ -126,7 +126,7 @@ COL_TREND.citationsNoSelf = 8
 ## Week boundary
 
 Weeks run **Monday 00:00:00 → Sunday 23:59:59**: in the visitor's local time on the site
-(`weekStart()` in `utils.js`), and in Central Time in the scripts (`weekStartDay()` in `lib.js`).
+(`weekStart()` in `utils.js`), and in `CONFIG.timezone` in the scripts (`weekStartDay()` in `lib.js`).
 "This Week" is the current window; papers roll into the Archive automatically after Sunday.
 
 ---

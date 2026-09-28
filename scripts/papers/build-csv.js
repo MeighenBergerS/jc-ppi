@@ -7,12 +7,13 @@
    before each deploy.
 
    Usage: node scripts/papers/build-csv.js <papers.csv> <trending.csv>
-   Environment: GITHUB_REPOSITORY (default MeighenBergerS/jc-ppi),
+   Environment: GITHUB_REPOSITORY (default CONFIG.issuesRepo),
    GITHUB_TOKEN (optional locally; raises the API rate limit).
    ============================================================ */
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { CONFIG } from '../../site/assets/js/config.js';
 import { LABELS, issuesToRows, toCsv, github, fetchProfileNames } from './lib.js';
 import { parseTrendingIssue, trendingToRows } from './trending.js';
 
@@ -26,10 +27,7 @@ const write = (path, text) => {
   writeFileSync(path, text);
 };
 
-const api = github(
-  process.env.GITHUB_TOKEN,
-  process.env.GITHUB_REPOSITORY || 'MeighenBergerS/jc-ppi'
-);
+const api = github(process.env.GITHUB_TOKEN, process.env.GITHUB_REPOSITORY || CONFIG.issuesRepo);
 const issues = await api.paginate(`/issues?labels=${LABELS.paper}&state=all`);
 const rows = issuesToRows(issues, await fetchProfileNames(api, issues));
 
