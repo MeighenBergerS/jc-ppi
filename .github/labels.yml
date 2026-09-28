@@ -3,7 +3,7 @@
 
 # Paper submissions (see docs/ISSUES-PREVIEW.md)
 - name: paper
-  color: "5319e7"
+  color: "e7298a"
   description: A paper suggested for the journal club
 - name: needs approval
   color: "fbca04"
