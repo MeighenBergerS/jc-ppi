@@ -6,7 +6,7 @@ Static website for the Iowa Particles & Plots HEP journal club.
 Members suggest papers as GitHub issues (label `paper`); a bot fills in each paper's details; the
 deploy workflow turns the issues into CSV files that the site renders.
 No framework, no build step for the site, no npm dependencies (test runner is `node:test`, built
-into Node ≥ 18). The documentation site (Documentation tab, `/docs/`) is built from `docs/` with
+into Node ≥ 18). The documentation site (`/docs/`, linked from the About page and the footer) is built from `docs/` with
 MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 
 ---
