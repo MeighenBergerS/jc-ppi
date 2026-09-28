@@ -13,17 +13,23 @@ The easiest way to contribute is to suggest a paper for an upcoming meeting.
    on [arXiv](https://arxiv.org) — see the [arXiv guide in the README](../README.md#guide-to-arxiv)
    if you're new to it.
 
-2. **Submit it** using the link on the [journal club website](https://meighenbergers.github.io/jc-ppi/).
-   You'll be asked for:
+2. **Submit it** with the [Suggest a paper issue form](https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml),
+   also linked as "Submit a Paper" on the [journal club website](https://meighenbergers.github.io/jc-ppi/).
+   You need a GitHub account. You'll be asked for:
 
-   | Field                            | What to enter                                                              |
-   | -------------------------------- | -------------------------------------------------------------------------- |
-   | **Your name**                    | Your first name, or however you'd like to be listed                        |
-   | **arXiv ID or URL**              | e.g. `2301.12345` or `https://arxiv.org/abs/2301.12345`                    |
-   | **Why are you suggesting this?** | A sentence or two is great. "General interest" is a perfectly fine answer. |
+   | Field                | What to enter                                                              |
+   | -------------------- | -------------------------------------------------------------------------- |
+   | **arXiv ID or link** | e.g. `2301.12345` or `https://arxiv.org/abs/2301.12345`                    |
+   | **Why this paper?**  | A sentence or two is great. "General interest" is a perfectly fine answer. |
 
-3. Your submission will appear automatically on the website under **This Week**.
-   After Sunday it moves to the **Archive** — no action needed from you.
+   The site shows the name on your GitHub profile, or your username.
+
+3. A bot adds the paper's title, authors, abstract and BibTeX to your issue within a few
+   minutes, and the paper appears on the website under **This Week**. After Sunday it moves to
+   the **Archive**, no action needed from you. If you aren't on the members list yet, a
+   maintainer approves your first paper before it shows.
+
+4. **Vote** for the papers you want to discuss with a 👍 reaction on their issues.
 
 ### Tips for a good submission
 
@@ -59,25 +65,25 @@ check always passes.
 
 ### File map
 
-| File                                   | What it does                                                       |
-| -------------------------------------- | ------------------------------------------------------------------ |
-| `site/assets/js/config.js`             | Google Sheet / Form URLs and column map — **start here for setup** |
-| `site/assets/js/utils.js`              | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`          |
-| `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction       |
-| `site/assets/js/sheet.js`              | Apps Script mutation wrapper (vote / edit / remove)                |
-| `site/assets/js/table.js`              | DOM table builder                                                  |
-| `site/assets/js/app.js`                | Page renderers and entry point                                     |
-| `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                    |
-| `site/assets/css/style.css`            | All styling                                                        |
-| `site/index.html`                      | This Week page                                                     |
-| `site/archive.html`                    | Archive page (with subfield filter)                                |
-| `site/stats.html`                      | Submission statistics by year                                      |
-| `site/resources.html`                  | arXiv & INSPIRE-HEP guide                                          |
-| `tests/server/index.mjs`               | Local dev server (mock endpoints, config URL injection)            |
-| `tests/server/generate-fixtures.mjs`   | Fetches real papers from INSPIRE and writes fresh fixture files    |
-| `tests/server/scenario.json`           | User/round config for fixture generation — edit freely             |
-| `tests/fixtures/submissions.csv`       | Committed fixture: baseline submission data                        |
-| `tests/fixtures/inspire-response.json` | Committed fixture: baseline INSPIRE API response                   |
+| File                                   | What it does                                                                                               |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `site/assets/js/config.js`             | Repository, meeting time and column maps — **start here for setup**                                        |
+| `site/assets/js/utils.js`              | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`                                                  |
+| `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction                                               |
+| `site/assets/js/table.js`              | DOM table builder                                                                                          |
+| `site/assets/js/app.js`                | Page renderers and entry point                                                                             |
+| `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                                                            |
+| `site/assets/css/style.css`            | All styling                                                                                                |
+| `site/index.html`                      | This Week page                                                                                             |
+| `site/archive.html`                    | Archive page (with subfield filter)                                                                        |
+| `site/stats.html`                      | Submission statistics by year                                                                              |
+| `site/resources.html`                  | arXiv & INSPIRE-HEP guide                                                                                  |
+| `scripts/papers/`                      | The paper bot, site data builder, Trending issue and Slack reminder (see [MAINTAINING.md](MAINTAINING.md)) |
+| `tests/server/index.mjs`               | Local dev server (fixtures as site data, INSPIRE mock)                                                     |
+| `tests/server/generate-fixtures.mjs`   | Fetches real papers from INSPIRE and writes fresh fixture files                                            |
+| `tests/server/scenario.json`           | User/round config for fixture generation — edit freely                                                     |
+| `tests/fixtures/submissions.csv`       | Committed fixture: baseline submission data                                                                |
+| `tests/fixtures/inspire-response.json` | Committed fixture: baseline INSPIRE API response                                                           |
 
 ### Making changes
 
@@ -86,7 +92,7 @@ check always passes.
 3. Run `npm test` to make sure all tests pass.
 4. Open a pull request against `main`.
 
-The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
+The site redeploys automatically whenever site files or `scripts/papers/` change on `main`.
 
 ### AI assistance
 
@@ -100,7 +106,7 @@ the README.
 ### Local dev server
 
 The dev server lets you run the full site locally against realistic fake data,
-with no access to Google Sheets or the live INSPIRE API required.
+with no access to GitHub issues or the live INSPIRE API required.
 
 ```
 npm run dev      # start the server with committed fixture data
@@ -111,18 +117,17 @@ Then open **http://localhost:3000** in your browser.
 
 #### How it works
 
-The server (`tests/server/index.mjs`) intercepts the three external URLs the
-site normally talks to and routes them to local mock endpoints:
+The server (`tests/server/index.mjs`) serves the fixtures where the deployed site
+finds its data, and stands in for INSPIRE-HEP:
 
-| External URL                    | Mock endpoint            | Source                                         |
-| ------------------------------- | ------------------------ | ---------------------------------------------- |
-| Google Sheets CSV (submissions) | `GET /mock/sheet.csv`    | `tests/fixtures/submissions[.fresh].csv`       |
-| Google Sheets CSV (trending)    | `GET /mock/trending.csv` | `tests/fixtures/trending[.fresh].csv`          |
-| `inspirehep.net/api/literature` | `GET /mock/inspire`      | `tests/fixtures/inspire-response[.fresh].json` |
-| Apps Script mutate URL          | `POST /mock/mutate`      | In-memory store (votes, edits, removals)       |
+| The site asks for               | Served from                                    |
+| ------------------------------- | ---------------------------------------------- |
+| `data/papers.csv`               | `tests/fixtures/submissions[.fresh].csv`       |
+| `data/trending.csv`             | `tests/fixtures/trending[.fresh].csv`          |
+| `inspirehep.net/api/literature` | `tests/fixtures/inspire-response[.fresh].json` |
 
-URL substitution happens by serving a patched version of `config.js` and
-`inspire.js` at request time — the source files on disk are never modified.
+INSPIRE requests reach the mock because the server rewrites the INSPIRE URL in
+`inspire.js` as it serves it; the file on disk is never modified.
 
 #### Fixture files
 
@@ -170,12 +175,15 @@ npm test
 
 Test files live in `tests/`:
 
-| File              | Covers                                                                                        |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| `utils.test.js`   | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
-| `data.test.js`    | `deduplicatePapers`, `computeSubmissionStats`                                                 |
-| `inspire.test.js` | `parseHit`                                                                                    |
-| `runner.html`     | Browser-side DOM tests for `buildTable`                                                       |
+| File               | Covers                                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| `utils.test.js`    | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId` |
+| `data.test.js`     | `deduplicatePapers`, `computeSubmissionStats`                                                 |
+| `inspire.test.js`  | `parseHit`                                                                                    |
+| `papers.test.js`   | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows       |
+| `slack.test.js`    | The Slack reminder: this week's papers, schedule, message                                     |
+| `trending.test.js` | Trending papers, the Trending issue, and keeping it out of the submissions                    |
+| `runner.html`      | Browser-side DOM tests for `buildTable`                                                       |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)
 runs `npm test` automatically before every commit, so the suite must be green

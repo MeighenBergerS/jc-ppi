@@ -3,8 +3,10 @@
 ## Project overview
 
 Static website for the Iowa Particles & Plots HEP journal club.
-Members submit papers via Google Form → Google Sheet → site renders them live.
-No framework, no build step, no npm dependencies (test runner is `node:test`, built-in to Node ≥ 18).
+Members suggest papers as GitHub issues (label `paper`); a bot fills in each paper's details; the
+deploy workflow turns the issues into CSV files that the site renders.
+No framework, no build step for the site, no npm dependencies (test runner is `node:test`, built
+into Node ≥ 18).
 
 ---
 
@@ -12,77 +14,89 @@ No framework, no build step, no npm dependencies (test runner is `node:test`, bu
 
 - **Vanilla ES modules** — all JS uses `import`/`export`; loaded via `<script type="module">` in HTML.
 - **No framework** — no React, Vue, TypeScript, Webpack, Vite, or any third-party library.
-- **Node ≥ 18** — only for the test suite (`node --test`).
-- **Google Apps Script** (`docs/appscript.gs`) — server-side GAS code; uses `var`, not Node.js.
+- **Node ≥ 18** — for the test suite (`node --test`) and the scripts in `scripts/papers/`, which run
+  in GitHub Actions with Node 20. The scripts import the site's modules (`utils.js`, `inspire.js`,
+  `config.js`), so those must keep working in Node (no DOM access at module top level).
 
 ---
 
 ## Key source files
 
-| File                         | Purpose                                                                   |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `site/assets/js/config.js`   | **Only file to edit for setup.** All URLs, column indices, meeting config |
-| `site/assets/js/app.js`      | Entry point; fetches CSV, renders This Week / Archive / Trending          |
-| `site/assets/js/inspire.js`  | INSPIRE-HEP API client with localStorage cache                            |
-| `site/assets/js/table.js`    | DOM builder; turns CSV rows + metadata into `<table>`                     |
-| `site/assets/js/sheet.js`    | Mutation wrapper (vote, edit, remove, discuss → Apps Script)              |
-| `site/assets/js/utils.js`    | Pure helpers: week math, CSV parser, arXiv ID utilities                   |
-| `site/assets/js/trending.js` | Trending section renderer                                                 |
-| `site/assets/js/stats.js`    | Stats page charts                                                         |
-| `docs/appscript.gs`          | Google Apps Script: approval, mutations, trending refresh, Slack          |
+| File                               | Purpose                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| `site/assets/js/config.js`         | **Only file to edit for setup.** Repository, data URLs, meeting, column maps   |
+| `site/assets/js/app.js`            | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
+| `site/assets/js/inspire.js`        | INSPIRE-HEP API client with localStorage cache                                 |
+| `site/assets/js/table.js`          | DOM builder; turns CSV rows + metadata into `<table>`                          |
+| `site/assets/js/utils.js`          | Pure helpers: week math, CSV parser, arXiv ID utilities                        |
+| `site/assets/js/trending.js`       | Trending section renderer                                                      |
+| `site/assets/js/stats.js`          | Stats page charts                                                              |
+| `scripts/papers/lib.js`            | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client   |
+| `scripts/papers/enrich.js`         | The paper bot (`.github/workflows/papers.yml`)                                 |
+| `scripts/papers/build-csv.js`      | Writes `site/data/papers.csv` and `trending.csv` (`deploy-pages.yml`)          |
+| `scripts/papers/trending.js`       | Trending papers from INSPIRE; the Trending issue body                          |
+| `scripts/papers/trending-issue.js` | Opens the twice-weekly Trending issue (`trending.yml`)                         |
+| `scripts/papers/slack.js`          | The weekly Slack reminder message                                              |
+| `scripts/papers/slack-reminder.js` | Posts it (`slack-reminder.yml`)                                                |
 
 ---
 
 ## Data pipeline
 
 ```
-Google Form → Google Sheet (private tab, includes email)
-  → Apps Script auto-approves known members (Members tab)
-  → Public tab mirrors all columns except email
-  → Site fetches Public tab as CSV
-  → filters: Approved = "TRUE", Removed ≠ "TRUE"
-  → INSPIRE-HEP API fills title / authors / abstract / citations / BibTeX
+"Suggest a paper" issue form (.github/ISSUE_TEMPLATE/1-paper.yml)
+  → paper bot: approval (paper-members.txt, paper-maintainers.txt, collaborators),
+    INSPIRE/arXiv metadata comment, "Updated By Bot", "Submitted Before"
+  → deploy workflow: build-csv.js writes site/data/papers.csv
+    (approved, not closed as "not planned"; votes = 👍 reactions)
+  → site fetches data/papers.csv
+  → INSPIRE-HEP API fills title / authors / abstract / citations in the browser
 ```
 
 Trending pipeline:
 
 ```
-Apps Script triggers Monday & Wednesday
-  → refreshTrendingPapers() queries INSPIRE-HEP
-  → writes to Trending tab
-  → site fetches Trending tab CSV → renders Trending section
+trending.yml (Monday & Wednesday) → Trending issue (labels Trending, paper, Updated By Bot)
+  → build-csv.js writes site/data/trending.csv from the newest Trending issue
+  → site renders the Trending section
 ```
+
+Issues labelled `Trending` also carry `paper` but are never submissions: use `isSubmission()` /
+`isVisiblePaper()` in `lib.js`, never the `paper` label alone.
 
 ---
 
-## Google Sheet — Public tab column indices (0-based, from CSV)
+## papers.csv column indices (0-based)
+
+The layout matches the retired Google Sheet's Public tab.
 
 ```
-COL.timestamp     = 0  (A) Submission timestamp
-COL.name          = 1  (B) Submitter name
-COL.arxivId       = 2  (C) arXiv ID as submitted (may be URL or bare ID)
-COL.comment       = 3  (D) Original suggestion comment
-COL.approved      = 4  (E) "TRUE" when approved
-COL.removed       = 5  (F) "TRUE" when removed by a visitor
-COL.editedComment = 6  (G) Edited comment (overrides COL.comment when non-empty)
-COL.votes         = 7  (H) Running upvote count
-COL.discussed     = 8  (I) "TRUE" when starred as discussed at the meeting
+COL.timestamp     = 0  Submission time (ISO for issues; "M/D/YYYY H:MM:SS" Central for imported)
+COL.name          = 1  GitHub profile name, or the Sheet name for imported issues
+COL.arxivId       = 2  arXiv ID as submitted (may be URL or bare ID)
+COL.comment       = 3  "Why this paper?"
+COL.approved      = 4  always "TRUE"
+COL.removed       = 5  always empty
+COL.editedComment = 6  always empty
+COL.votes         = 7  👍 reactions (+ imported votes)
+COL.discussed     = 8  "TRUE" when labelled "discussed"
+COL.issueUrl      = 9  the paper's issue
 ```
 
 `COL` (exported from `config.js`) is the single source of truth — never hardcode column indices.
 
-Trending tab (`COL_TREND`, also in `config.js`):
+trending.csv (`COL_TREND`, also in `config.js`):
 
 ```
-COL_TREND.category       = 0  (A)
-COL_TREND.rank           = 1  (B)
-COL_TREND.arxivId        = 2  (C)
-COL_TREND.title          = 3  (D)
-COL_TREND.abstract       = 4  (E)
-COL_TREND.authors        = 5  (F)
-COL_TREND.affiliation    = 6  (G)
-COL_TREND.citations      = 7  (H)
-COL_TREND.citationsNoSelf = 8 (I)
+COL_TREND.category       = 0
+COL_TREND.rank           = 1
+COL_TREND.arxivId        = 2
+COL_TREND.title          = 3
+COL_TREND.abstract       = 4
+COL_TREND.authors        = 5
+COL_TREND.affiliation    = 6
+COL_TREND.citations      = 7
+COL_TREND.citationsNoSelf = 8
 ```
 
 ---
@@ -93,7 +107,7 @@ COL_TREND.citationsNoSelf = 8 (I)
 - **Old format**: `category/YYMMNNN`, e.g. `hep-ph/9901123`.
 - Always strip the version suffix before comparisons: `stripVersion()` in `utils.js`.
 - Extract a bare ID from URLs or raw input: `normalizeArxivId()` in `utils.js`.
-- **3-digit prefix auto-correction**: `708.1137` → `0708.1137` (handled in `inspire.js`).
+- **3-digit prefix auto-correction**: `708.1137` → `0708.1137` (in `inspire.js` and `cleanArxivId()`).
 - Validity check: `isValidArxivId()` in `utils.js`.
 
 ---
@@ -109,21 +123,10 @@ COL_TREND.citationsNoSelf = 8 (I)
 
 ---
 
-## Mutation endpoint (Apps Script web app)
-
-- URL set at `CONFIG.mutateUrl` in `config.js`; interactive controls are hidden when it is empty.
-- All mutations are POSTed from `sheet.js` with `Content-Type: text/plain` and a JSON body.
-- Request body shape: `{ action, arxivId, ...extras }`.
-- Actions: `vote`, `remove`, `edit` (requires `comment`), `discuss`.
-- Response: `{ ok: true, ... }` on success, `{ ok: false, error: '...' }` on handled error.
-- Network errors are rethrown; callers are responsible for user-facing error handling.
-
----
-
 ## Week boundary
 
-Weeks run **Monday 00:00:00 local time → Sunday 23:59:59 local time**.
-`weekStart(date)` in `utils.js` returns the Monday `Date` for the week containing `date`.
+Weeks run **Monday 00:00:00 → Sunday 23:59:59**: in the visitor's local time on the site
+(`weekStart()` in `utils.js`), and in Central Time in the scripts (`weekStartDay()` in `lib.js`).
 "This Week" is the current window; papers roll into the Archive automatically after Sunday.
 
 ---
@@ -132,25 +135,21 @@ Weeks run **Monday 00:00:00 local time → Sunday 23:59:59 local time**.
 
 ```bash
 npm test
-# or directly:
-node --test tests/utils.test.js tests/data.test.js tests/inspire.test.js tests/config.test.js
 ```
 
 - Uses `node:test` and `node:assert/strict` — no external test framework.
 - Test fixtures live in `tests/fixtures/`.
-- Run tests after any change to `utils.js`, `config.js`, or `inspire.js`.
+- Run tests after any change to `site/assets/js/` or `scripts/papers/`.
 
 ---
 
-## Apps Script (`docs/appscript.gs`)
+## Security
 
-- Google Apps Script **V8 runtime** — use `var` declarations to match the existing style.
-- Not Node.js: do not suggest `import`, `require`, or npm packages.
-- Column positions here are **1-indexed** (`COL_TIMESTAMP = 1`, etc.), unlike the JS (0-indexed).
-- Deployed as a web app: Execute as owner, accessible by anyone (unauthenticated).
-- `doPost(e)` handles all mutation actions forwarded from the site.
-- `onFormSubmit(e)` is a form-submit trigger for automatic member approval.
-- `weeklySlackReminder()` and `refreshTrendingPapers()` are time-driven triggers.
+- Issue bodies, names and INSPIRE text are untrusted. On the site, insert them with
+  `textContent` or DOM building, never `innerHTML`. In bot comments, pass them through `safeText()`
+  (escapes HTML and stops `@` mentions).
+- Workflows read issue content from the event payload file, never by interpolating
+  `${{ github.event.issue.body }}` into a `run:` script.
 
 ---
 
