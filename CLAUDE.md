@@ -17,7 +17,7 @@ npm install        # first time only; wires up the pre-commit hook
 npm test           # node:test suite, no dependencies
 npm run dev        # local site on http://localhost:3000 against fixture data
 npm run refresh    # fetch fresh INSPIRE papers into *.fresh.* fixtures, then serve
-prettier --check "site/**/*.{html,css,js}" "docs/**/*.md" README.md   # what CI lints
+prettier --check "site/**/*.{html,css,js}" "scripts/**/*.js" "tests/**/*.{js,html}" "**/*.md"   # what CI lints
 ```
 
 The pre-commit hook (`.githooks/pre-commit`) formats staged `.html`, `.css`, `.js` and `.md` files
