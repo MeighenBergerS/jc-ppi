@@ -19,6 +19,8 @@ import {
   tierReached,
   buildRoundup,
   renderRoundup,
+  roundupLogins,
+  parseOptOut,
 } from '../scripts/papers/roundup.js';
 
 const body = (arxiv, name) =>
@@ -297,5 +299,36 @@ describe('renderRoundup', () => {
     const { text } = renderRoundup(buildRoundup(papers, '2026-10', meta), meta);
     assert.match(text, /didn't suggest a paper this month/);
     assert.match(text, /Last month: 2 papers suggested, 1 discussed\./);
+  });
+});
+
+// ── Recipients ────────────────────────────────────────────────
+
+describe('roundupLogins', () => {
+  it('joins the member lists and past submitters, lower-case and sorted', () => {
+    const issues = [
+      issue({ login: 'Carol', at: '2026-09-02T15:00:00Z' }),
+      issue({ login: 'alice', at: '2026-09-03T15:00:00Z' }),
+    ];
+    assert.deepEqual(roundupLogins(issues, ['Bob', 'ALICE']), ['alice', 'bob', 'carol']);
+  });
+
+  it('skips the importer, bots and issues that are not visible papers', () => {
+    const issues = [
+      imported('Alice Chen', '3/4/2025 10:00:00', '2503.00001'),
+      issue({ login: 'dependabot[bot]', at: '2026-09-02T15:00:00Z' }),
+      issue({ login: 'dave', at: '2026-09-02T15:00:00Z', labels: [LABELS.needsApproval] }),
+    ];
+    assert.deepEqual(roundupLogins(issues, []), []);
+  });
+});
+
+describe('parseOptOut', () => {
+  it('splits on spaces, commas and new lines, ignoring case', () => {
+    assert.deepEqual([...parseOptOut('Alice, bob\ncarol  ')], ['alice', 'bob', 'carol']);
+  });
+
+  it('is empty when unset', () => {
+    assert.equal(parseOptOut(undefined).size, 0);
   });
 });

@@ -44,6 +44,7 @@ Suggesting, voting, editing and withdrawing papers are covered in
 | `.github/workflows/deploy-pages.yml` + `scripts/papers/build-csv.js`        | Before every deploy, writes the approved paper issues to `site/data/papers.csv` and the newest `Trending` issue to `site/data/trending.csv`. Runs on pushes to the site, on paper-issue changes and hourly. If building the data fails, nothing is deployed and the previous site stays up.                                                                                                                                                       |
 | `.github/workflows/trending.yml` + `scripts/papers/trending-issue.js`       | On the days in `CONFIG.trending` (Monday and Wednesday mornings), opens a `Trending` issue with the most-cited recent hep-ph papers per category (INSPIRE-HEP), labelled `Trending`, `paper` and `Updated By Bot`, closes the previous one, and redeploys the site. The bot and the site data ignore `Trending` issues as submissions.                                                                                                            |
 | `.github/workflows/slack-reminder.yml` + `scripts/papers/slack-reminder.js` | Thursday 1 PM Central, posts the weekly reminder to Slack: who submitted this week, the most-voted paper, and the top trending paper per category.                                                                                                                                                                                                                                                                                                |
+| `.github/workflows/roundup.yml` + `scripts/papers/roundup-email.js`         | The 1st of each month, emails each member their private roundup of the month before (see [Monthly roundups](#monthly-roundups)).                                                                                                                                                                                                                                                                                                                  |
 | `.github/workflows/keepalive.yml`                                           | Weekly, checks the last commit; at 25 days old it re-enables any paused workflow and pushes an empty commit, so GitHub doesn't pause the schedules (it does after 60 days without commits).                                                                                                                                                                                                                                                       |
 | `.github/workflows/check-links.yml`                                         | Weekly, checks that the live pages load and the data files have rows.                                                                                                                                                                                                                                                                                                                                                                             |
 | `.github/labels.yml` + `.github/workflows/labels.yml`                       | The labels. Edit the file, not the labels on GitHub.                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -63,11 +64,32 @@ To see this week's message without posting, use **Actions → Slack reminder →
 
 ## Monthly roundups
 
-Each member can get a private monthly roundup: the papers they suggested, which were discussed,
-their weekly streak and the milestones they reached (📚 papers suggested, 🗣️ discussed, 🔥 weeks
-in a row, 🧭 subfields, ⚡ suggested the month they hit arXiv, 👍 votes). It compares a member
-only with their own earlier months; no one else sees it, and nothing personal is on the site.
-The milestone tiers are `MILESTONES` in `scripts/papers/roundup.js`.
+On the 1st of each month, each member gets a private email about the month before: the papers
+they suggested, which were discussed, their weekly streak and the milestones they reached (📚
+papers suggested, 🗣️ discussed, 🔥 weeks in a row, 🧭 subfields, ⚡ suggested the month they hit
+arXiv, 👍 votes). It compares a member only with their own earlier months; no one else sees it,
+and nothing personal is on the site. The milestone tiers are `MILESTONES` in
+`scripts/papers/roundup.js`.
+
+Members are everyone in `paper-members.txt` and `paper-maintainers.txt`, and everyone who has
+suggested a paper. A member gets the email only if their GitHub profile shows a public email
+(Settings → Public profile → Public email); without one they are skipped. Their papers from the
+Google Sheet count when the name typed into the Sheet matches their GitHub profile name.
+
+| Setting                    | Where                                  | Values                                                                |
+| -------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| Club Gmail address         | Repository secret `GMAIL_ADDRESS`      | Set with `gh secret set GMAIL_ADDRESS`                                |
+| Gmail app password         | Repository secret `GMAIL_APP_PASSWORD` | A Google App Password (not the account password); `gh secret set ...` |
+| Send on schedule (the 1st) | Repository variable `ROUNDUP_EMAILS`   | `on` to send; anything else only counts                               |
+| Opted out                  | Repository variable `ROUNDUP_OPTOUT`   | GitHub usernames, separated by spaces, commas or new lines            |
+
+The email says to reply to stop getting it. Replies go to the club Gmail; add the sender's GitHub
+username to `ROUNDUP_OPTOUT`. Repository variables are visible to collaborators only, not to the
+public.
+
+**Actions → Monthly roundup → Run workflow** counts who would get an email; tick "send" to send
+them, and give a month (`2026-09`) to send an earlier one. The Actions log is public, so it shows
+only counts, never names, addresses or roundups.
 
 To see a member's roundup without sending anything:
 
