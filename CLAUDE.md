@@ -25,13 +25,22 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 
 ## Deploying
 
-- Pushing to `main` deploys `site/` to GitHub Pages, but only when files under `site/` change
-  (`deploy-pages.yml`). Changes to `docs/`, tests or the README do not redeploy.
+- Pushing to `main` deploys `site/` to GitHub Pages when files under `site/` or `scripts/papers/`
+  change (`deploy-pages.yml`). It also redeploys on paper-issue changes and hourly, to refresh the
+  issues preview. Changes to `docs/`, tests or the README alone do not redeploy.
 - Pages serves with `Cache-Control: max-age=600`. After a deploy, the old page can show for up to
   ten minutes; check the live file with `curl` before assuming a deploy failed.
 - `docs/appscript.gs` is a reference copy. The live Apps Script runs inside the Google Sheet and
   changes only when someone pastes the code in and redeploys. Load the `appscript-changes` skill
   before editing that file.
+
+## GitHub issues trial
+
+Paper submissions are on trial as GitHub issues, next to the Google Form (`docs/ISSUES-PREVIEW.md`).
+The bot and the preview data builder live in `scripts/papers/`, with tests in
+`tests/papers.test.js`. Field labels in `.github/ISSUE_TEMPLATE/paper.yml` and `FIELDS` in
+`scripts/papers/lib.js` must match. Labels are defined in `.github/labels.yml`, never on GitHub.
+Any page opened with `?source=issues` reads the issues instead of the Sheet.
 
 ## Settings that live in more than one place
 
