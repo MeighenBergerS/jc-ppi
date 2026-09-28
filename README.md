@@ -164,6 +164,12 @@ package.json                 ← Test runner config (node:test, no external deps
 
 ---
 
+## Development with AI assistance
+
+This site was developed with the help of Claude, Anthropic's AI assistant, used through Claude Code for code, tests and documentation. The maintainer directed the work and is responsible for its content.
+
+---
+
 ## Documentation
 
 | Document                                       | Contents                                                      |

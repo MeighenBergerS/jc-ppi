@@ -88,6 +88,13 @@ check always passes.
 
 The site redeploys automatically whenever site files change (HTML, CSS, JS assets).
 
+### AI assistance
+
+You may use AI tools, but you are the author of your contribution and responsible for it. Do not
+list an AI tool as an author, co-author or signer: no `Co-Authored-By`, `Signed-off-by` or
+"Generated with" lines in commits or pull requests. The project discloses AI assistance once, in
+the README.
+
 ---
 
 ### Local dev server
