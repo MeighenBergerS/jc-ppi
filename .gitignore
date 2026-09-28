@@ -35,3 +35,6 @@ site/docs/
 
 # ── Python virtual environment (MkDocs, see docs/requirements.txt) ──
 .venv/
+
+# ── Python bytecode (scripts/papers/email_submissions.py and its tests) ──
+__pycache__/

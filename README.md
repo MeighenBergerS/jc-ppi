@@ -131,6 +131,7 @@ scripts/papers/
   enrich.js                    ← The paper bot
   build-csv.js                 ← Builds site/data/ from the issues
   trending-issue.js            ← Opens the Trending issue
+  email_submissions.py         ← Turns emailed papers into issues (Python, stdlib only)
   slack-reminder.js            ← Posts the weekly Slack reminder
   roundup-email.js             ← Emails the monthly roundups
   roundup-preview.js           ← Prints a member's monthly roundup

@@ -499,6 +499,16 @@ async function init() {
     updatesEl.replaceChildren('Room changes and cancellations are announced in the ', link, '.');
   }
 
+  // Bringing a paper by email, when CONFIG.submissionEmail is set
+  if (CONFIG.submissionEmail) {
+    document.querySelectorAll('[data-email-option]').forEach((el) => {
+      const link = el.querySelector('[data-email-link]');
+      link.href = `mailto:${CONFIG.submissionEmail}`;
+      link.textContent = CONFIG.submissionEmail;
+      el.hidden = false;
+    });
+  }
+
   // Calendar export (This Week and About)
   document.getElementById('cal-export')?.addEventListener('click', _downloadCalendar);
 

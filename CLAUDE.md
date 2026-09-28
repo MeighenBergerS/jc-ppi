@@ -14,7 +14,7 @@ This file adds only what the shared file does not cover.
 
 ```sh
 npm install        # first time only; wires up the pre-commit hook
-npm test           # node:test suite, no dependencies
+npm test           # node:test suite, then the Python unittest suite; no dependencies
 npm run dev        # local site on http://localhost:3000 against fixture data
 npm run refresh    # fetch fresh INSPIRE papers into *.fresh.* fixtures, then serve
 npm run roundup -- <login> [YYYY-MM]   # print a member's monthly roundup; sends nothing
@@ -50,7 +50,9 @@ with Prettier, re-stages them, and aborts the commit if `npm test` fails.
 with tests in `tests/papers.test.js`, `tests/trending.test.js`, `tests/slack.test.js`,
 `tests/roundup.test.js`, `tests/roundup-html.test.js` and `tests/smtp.test.js`. Field
 labels in `.github/ISSUE_TEMPLATE/1-paper.yml` and `FIELDS` in `scripts/papers/lib.js` must match.
-Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
+`scripts/papers/email_submissions.py` (Python, standard library only) turns emailed papers into
+issues in the same form layout; `tests/test_email_submissions.py` checks its field labels match
+too. Labels are defined in `.github/labels.yml`, never on GitHub. Issues labelled `imported` hold the
 Google Sheet history; keep `parseImported()` and the Sheet timestamp handling working for them.
 
 ## Settings
