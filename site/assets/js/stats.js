@@ -21,6 +21,7 @@
 import { CONFIG, COL, TITLE_STOP_WORDS } from './config.js';
 import { parseCsv, weekStart, fmtWeekRange, normalizeArxivId, stripVersion } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
+import { plainText } from './mathtext.js';
 
 const DEFAULT_YEAR = new Date().getFullYear();
 
@@ -688,7 +689,7 @@ async function renderStats(year, allRows) {
   const wordCounts = new Map();
   metaMap.forEach((meta) => {
     if (!meta.title) return;
-    meta.title
+    plainText(meta.title)
       .toLowerCase()
       .replace(/[^a-z0-9\- ]/g, ' ')
       .split(/\s+/)

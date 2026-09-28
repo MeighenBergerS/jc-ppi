@@ -69,9 +69,15 @@ describe('renderRoundupHtml', () => {
     assert.match(html, />papers suggested</);
   });
 
-  it('escapes titles from INSPIRE', () => {
-    assert.ok(html.includes('Neutrinos &lt;b&gt;&amp; friends&lt;/b&gt;'));
-    assert.ok(!html.includes('<b>& friends'));
+  it('turns markup in titles into plain, escaped text', () => {
+    assert.ok(html.includes('Neutrinos &amp; friends'));
+    assert.ok(!html.includes('<b>'));
+    const risky = renderRoundupHtml(
+      roundup(),
+      new Map([['2609.00001', { title: 'A <script>alert(1)</script> and $m_\\nu$' }]])
+    );
+    assert.ok(risky.includes('A &lt;script&gt;alert(1)&lt;/script&gt; and mν'));
+    assert.ok(!risky.includes('<script>'));
   });
 
   it('links each paper to arXiv and its issue, and marks the discussed one', () => {

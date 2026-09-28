@@ -12,6 +12,7 @@
 
 import { COL } from './config.js';
 import { normalizeArxivId, stripVersion } from './utils.js';
+import { setRichText } from './mathtext.js';
 import {
   appendText,
   appendKeywordPills,
@@ -84,10 +85,10 @@ export function buildCards(
       a.href = `https://arxiv.org/abs/${meta.correctedId ?? id}`;
       a.target = '_blank';
       a.rel = 'noopener';
-      a.textContent = meta.title || `arXiv:${id}`;
+      setRichText(a, meta.title || `arXiv:${id}`);
       title.appendChild(a);
     } else {
-      title.textContent = meta.title || (paper[COL.arxivId] ?? '').trim() || 'Untitled';
+      setRichText(title, meta.title || (paper[COL.arxivId] ?? '').trim() || 'Untitled');
     }
     card.appendChild(title);
     appendText(card, meta.authors, 'card-authors');
@@ -118,7 +119,7 @@ export function buildCards(
       const summary = document.createElement('summary');
       summary.textContent = 'Abstract';
       details.appendChild(summary);
-      appendText(details, meta.abstract, 'paper-abstract');
+      appendText(details, meta.abstract, 'paper-abstract', { math: true });
       card.appendChild(details);
     }
 

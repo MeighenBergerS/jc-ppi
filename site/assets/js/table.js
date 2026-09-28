@@ -10,6 +10,7 @@
 
 import { COL } from './config.js';
 import { normalizeArxivId, stripVersion, arxivLink } from './utils.js';
+import { setRichText } from './mathtext.js';
 
 /**
  * Builds a <table> element from paper rows and INSPIRE metadata.
@@ -58,9 +59,9 @@ export function buildTable(papers, metaMap = new Map(), { shortName = (n) => n }
       star.textContent = '\u2605 Discussed at JC';
       tdPaper.appendChild(star);
     }
-    appendText(tdPaper, meta.title, 'paper-title');
+    appendText(tdPaper, meta.title, 'paper-title', { math: true });
     appendText(tdPaper, meta.authors, 'paper-comment');
-    appendText(tdPaper, meta.abstract, 'paper-abstract');
+    appendText(tdPaper, meta.abstract, 'paper-abstract', { math: true });
     tdPaper.appendChild(buildBadgeRow(paper[COL.arxivId], id, meta));
     appendKeywordPills(tdPaper, meta);
 
@@ -160,15 +161,19 @@ export function appendKeywordPills(parent, meta) {
 
 /**
  * Appends a <div class=className> with text, only if text is non-empty.
+ * With `math`, MathML and $…$ LaTeX in the text render as formulas
+ * (setRichText() in mathtext.js); otherwise it is plain text.
  * @param {HTMLElement} parent
  * @param {string} text
  * @param {string} className
+ * @param {{math?: boolean}} [options]
  */
-export function appendText(parent, text, className) {
+export function appendText(parent, text, className, { math = false } = {}) {
   if (!text) return;
   const div = document.createElement('div');
   div.className = className;
-  div.textContent = text;
+  if (math) setRichText(div, text);
+  else div.textContent = text;
   parent.appendChild(div);
 }
 

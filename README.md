@@ -121,6 +121,7 @@ site/                          ← everything GitHub Pages serves
       inspire.js               ← INSPIRE-HEP API client + arXiv validation
       table.js                 ← Archive table builder
       cards.js                 ← This Week paper cards
+      mathtext.js              ← MathML and LaTeX in titles and abstracts
       app.js                   ← This Week / Archive renderers and entry point
       stats.js                 ← Stats page
       iowa.js                  ← Iowa Research page
