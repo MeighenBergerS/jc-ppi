@@ -23,22 +23,24 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 
 ## Key source files
 
-| File                               | Purpose                                                                        |
-| ---------------------------------- | ------------------------------------------------------------------------------ |
-| `site/assets/js/config.js`         | **All club settings** (repo, time zone, meeting, reminder, trending), columns  |
-| `site/assets/js/app.js`            | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
-| `site/assets/js/inspire.js`        | INSPIRE-HEP API client with localStorage cache                                 |
-| `site/assets/js/table.js`          | DOM builder; turns CSV rows + metadata into `<table>`                          |
-| `site/assets/js/utils.js`          | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
-| `site/assets/js/trending.js`       | Trending section renderer                                                      |
-| `site/assets/js/stats.js`          | Stats page charts                                                              |
-| `scripts/papers/lib.js`            | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client   |
-| `scripts/papers/enrich.js`         | The paper bot (`.github/workflows/papers.yml`)                                 |
-| `scripts/papers/build-csv.js`      | Writes `site/data/papers.csv` and `trending.csv` (`deploy-pages.yml`)          |
-| `scripts/papers/trending.js`       | Trending papers from INSPIRE; the Trending issue body                          |
-| `scripts/papers/trending-issue.js` | Opens the twice-weekly Trending issue (`trending.yml`)                         |
-| `scripts/papers/slack.js`          | The weekly Slack reminder message                                              |
-| `scripts/papers/slack-reminder.js` | Posts it (`slack-reminder.yml`)                                                |
+| File                                | Purpose                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `site/assets/js/config.js`          | **All club settings** (repo, time zone, meeting, reminder, trending), columns  |
+| `site/assets/js/app.js`             | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
+| `site/assets/js/inspire.js`         | INSPIRE-HEP API client with localStorage cache                                 |
+| `site/assets/js/table.js`           | DOM builder; turns CSV rows + metadata into `<table>`                          |
+| `site/assets/js/utils.js`           | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
+| `site/assets/js/trending.js`        | Trending section renderer                                                      |
+| `site/assets/js/stats.js`           | Stats page charts                                                              |
+| `scripts/papers/lib.js`             | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client   |
+| `scripts/papers/enrich.js`          | The paper bot (`.github/workflows/papers.yml`)                                 |
+| `scripts/papers/build-csv.js`       | Writes `site/data/papers.csv` and `trending.csv` (`deploy-pages.yml`)          |
+| `scripts/papers/trending.js`        | Trending papers from INSPIRE; the Trending issue body                          |
+| `scripts/papers/trending-issue.js`  | Opens the twice-weekly Trending issue (`trending.yml`)                         |
+| `scripts/papers/slack.js`           | The weekly Slack reminder message                                              |
+| `scripts/papers/slack-reminder.js`  | Posts it (`slack-reminder.yml`)                                                |
+| `scripts/papers/roundup.js`         | A member's private monthly roundup: papers, streak, milestones, email text     |
+| `scripts/papers/roundup-preview.js` | Prints one member's roundup (`npm run roundup`)                                |
 
 ---
 
