@@ -162,20 +162,21 @@ npm test
 
 Test files live in `tests/`:
 
-| File                   | Covers                                                                                                           |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `utils.test.js`        | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId`, `shortNamer`      |
-| `data.test.js`         | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`, `clubStreak`, `niceMax`, `topicMonths`, `voteLeader` |
-| `inspire.test.js`      | `parseHit`                                                                                                       |
-| `papers.test.js`       | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows                          |
-| `slack.test.js`        | The Slack reminder: this week's papers, schedule, message                                                        |
-| `trending.test.js`     | Trending papers, the Trending issue, and keeping it out of the submissions                                       |
-| `roundup.test.js`      | The personal monthly roundup: a member's papers, streaks, milestones, the email text                             |
-| `roundup-html.test.js` | The HTML roundup email: escaping, papers, milestones, an empty month                                             |
-| `topics.test.js`       | `CONFIG.topics` and matching papers to topics                                                                    |
-| `mathtext.test.js`     | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                        |
-| `smtp.test.js`         | The SMTP client that sends the roundups, against a fake server                                                   |
-| `runner.html`          | Browser-side DOM tests for `buildTable`, `buildCards` and `setRichText`                                          |
+| File                        | Covers                                                                                                           |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `utils.test.js`             | `weekStart`, `fmtWeekRange`, `parseCsv`, `normalizeArxivId`, `stripVersion`, `isValidArxivId`, `shortNamer`      |
+| `data.test.js`              | `deduplicatePapers`, `computeSubmissionStats`, `yearWeeks`, `clubStreak`, `niceMax`, `topicMonths`, `voteLeader` |
+| `inspire.test.js`           | `parseHit`                                                                                                       |
+| `papers.test.js`            | The paper bot's helpers: issue forms, weeks, names, earlier submissions, site data rows                          |
+| `slack.test.js`             | The Slack reminder: this week's papers, schedule, message                                                        |
+| `trending.test.js`          | Trending papers, the Trending issue, and keeping it out of the submissions                                       |
+| `roundup.test.js`           | The personal monthly roundup: a member's papers, streaks, milestones, the email text                             |
+| `roundup-html.test.js`      | The HTML roundup email: escaping, papers, milestones, an empty month                                             |
+| `topics.test.js`            | `CONFIG.topics` and matching papers to topics                                                                    |
+| `mathtext.test.js`          | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                        |
+| `smtp.test.js`              | The SMTP client that sends the roundups, against a fake server                                                   |
+| `test_email_submissions.py` | Email submissions (Python `unittest`): subjects, bodies, names, the issue body the bot reads, the reply          |
+| `runner.html`               | Browser-side DOM tests for `buildTable`, `buildCards` and `setRichText`                                          |
 
 The **pre-commit hook** (installed by `npm install` via the `prepare` script)
 runs `npm test` automatically before every commit, so the suite must be green

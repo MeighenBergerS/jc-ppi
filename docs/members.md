@@ -22,6 +22,14 @@ your username if the profile has no name.
    website under **This Week**, and moves to the **Archive** after Sunday. If you aren't on the
    members list yet, a maintainer approves your first paper before it shows.
 
+### No GitHub account? Email it
+
+If the club has turned on email submissions, This Week and About show its address. Send an email
+there with the **arXiv ID or link as the subject** (e.g. `2301.12345`) and **a line on why in the
+body**. The name in your email's "From" is shown on the site; your address is not. You get a
+reply with the paper's issue, and the paper shows on the site once a maintainer approves it.
+Voting still needs a GitHub account.
+
 ### Tips for a good submission
 
 Anyone can bring a paper. You don't need to be an expert, to have read everything in the field, or

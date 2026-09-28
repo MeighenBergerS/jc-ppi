@@ -20,6 +20,11 @@ export const CONFIG = {
   // Where "Bring a paper" links go: the paper issue form.
   formUrl: `https://github.com/${REPO}/issues/new?template=1-paper.yml`,
 
+  // The club Gmail that .github/workflows/email-submissions.yml reads, so people
+  // without GitHub can email a paper (arXiv ID as the subject, why in the body).
+  // Shown on This Week and About when set; '' hides it.
+  submissionEmail: '',
+
   // Base URL of the deployed site, used in the calendar .ics file.
   // Leave blank to derive it from window.location (right for most deployments).
   siteUrl: '',

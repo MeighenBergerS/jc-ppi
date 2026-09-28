@@ -1,0 +1,43 @@
+name: Email submissions
+
+# Turns papers emailed to the club Gmail into paper issues
+# (scripts/papers/email_submissions.py): subject = arXiv ID or link,
+# body = why. Every emailed paper waits for a maintainer. Scheduled runs
+# only act when the repository variable EMAIL_SUBMISSIONS is "on";
+# otherwise they only count. The log shows counts and issue numbers,
+# never names or addresses.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      process:
+        description: "Open issues and reply (otherwise only count the new emails)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: write # to start the paper bot on the new issues
+
+concurrency:
+  group: email-submissions
+  cancel-in-progress: false
+
+jobs:
+  submissions:
+    name: Read emailed papers
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' || vars.EMAIL_SUBMISSIONS == 'on'
+    steps:
+      - uses: actions/checkout@v7
+      - name: Read the club Gmail and open issues
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && !inputs.process }}
+        run: python3 scripts/papers/email_submissions.py
