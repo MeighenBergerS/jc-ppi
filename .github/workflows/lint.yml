@@ -1,7 +1,7 @@
 name: Lint
 
 # Every pull request runs this, so it can be a required check. Checks the
-# files the pre-commit hook formats.
+# files the pre-commit hook formats, and that the docs site builds cleanly.
 on:
   push:
     branches: [main]
@@ -11,6 +11,10 @@ on:
       - "**.js"
       - "**.md"
       - ".prettierrc"
+      - ".prettierignore"
+      - "docs/**"
+      - "docs_theme/**"
+      - "mkdocs.yml"
       - ".github/workflows/lint.yml"
   pull_request:
 
@@ -38,3 +42,24 @@ jobs:
             "scripts/**/*.js" \
             "tests/**/*.{js,html}" \
             "**/*.md"
+
+  docs:
+    name: Docs build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      # --strict fails on warnings, such as a broken link between pages.
+      - name: Build the docs site
+        run: |
+          pip install -r docs/requirements.txt
+          mkdocs build --strict

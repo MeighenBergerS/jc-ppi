@@ -1,0 +1,10 @@
+# The docs site build output (mkdocs build), not committed.
+site/docs/
+
+# The MkDocs theme template is Jinja, which Prettier would break.
+docs_theme/
+
+# Vendored libraries for the docs site, kept as released.
+docs/js/clipboard.js
+docs/js/popper.min.js
+docs/js/tippy-bundle.umd.js

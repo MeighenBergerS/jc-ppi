@@ -9,16 +9,8 @@ on GitHub Actions; there is nothing to host or pay for.
 
 ## For members
 
-| To…                  | Do this                                                                                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Suggest a paper      | [Open a "Suggest a paper" issue](https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml), or use "Submit a Paper" on the site. You need a GitHub account. The site shows the name on your GitHub profile, or your username.   |
-| Vote                 | Add a 👍 reaction to the paper's issue ("Vote" on the site links there). One vote per person.                                                                                                                                                   |
-| Change your comment  | Edit the issue.                                                                                                                                                                                                                                 |
-| Withdraw a paper     | Close the issue as "not planned".                                                                                                                                                                                                               |
-| Read title, abstract | A bot comments on the issue with the title, authors, abstract, links and BibTeX, usually within a few minutes, and labels it `Updated By Bot`. If the paper was suggested before, it also lists the earlier issues and adds `Submitted Before`. |
-
-New papers, edits and labels reach the site within a few minutes. Votes take up to an hour,
-because reactions don't start a rebuild; an hourly one picks them up.
+Suggesting, voting, editing and withdrawing papers are covered in
+[Suggesting and voting](members.md).
 
 ## For maintainers
 

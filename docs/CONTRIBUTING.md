@@ -7,38 +7,7 @@ and how to contribute to the website itself.
 
 ## Suggesting a paper for discussion
 
-The easiest way to contribute is to suggest a paper for an upcoming meeting.
-
-1. **Find a paper** you'd like the group to discuss. Papers are usually found
-   on [arXiv](https://arxiv.org) — see the [arXiv guide in the README](../README.md#guide-to-arxiv)
-   if you're new to it.
-
-2. **Submit it** with the [Suggest a paper issue form](https://github.com/MeighenBergerS/jc-ppi/issues/new?template=1-paper.yml),
-   also linked as "Submit a Paper" on the [journal club website](https://meighenbergers.github.io/jc-ppi/).
-   You need a GitHub account. You'll be asked for:
-
-   | Field                | What to enter                                                              |
-   | -------------------- | -------------------------------------------------------------------------- |
-   | **arXiv ID or link** | e.g. `2301.12345` or `https://arxiv.org/abs/2301.12345`                    |
-   | **Why this paper?**  | A sentence or two is great. "General interest" is a perfectly fine answer. |
-
-   The site shows the name on your GitHub profile, or your username.
-
-3. A bot adds the paper's title, authors, abstract and BibTeX to your issue within a few
-   minutes, and the paper appears on the website under **This Week**. After Sunday it moves to
-   the **Archive**, no action needed from you. If you aren't on the members list yet, a
-   maintainer approves your first paper before it shows.
-
-4. **Vote** for the papers you want to discuss with a 👍 reaction on their issues.
-
-### Tips for a good submission
-
-- Any HEP-adjacent topic is fair game: theory, experiment, phenomenology,
-  instrumentation, or even a review/methods paper you found useful.
-- Recent papers (posted this week or last) tend to generate the best discussion,
-  but older papers are welcome too.
-- If the paper is very long, mentioning which sections are most relevant in the
-  "why" field helps people prepare.
+See [Suggesting and voting](members.md).
 
 ---
 
@@ -67,7 +36,7 @@ check always passes.
 
 | File                                   | What it does                                                                                               |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `site/assets/js/config.js`             | Repository, meeting time and column maps — **start here for setup**                                        |
+| `site/assets/js/config.js`             | All club settings and column maps — **start here for setup**                                               |
 | `site/assets/js/utils.js`              | Week math, CSV parser, arXiv ID helpers, `isValidArxivId`                                                  |
 | `site/assets/js/inspire.js`            | INSPIRE-HEP API client, arXiv validation, ID auto-correction                                               |
 | `site/assets/js/table.js`              | DOM table builder                                                                                          |
@@ -79,6 +48,7 @@ check always passes.
 | `site/stats.html`                      | Submission statistics by year                                                                              |
 | `site/resources.html`                  | arXiv & INSPIRE-HEP guide                                                                                  |
 | `scripts/papers/`                      | The paper bot, site data builder, Trending issue and Slack reminder (see [MAINTAINING.md](MAINTAINING.md)) |
+| `docs/`, `mkdocs.yml`                  | This documentation site (see [Documentation site](#documentation-site))                                    |
 | `tests/server/index.mjs`               | Local dev server (fixtures as site data, INSPIRE mock)                                                     |
 | `tests/server/generate-fixtures.mjs`   | Fetches real papers from INSPIRE and writes fresh fixture files                                            |
 | `tests/server/scenario.json`           | User/round config for fixture generation — edit freely                                                     |
@@ -102,6 +72,19 @@ list an AI tool as an author, co-author or signer: no `Co-Authored-By`, `Signed-
 the README.
 
 ---
+
+### Documentation site
+
+These pages are built with [MkDocs](https://www.mkdocs.org) from `docs/` and deploy with the site
+under `/docs/`. To preview them, with Python 3:
+
+```bash
+pip install -r docs/requirements.txt
+mkdocs serve   # http://127.0.0.1:8000/jc-ppi/docs/
+```
+
+Add a new page to `nav` in `mkdocs.yml`. CI runs `mkdocs build --strict`, which fails on broken
+links between pages.
 
 ### Local dev server
 
@@ -198,5 +181,5 @@ changes, update `tests/inspire.test.js` and, if needed, the JSON fixture in
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant Code of Conduct](../CODE_OF_CONDUCT.md).
+This project follows the [Contributor Covenant Code of Conduct](https://github.com/MeighenBergerS/jc-ppi/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold it.

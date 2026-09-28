@@ -1,0 +1,46 @@
+site_name: Journal Club Docs
+site_description: How the Iowa Particles & Plots Journal Club and its website work.
+site_url: https://meighenbergers.github.io/jc-ppi/docs/
+repo_url: https://github.com/MeighenBergerS/jc-ppi
+edit_uri: edit/main/docs/
+copyright: © Iowa Particles & Plots Journal Club
+
+# The docs build into site/docs/, next to the club site, and deploy with it
+# (.github/workflows/deploy-pages.yml). site/docs/ is not committed.
+docs_dir: docs
+site_dir: site/docs
+exclude_docs: |
+  requirements.txt
+
+theme:
+  name: readthedocs
+  custom_dir: docs_theme
+  logo: img/logo.svg
+  # The readthedocs theme picks up docs/img/favicon.ico on its own.
+
+nav:
+  - '← Journal club website': 'https://meighenbergers.github.io/jc-ppi/'
+  - 'Home': 'index.md'
+  - Members:
+      - 'Suggesting and voting': 'members.md'
+      - 'arXiv and INSPIRE-HEP': 'ARXIV-GUIDE.md'
+  - Maintainers:
+      - 'Running the club': 'MAINTAINING.md'
+      - 'Deploying your own': 'SETUP.md'
+      - 'Contributing code': 'CONTRIBUTING.md'
+
+extra_css:
+  - css/custom_rules.css
+extra_javascript:
+  - js/popper.min.js
+  - js/tippy-bundle.umd.js
+  - js/clipboard.js
+  - js/extra.js
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+
+plugins:
+  - search

@@ -51,13 +51,8 @@ site; after that it runs every Monday and Wednesday morning.
 1. Go to [api.slack.com/apps](https://api.slack.com/apps) → **Create New App → From scratch**.
 2. Under **Features → Incoming Webhooks**, turn it on, click **Add New Webhook to Workspace**,
    and choose your channel. Copy the webhook URL.
-3. Store it as a repository secret and turn on the Thursday reminder:
-
-   ```sh
-   gh secret set SLACK_WEBHOOK_URL   # paste the webhook URL when asked
-   gh variable set SLACK_REMINDER --body on
-   ```
-
+3. Store it as a repository secret with `gh secret set SLACK_WEBHOOK_URL` (paste the webhook URL
+   when asked), and turn on the weekly reminder with `gh variable set SLACK_REMINDER --body on`.
 4. Check the message with **Actions → Slack reminder → Run workflow**. Leave "post" unticked to
    only print it in the log, or tick it to send it now.
 

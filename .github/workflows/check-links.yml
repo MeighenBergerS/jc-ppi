@@ -18,7 +18,7 @@ jobs:
       - name: Check site pages are reachable
         run: |
           BASE="https://meighenbergers.github.io/jc-ppi"
-          for PAGE in "/" "/archive.html" "/stats.html" "/iowa.html" "/resources.html"; do
+          for PAGE in "/" "/archive.html" "/stats.html" "/iowa.html" "/resources.html" "/docs/"; do
             URL="${BASE}${PAGE}"
             HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
               --max-time 30 --location "$URL")
