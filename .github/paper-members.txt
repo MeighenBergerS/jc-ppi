@@ -1,5 +1,10 @@
 # GitHub usernames whose paper issues are approved automatically, one per line.
-# Repository owners and collaborators are always approved and need not be listed.
-# Anyone else's paper issue gets the "needs approval" label until a maintainer
-# removes it.
+# Repository collaborators and the maintainers in paper-maintainers.txt are
+# always approved and need not be listed. Anyone else's paper issue gets the
+# "needs approval" label until a maintainer removes it.
 MeighenBergerS
+mhostert # Matheus Hostert
+lkupari # Luke Kupari
+joelchoi00 # Joel Choi
+LakshaPradip # Laksha Pradip Das
+esmenaz-debug # Esmenaz Isik
