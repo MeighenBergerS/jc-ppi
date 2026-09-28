@@ -3,7 +3,8 @@
    ============================================================
    Loads submissions from data/papers.csv (built from the paper
    issues on every deploy), fetches paper metadata from
-   INSPIRE-HEP, and renders the This Week / Archive pages.
+   INSPIRE-HEP, and renders the This Week (cards) / Archive
+   (tables) pages.
 
    This Week polls for new submissions every POLL_INTERVAL ms.
    Archive groups by week and lazy-loads metadata on first open.
@@ -20,9 +21,11 @@ import {
   stripVersion,
   meetingTime,
   meetingIcs,
+  shortNamer,
 } from './utils.js';
 import { fetchPaperMetadata } from './inspire.js';
 import { buildTable } from './table.js';
+import { buildCards } from './cards.js';
 import { renderTrending } from './trending.js';
 
 /** Re-fetch interval for the This Week page (ms). */
@@ -136,6 +139,15 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
   if (!force && hash === _lastThisWeekHash) return;
   _lastThisWeekHash = hash;
 
+  const summary = document.getElementById('week-summary');
+  if (summary) {
+    const votes = thisWeek.reduce((sum, p) => sum + Number(p[COL.votes] ?? 0), 0);
+    summary.textContent = thisWeek.length
+      ? `${thisWeek.length} paper${thisWeek.length !== 1 ? 's' : ''} on the table · ` +
+        `${votes} vote${votes !== 1 ? 's' : ''} so far`
+      : '';
+  }
+
   container.innerHTML = '';
 
   if (thisWeek.length === 0) {
@@ -149,10 +161,8 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
     container.innerHTML = `<div class="loading">Fetching paper details from INSPIRE-HEP…</div>`;
     const metaMap = await fetchPaperMetadata(thisWeek.map((p) => p[COL.arxivId]));
     container.innerHTML = '';
-    // Pass thisWeek:true only when the mutation endpoint is configured,
-    // so vote/edit/remove controls appear only when they can actually work.
-    // Build a map of the most-recent previous submission (before this
-    // week) for each arXiv ID so we can annotate re-submissions.
+    // The most recent submission of each paper before this week, to
+    // note re-submissions.
     const previousSubmissions = new Map();
     papers.forEach((p) => {
       const id = stripVersion(normalizeArxivId(p[COL.arxivId]));
@@ -166,10 +176,14 @@ async function renderThisWeek(papers, container, { force = false } = {}) {
       }
     });
 
+    const hint = document.createElement('p');
+    hint.className = 'cards-hint';
+    hint.textContent = `Vote with 👍 for what you'd like to discuss on ${CONFIG.meeting.day}.`;
+    container.appendChild(hint);
     container.appendChild(
-      buildTable(thisWeek, metaMap, {
-        thisWeek: true,
+      buildCards(thisWeek, metaMap, {
         previousSubmissions,
+        shortName: shortNamer(papers.map((p) => p[COL.name])),
       })
     );
 
@@ -222,6 +236,7 @@ async function renderArchive(papers, container) {
       return !isNaN(ts) && ts < monday;
     })
   );
+  const shortName = shortNamer(papers.map((p) => p[COL.name]));
 
   container.innerHTML = '';
 
@@ -262,7 +277,7 @@ async function renderArchive(papers, container) {
       contentDiv.innerHTML = `<div class="loading">Fetching paper details from INSPIRE-HEP…</div>`;
       fetchPaperMetadata(weekPapers.map((p) => p[COL.arxivId])).then((metaMap) => {
         contentDiv.innerHTML = '';
-        const table = buildTable(weekPapers, metaMap);
+        const table = buildTable(weekPapers, metaMap, { shortName });
         // Register any new subfield categories and re-render filter bar
         _registerCategories(metaMap);
         // Apply active text + category filters immediately on load

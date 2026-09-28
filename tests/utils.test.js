@@ -6,6 +6,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  shortNamer,
   weekStart,
   fmtWeekRange,
   parseCsv,
@@ -391,5 +392,36 @@ describe('meeting text and calendar', () => {
     assert.match(ics, /BYDAY=MO/);
     // 2026-03-02 is a Monday.
     assert.equal(new Date('2026-03-02T12:00:00Z').getUTCDay(), 1);
+  });
+});
+
+describe('shortNamer', () => {
+  const short = shortNamer([
+    'Luke Kupari',
+    'Alex Kim',
+    'Alex  Rivera',
+    'joelchoi00',
+    'Mary Jane Watson',
+    '',
+  ]);
+
+  it('uses the first name', () => {
+    assert.equal(short('Luke Kupari'), 'Luke');
+    assert.equal(short('Mary Jane Watson'), 'Mary');
+  });
+
+  it('adds the last initial when two people share a first name', () => {
+    assert.equal(short('Alex Kim'), 'Alex K.');
+    assert.equal(short('Alex Rivera'), 'Alex R.');
+  });
+
+  it('keeps one-word names and ignores spacing', () => {
+    assert.equal(short('joelchoi00'), 'joelchoi00');
+    assert.equal(short('  Luke   Kupari '), 'Luke');
+  });
+
+  it('returns unknown names as they are', () => {
+    assert.equal(short('Someone Else'), 'Someone Else');
+    assert.equal(short(''), '');
   });
 });

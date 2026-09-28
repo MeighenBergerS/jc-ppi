@@ -113,6 +113,7 @@
       // ── Import modules under test ─────────────────────────────────────────────────
 
       import { buildTable } from '../site/assets/js/table.js';
+      import { buildCards } from '../site/assets/js/cards.js';
 
       // ── Synthetic test data ───────────────────────────────────────────────────────
 
@@ -311,6 +312,65 @@
           const badge = table.querySelector('.paper-discussed');
           assert(badge != null, 'expected at least one .paper-discussed badge');
           assert(badge.textContent.includes('\u2605'), 'badge should contain the \u2605 character');
+        });
+      });
+
+      suite('buildCards — This Week cards', () => {
+        const withIssues = PAPERS.map((p, i) => [...p, `https://github.com/o/r/issues/${i + 1}`]);
+
+        test('produces one card per paper', async () => {
+          const cards = buildCards(withIssues, META_MAP);
+          assertEqual(cards.querySelectorAll('.paper-card').length, 3);
+        });
+
+        test('the discussed paper gets the highlighted card and tag', async () => {
+          const cards = buildCards(withIssues, META_MAP);
+          const discussed = cards.querySelectorAll('.paper-card--discussed');
+          assertEqual(discussed.length, 1);
+          assertContains(discussed[0].textContent, 'A Dark Matter Study');
+          assertContains(discussed[0].querySelector('.card-tag').textContent, 'Discussed');
+        });
+
+        test('no "Leading the vote" once a paper is discussed', async () => {
+          const cards = buildCards(withIssues, META_MAP);
+          assertEqual(cards.querySelectorAll('.paper-card--leading').length, 0);
+        });
+
+        test('the clear vote leader is tagged before the meeting', async () => {
+          const undiscussed = withIssues.map((p) => p.map((v, i) => (i === 8 ? '' : v)));
+          const cards = buildCards(undiscussed, META_MAP);
+          const leading = cards.querySelectorAll('.paper-card--leading');
+          assertEqual(leading.length, 1);
+          assertContains(leading[0].textContent, 'A Dark Matter Study');
+        });
+
+        test('shows why and the short name, or "Brought by" without a comment', async () => {
+          const cards = buildCards(withIssues, META_MAP, {
+            shortName: (n) => n.split(' ')[0],
+          });
+          const whys = [...cards.querySelectorAll('.card-why')].map((el) => el.textContent);
+          assertEqual(whys[0], '“Great paper” — Alice');
+          assertEqual(whys[2], 'Brought by Carol');
+        });
+
+        test('titles are text, not HTML', async () => {
+          const meta = new Map([['2401.00001', { title: '<img src=x onerror=alert(1)>' }]]);
+          const cards = buildCards(withIssues.slice(0, 1), meta);
+          assertEqual(cards.querySelector('img'), null);
+          assertContains(cards.querySelector('.card-title').textContent, '<img');
+        });
+
+        test('falls back to the arXiv ID without INSPIRE data', async () => {
+          const cards = buildCards(withIssues.slice(2), META_MAP);
+          assertEqual(cards.querySelector('.card-title').textContent, 'arXiv:2401.00003');
+        });
+
+        test('each card links to its issue to vote', async () => {
+          const cards = buildCards(withIssues, META_MAP);
+          const votes = [...cards.querySelectorAll('.action-btn--vote')];
+          assertEqual(votes.length, 3);
+          assertEqual(votes[0].textContent, '▲ 3 · Vote');
+          assertEqual(votes[0].getAttribute('href'), 'https://github.com/o/r/issues/1');
         });
       });
 

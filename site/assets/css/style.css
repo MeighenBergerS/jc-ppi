@@ -154,6 +154,155 @@ main {
   color: var(--muted);
 }
 
+/* This Week: "This week · dates" above the heading, a summary below */
+.week-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.week-eyebrow .week-label {
+  margin: 0;
+  font-size: inherit;
+}
+
+.week-summary {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* ── This Week cards ─────────────────────────────────────── */
+
+.cards-hint {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+
+.paper-cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.paper-card {
+  position: relative;
+  padding: 1.15rem 1.25rem 1rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.paper-card--leading {
+  border-color: #b2dfdb;
+}
+
+.paper-card--discussed {
+  background: var(--accent-dim);
+  border: 1px solid #1b9e77;
+  box-shadow: 0 1px 0 #1b9e77;
+}
+
+.card-tag {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding: 0.15em 0.65em;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.card-tag--discussed {
+  background: #1b9e77;
+  color: #fff;
+}
+
+.card-tag--leading {
+  background: var(--accent-dim);
+  color: #0f5c45;
+}
+
+.card-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.card-title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.card-title a:hover {
+  text-decoration: underline;
+}
+
+.card-authors {
+  margin-top: 0.3rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.card-why {
+  margin-top: 0.8rem;
+  padding-left: 0.8rem;
+  border-left: 3px solid var(--accent-btn);
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.card-who {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.card-abstract {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+}
+
+.card-abstract summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.card-abstract .paper-abstract {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.card-footer .badge-row {
+  margin-top: 0;
+  flex: 1 1 16rem;
+}
+
+.card-footer .actions-container {
+  flex: 0 0 auto;
+}
+
+.card-footer .action-btn--vote {
+  padding: 0.35em 0.9em;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 /* ── Papers table ────────────────────────────────────────── */
 
 .papers-table {
@@ -202,6 +351,14 @@ main {
 .papers-table td:nth-child(3) {
   width: 33%;
   min-width: 140px;
+}
+
+.badge-row {
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .arxiv-link {
@@ -321,14 +478,7 @@ main {
   line-height: 1;
 }
 
-/* ── Interactive row controls (this week only) ───────────── */
-
-th.actions-col,
-td.actions-cell {
-  width: 8rem;
-  vertical-align: top;
-  padding-top: 0.6rem;
-}
+/* ── Vote link (This Week cards) ─────────────────────────── */
 
 .actions-container {
   display: flex;
