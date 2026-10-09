@@ -1,12 +1,15 @@
 name: Check site
 
-# Weekly check that the live site's pages load and that the last deploy
-# built its data files from the issues.
+# Checks that the live site's pages load, that the last deploy built its
+# data files from the issues, and that a deploy has run recently. Deploys
+# run hourly; when they stop (e.g. a run stuck "waiting" holds the queue and
+# every later deploy is cancelled, which counts as no failure), this fails
+# and GitHub emails the maintainers.
 
 on:
   schedule:
-    # Every Monday at 08:00 UTC
-    - cron: "0 8 * * 1"
+    # Every 6 hours
+    - cron: "17 */6 * * *"
   workflow_dispatch: # allow manual runs
 
 jobs:
@@ -42,3 +45,21 @@ jobs:
             fi
           done
           echo "OK — papers.csv and trending.csv have rows."
+
+      - name: Check the site data is fresh
+        run: |
+          URL="https://meighenbergers.github.io/jc-ppi/data/papers.csv"
+          MAX_HOURS=6
+          MODIFIED=$(curl --silent --head --max-time 30 "$URL" \
+            | grep -i '^last-modified:' | cut -d' ' -f2- | tr -d '\r')
+          if [ -z "$MODIFIED" ]; then
+            echo "::error::$URL has no Last-Modified header; is the site reachable?"
+            exit 1
+          fi
+          AGE_HOURS=$(( ( $(date +%s) - $(date -d "$MODIFIED" +%s) ) / 3600 ))
+          echo "papers.csv last deployed: $MODIFIED ($AGE_HOURS hours ago)"
+          if [ "$AGE_HOURS" -ge "$MAX_HOURS" ]; then
+            echo "::error::The site data is $AGE_HOURS hours old; deploys run hourly. Open Actions → Deploy to GitHub Pages: if a run is stuck \"waiting\" or \"in progress\", cancel it and the queued deploy will run."
+            exit 1
+          fi
+          echo "OK — deployed within the last $MAX_HOURS hours."
