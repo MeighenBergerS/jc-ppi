@@ -1909,6 +1909,16 @@ footer p + p {
   animation-name: season-fall-banner;
 }
 
+/* Zip: straight down and slightly across, fast, no spin */
+.season--zip {
+  animation: season-zip var(--season-duration, 4s) linear infinite;
+}
+
+.season-banner.season--zip {
+  top: -40px !important;
+  animation-name: season-zip-banner;
+}
+
 .season--float {
   animation: season-float var(--season-duration, 5s) ease-in-out infinite alternate;
 }
@@ -1953,6 +1963,24 @@ footer p + p {
   }
 }
 
+@keyframes season-zip {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-60px, 115vh);
+  }
+}
+
+@keyframes season-zip-banner {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-50px, 460px);
+  }
+}
+
 @keyframes season-float {
   from {
     transform: translateY(-6px);
@@ -1981,13 +2009,16 @@ footer p + p {
 /* Reduced motion: everything rests where it would be */
 @media (prefers-reduced-motion: reduce) {
   .season--fall,
+  .season--zip,
   .season--float,
   .season--twinkle {
     animation: none;
   }
 
   .season-sprite.season--fall,
-  .season-banner.season--fall {
+  .season-banner.season--fall,
+  .season-sprite.season--zip,
+  .season-banner.season--zip {
     top: var(--season-rest) !important;
   }
 }
