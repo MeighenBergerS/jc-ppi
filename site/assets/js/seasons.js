@@ -96,10 +96,16 @@ function _img(sprite, scale, className) {
   return img;
 }
 
-/** Sets a sprite moving: falling (on a loop, with a random speed), floating or twinkling. */
-function _animate(img, motion, fallSeconds) {
+const MOVES_DOWN = new Set(['fall', 'zip']);
+
+/**
+ * Sets a sprite moving: falling or zipping down (on a loop, `seconds` per
+ * pass), floating or twinkling; 'still' sprites stay put.
+ */
+function _animate(img, motion, seconds) {
+  if (motion === 'still') return;
   img.classList.add(`season--${motion}`);
-  const duration = motion === 'fall' ? rand(...fallSeconds) : rand(4, 7);
+  const duration = MOVES_DOWN.has(motion) ? rand(...seconds) : rand(4, 7);
   img.style.setProperty('--season-duration', `${duration.toFixed(1)}s`);
   img.style.animationDelay = `${(-rand(0, duration)).toFixed(1)}s`;
 }
@@ -137,6 +143,11 @@ function _decorate(name) {
   if (!theme) return;
   document.documentElement.dataset.season = name;
   const header = document.querySelector('header');
+
+  // A theme can swap the tagline for the day
+  if (theme.tagline) {
+    document.querySelectorAll('.tagline').forEach((el) => (el.textContent = theme.tagline));
+  }
 
   // The pixel strip along the bottom of the black header
   if (header && theme.strip) {
@@ -176,7 +187,7 @@ function _decorate(name) {
         }
         img.style.top = `${rand(4, 80).toFixed(1)}%`;
         img.style.setProperty('--season-rest', img.style.top);
-        _animate(img, sprite.motion ?? motion, [9, 16]);
+        _animate(img, sprite.motion ?? motion, theme.banner.seconds ?? [9, 16]);
         scene.appendChild(img);
       }
     }
@@ -186,18 +197,29 @@ function _decorate(name) {
   // Sprites in the window's side margins, on wide screens
   const gutter = (document.documentElement.clientWidth - CONTENT_WIDTH) / 2;
   if (gutter < GUTTER_MIN || !theme.margin) return;
-  const { sprites, count, motion, scales } = theme.margin;
-  _shuffled(sprites, count).forEach((sprite, i) => {
+  const { sprites, count, motion, scales, seconds = [14, 26] } = theme.margin;
+  // Still sprites (a building) appear once; their repeats become moving ones
+  const moving = sprites.filter((s) => (s.motion ?? motion) !== 'still');
+  const seen = new Set();
+  const picks = _shuffled(sprites, count).map((s) => {
+    if ((s.motion ?? motion) !== 'still') return s;
+    if (seen.has(s) && moving.length) return pick(moving);
+    seen.add(s);
+    return s;
+  });
+  picks.forEach((sprite, i) => {
     const scale = pick(scales);
     const { width } = spriteSize(sprite);
     const img = _img(sprite, scale, 'season-sprite');
-    // Alternate sides; where it rests if it doesn't fall (reduced motion)
-    const rest = `${rand(25, 92).toFixed(1)}vh`;
+    // Alternate sides; where it rests if it doesn't move (or for reduced
+    // motion). Still sprites, like buildings, stand near the bottom.
+    const still = (sprite.motion ?? motion) === 'still';
+    const rest = `${(still ? rand(78, 86) : rand(25, 92)).toFixed(1)}vh`;
     img.style.setProperty('--season-rest', rest);
-    img.style.top = (sprite.motion ?? motion) === 'fall' ? '-48px' : rest;
+    img.style.top = MOVES_DOWN.has(sprite.motion ?? motion) ? '-48px' : rest;
     const inset = 12 + Math.random() * Math.max(0, gutter - width * scale - 40);
     img.style[i % 2 ? 'right' : 'left'] = `${Math.round(inset)}px`;
-    _animate(img, sprite.motion ?? motion, [14, 26]);
+    _animate(img, sprite.motion ?? motion, seconds);
     document.body.appendChild(img);
   });
 }

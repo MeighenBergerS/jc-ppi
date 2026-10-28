@@ -65,6 +65,11 @@ describe('themeFor', () => {
   it('uses CONFIG.seasons by default', () => {
     assert.equal(themeFor(on(2026, 10, 31)), 'dark-matter');
     assert.equal(themeFor(on(2026, 10, 1)), 'autumn');
+    assert.equal(themeFor(on(2026, 12, 4)), 'pauli');
+    assert.equal(themeFor(on(2026, 12, 6)), 'pauli');
+    assert.equal(themeFor(on(2026, 12, 7)), 'autumn');
+    assert.equal(themeFor(on(2026, 12, 21)), 'winter');
+    assert.equal(themeFor(on(2027, 3, 19)), 'winter');
   });
 });
 
@@ -90,6 +95,7 @@ describe('themes', () => {
 
   it('every sprite is valid, and the scenes are well formed', () => {
     for (const [name, theme] of Object.entries(THEMES)) {
+      if (theme.tagline) assert.ok(theme.tagline.length < 60, `${name} tagline is short`);
       assert.deepEqual(spriteProblems(`${name}.strip`, theme.strip), []);
       if (theme.corners)
         assert.deepEqual(spriteProblems(`${name}.corners`, theme.corners.sprite), []);
@@ -101,10 +107,11 @@ describe('themes', () => {
           scene.scales.every((k) => Number.isInteger(k) && k > 0),
           `${name}.${part} scales`
         );
+        if (scene.seconds) assert.ok(scene.seconds[0] > 0 && scene.seconds[1] >= scene.seconds[0]);
         for (const [i, sprite] of scene.sprites.entries()) {
           assert.deepEqual(spriteProblems(`${name}.${part}[${i}]`, sprite), []);
           assert.ok(
-            ['fall', 'float', 'twinkle'].includes(sprite.motion ?? scene.motion),
+            ['fall', 'zip', 'float', 'twinkle', 'still'].includes(sprite.motion ?? scene.motion),
             `${name}.${part}[${i}] motion`
           );
         }

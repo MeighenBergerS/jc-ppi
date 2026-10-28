@@ -149,8 +149,14 @@ export const CONFIG = {
   seasons: {
     enabled: true,
     dayWindow: 2, // days before and after a physics day
-    base: [{ theme: 'autumn', from: '09-22', to: '12-20' }],
-    days: [{ theme: 'dark-matter', label: 'Dark Matter Day', date: '10-31' }],
+    base: [
+      { theme: 'autumn', from: '09-22', to: '12-20' },
+      { theme: 'winter', from: '12-21', to: '03-19' },
+    ],
+    days: [
+      { theme: 'dark-matter', label: 'Dark Matter Day', date: '10-31' },
+      { theme: 'pauli', label: "Pauli's neutrino letter", date: '12-04' },
+    ],
   },
 
   // The Iowa Research page: how many weeks back to search.

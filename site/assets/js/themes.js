@@ -11,9 +11,12 @@
                  header, behind the text
      margin      { sprites, count, motion, scales }: in the
                  window's side margins, on wide screens
-   motion is 'fall', 'float' or 'twinkle' (a sprite's own motion
-   wins); all of it stops for reduced motion. scales are picked
-   at random per sprite, for a little depth. Sprites are rows of
+     tagline     optional: replaces the tagline while the theme shows
+   motion is 'fall', 'zip' (fast and straight), 'float', 'twinkle'
+   or 'still' (a sprite's own motion wins); all of it stops for
+   reduced motion. A scene's optional seconds: [min, max] is how
+   long one pass of 'fall' or 'zip' takes. scales are picked at
+   random per sprite, for a little depth. Sprites are rows of
    characters plus a palette (pixelart.js): "." is transparent;
    "o" is usually the dark outline.
    ============================================================ */
@@ -173,8 +176,129 @@ const DARK_MATTER = {
   },
 };
 
+// ── Winter ────────────────────────────────────────────────────
+
+const FLAKE_ROWS = ['...w...', '.w.w.w.', '..www..', 'wwwbwww', '..www..', '.w.w.w.', '...w...'];
+const SMALL_FLAKE_ROWS = ['..w..', '.wbw.', 'wbwbw', '.wbw.', '..w..'];
+const DOT_FLAKE_ROWS = ['.w.', 'www', '.w.'];
+// White on the black header; blue in the white margins
+const NIGHT = { w: '#f8fafc', b: '#bfdbfe' };
+const DAY = { w: '#93c5fd', b: '#3b82f6' };
+const flakes = (palette) => [
+  { rows: FLAKE_ROWS, palette },
+  { rows: SMALL_FLAKE_ROWS, palette },
+  { rows: DOT_FLAKE_ROWS, palette },
+];
+
+// The IceCube Lab on its stilts, at the South Pole
+const ICECUBE_LAB = {
+  rows: [
+    '......o.........',
+    '......o.........',
+    '.oooooooooooooo.',
+    '.oggggggggggggo.',
+    '.ogkkgkkgkkgkgo.',
+    '.oggggggggggggo.',
+    '.oooooooooooooo.',
+    '..o..o....o..o..',
+    '..o..o....o..o..',
+    'ssssssssssssssss',
+  ],
+  palette: { o: '#334155', g: '#cbd5e1', k: '#1e293b', s: '#bfdbfe' },
+  motion: 'still',
+};
+
+const WINTER = {
+  // Snow drifts
+  strip: {
+    rows: [
+      '.......ww................ww.....',
+      '.....wwwwww.............wwww....',
+      '...wwwwwwwwwww.......wwwwwwwww..',
+      '.wwwwwwwwwwwwwwww.wwwwwwwwwwwwww',
+      'wwwbwwwwwwwwwwwwwwwwwwwwwbwwwwww',
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    ],
+    palette: { w: '#f8fafc', b: '#bfdbfe' },
+  },
+  stripScale: 4,
+  // Icicles along the top corners
+  corners: {
+    sprite: {
+      rows: [
+        'wwwwwwwwwwwwwwwwwwwwwwww',
+        'cCCcccCCcccCCccccCCcccCc',
+        '.Cc...Cc...Cc....Cc...C.',
+        '.Cc...C....Cc....Cc.....',
+        '.C....C.....C.....C.....',
+        '.C..........C...........',
+        '.c..........c...........',
+      ],
+      palette: { w: '#f8fafc', c: '#e0f2fe', C: '#7dd3fc' },
+    },
+    scale: 4,
+  },
+  banner: { sprites: flakes(NIGHT), count: 22, motion: 'fall', scales: [2, 3], seconds: [10, 18] },
+  margin: {
+    sprites: [...flakes(DAY), ...flakes(DAY), ICECUBE_LAB],
+    count: 12,
+    motion: 'fall',
+    scales: [3, 4],
+    seconds: [16, 28],
+  },
+};
+
+// ── Pauli's neutrino letter (Dec 4, 1930) ─────────────────────
+
+// A neutrino in each flavour, with a short trail above it
+const NU_ROWS = ['..a..', '..a..', '.aAa.', 'aAwAa', '.aAa.'];
+const nu = (a, A) => ({ rows: NU_ROWS, palette: { a, A, w: '#ffffff' } });
+const NEUTRINOS = [nu('#93c5fd', '#3b82f6'), nu('#86efac', '#22c55e'), nu('#f9a8d4', '#ec4899')];
+// "Dear radioactive ladies and gentlemen…", sealed
+const LETTER = {
+  rows: [
+    'oooooooooooo',
+    'owwwwwwwwwwo',
+    'oowwwwwwwwoo',
+    'owowwwwwwowo',
+    'owwowwwwowwo',
+    'owwwoRRowwwo',
+    'owwwwRRwwwwo',
+    'owwwwwwwwwwo',
+    'oooooooooooo',
+  ],
+  palette: { o: '#57534e', w: '#fef3c7', R: '#b91c1c' },
+  motion: 'float',
+};
+
+const PAULI = {
+  // A wall of photomultiplier tubes, as in a neutrino detector
+  strip: {
+    rows: [
+      '..yy......yy......yy......yy....',
+      '.yYYy....yYYy....yYYy....yYYy...',
+      'yYwYYy..yYwYYy..yYwYYy..yYwYYy..',
+      'yYYYYy..yYYYYy..yYYYYy..yYYYYy..',
+      'gggggggggggggggggggggggggggggggg',
+    ],
+    palette: { y: '#facc15', Y: '#ca8a04', w: '#fef9c3', g: '#475569' },
+  },
+  stripScale: 4,
+  tagline: 'Dear radioactive ladies and gentlemen…',
+  banner: { sprites: NEUTRINOS, count: 20, motion: 'zip', scales: [2, 3], seconds: [2.5, 5] },
+  margin: {
+    sprites: [...NEUTRINOS, ...NEUTRINOS, LETTER],
+    count: 10,
+    motion: 'zip',
+    scales: [3, 4],
+    seconds: [4, 8],
+  },
+};
+
 /** The themes by name, as used in CONFIG.seasons. */
 export const THEMES = {
   autumn: AUTUMN,
   'dark-matter': DARK_MATTER,
+  winter: WINTER,
+  pauli: PAULI,
 };
