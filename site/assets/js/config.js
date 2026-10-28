@@ -140,6 +140,19 @@ export const CONFIG = {
     },
   ],
 
+  // Seasonal decorations (seasons.js, pixel art in themes.js): the site wears a
+  // theme for the season, or for a few days around a physics day, decided by
+  // the visitor's date. Northern-hemisphere seasons. Dates are 'MM-DD'. Only
+  // themes with art in themes.js are listed; the planned calendar is in
+  // docs/MAINTAINING.md. Preview any theme with ?season=<theme> on a page URL,
+  // or ?season=none for none. `enabled: false` turns it all off.
+  seasons: {
+    enabled: true,
+    dayWindow: 2, // days before and after a physics day
+    base: [{ theme: 'autumn', from: '09-22', to: '12-20' }],
+    days: [{ theme: 'dark-matter', label: 'Dark Matter Day', date: '10-31' }],
+  },
+
   // The Iowa Research page: how many weeks back to search.
   iowa: {
     lookbackWeeks: 8,

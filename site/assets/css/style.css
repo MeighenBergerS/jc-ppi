@@ -1828,3 +1828,69 @@ footer p + p {
     border: none;
   }
 }
+
+/* ── Seasonal decorations (seasons.js, themes.js) ────────── */
+
+/* A pixel strip along the bottom of the black header */
+.season-strip {
+  max-width: var(--max-width);
+  margin: 0.6rem auto 0;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* Small sprites pinned in the window's side margins, behind nothing */
+.season-sprite {
+  position: fixed;
+  z-index: 0;
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.9;
+}
+
+.season-sprite--sway {
+  animation: season-sway 6s ease-in-out infinite alternate;
+}
+
+.season-sprite--float {
+  animation: season-float 5s ease-in-out infinite alternate;
+}
+
+@keyframes season-sway {
+  from {
+    transform: rotate(-8deg) translateY(-3px);
+  }
+  to {
+    transform: rotate(8deg) translateY(3px);
+  }
+}
+
+@keyframes season-float {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: translateY(6px);
+  }
+}
+
+/* The content is 860px wide; below this there is no room in the margins */
+@media (max-width: 1060px) {
+  .season-sprite {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .season-sprite {
+    animation: none;
+  }
+}
+
+/* Dark Matter Day: the tagline in the halo's lavender */
+[data-season='dark-matter'] .tagline {
+  color: #c4b5fd;
+}

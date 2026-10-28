@@ -42,6 +42,9 @@ check always passes.
 | `site/assets/js/table.js`              | Archive table builder, and the pieces the cards share                                                      |
 | `site/assets/js/cards.js`              | This Week paper cards                                                                                      |
 | `site/assets/js/topics.js`             | Which club topics (`CONFIG.topics`) a paper is about                                                       |
+| `site/assets/js/seasons.js`            | Seasonal decorations: picks today's theme from `CONFIG.seasons` and adds it                                |
+| `site/assets/js/themes.js`             | The seasonal themes' pixel art                                                                             |
+| `site/assets/js/pixelart.js`           | Pixel-art sprites as code (rows + palette), drawn as SVG                                                   |
 | `site/assets/js/mathtext.js`           | Renders MathML and `$…$` LaTeX in INSPIRE titles and abstracts, safely                                     |
 | `site/assets/js/app.js`                | Page renderers and entry point                                                                             |
 | `site/assets/js/trending.js`           | Trending papers section renderer (display-only)                                                            |
@@ -173,6 +176,7 @@ Test files live in `tests/`:
 | `roundup.test.js`           | The personal monthly roundup: a member's papers, streaks, milestones, the email text                             |
 | `roundup-html.test.js`      | The HTML roundup email: escaping, papers, milestones, an empty month                                             |
 | `topics.test.js`            | `CONFIG.topics` and matching papers to topics                                                                    |
+| `seasons.test.js`           | Seasonal themes by date, the `?season=` preview, every sprite's validity                                         |
 | `mathtext.test.js`          | MathML and LaTeX in INSPIRE text: parsing, the whitelist, LaTeX to MathML                                        |
 | `smtp.test.js`              | The SMTP client that sends the roundups, against a fake server                                                   |
 | `test_email_submissions.py` | Email submissions (Python `unittest`): subjects, bodies, names, the issue body the bot reads, the reply          |
