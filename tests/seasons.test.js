@@ -70,6 +70,11 @@ describe('themeFor', () => {
     assert.equal(themeFor(on(2026, 12, 7)), 'autumn');
     assert.equal(themeFor(on(2026, 12, 21)), 'winter');
     assert.equal(themeFor(on(2027, 3, 19)), 'winter');
+    assert.equal(themeFor(on(2027, 2, 11)), 'women-in-science');
+    assert.equal(themeFor(on(2027, 3, 16)), 'pi-day');
+    assert.equal(themeFor(on(2027, 3, 17)), 'winter');
+    assert.equal(themeFor(on(2027, 3, 20)), 'spring');
+    assert.equal(themeFor(on(2027, 6, 20)), 'spring');
   });
 });
 
@@ -110,6 +115,9 @@ describe('themes', () => {
         if (scene.seconds) assert.ok(scene.seconds[0] > 0 && scene.seconds[1] >= scene.seconds[0]);
         for (const [i, sprite] of scene.sprites.entries()) {
           assert.deepEqual(spriteProblems(`${name}.${part}[${i}]`, sprite), []);
+          if (sprite.label) {
+            assert.ok(typeof sprite.label === 'string' && sprite.label.length <= 80, sprite.label);
+          }
           assert.ok(
             ['fall', 'zip', 'float', 'twinkle', 'still'].includes(sprite.motion ?? scene.motion),
             `${name}.${part}[${i}] motion`

@@ -1875,6 +1875,13 @@ footer p + p {
   opacity: 0.85;
 }
 
+/* A sprite with a label (themes.js) shows it on hover */
+.season-scene img.season-labelled,
+.season-sprite.season-labelled {
+  pointer-events: auto;
+  cursor: help;
+}
+
 /* No clear space beside the title (phones): faint, so the text stays readable */
 .season-banner--faint {
   opacity: 0.3;

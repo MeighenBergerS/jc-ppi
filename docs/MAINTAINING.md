@@ -75,26 +75,27 @@ To preview a theme, add `?season=<theme>` to any page's address, e.g. `?season=d
 `?season=none` shows none. `enabled: false` in `CONFIG.seasons` turns them off.
 
 The calendar (northern hemisphere). A physics day's theme shows for 2 days either side of it and
-wins over the season. Built so far: Autumn, Winter, Dark Matter Day and Pauli's neutrino letter.
+wins over the season. Built so far: Autumn, Winter, Spring, Dark Matter Day, Pauli's neutrino letter, Women and Girls in
+Science, and Pi Day.
 
-| Theme                           | Dates                       | Motif                                     |
-| ------------------------------- | --------------------------- | ----------------------------------------- |
-| Winter (built)                  | Dec 21 – Mar 19             | Snow on the banner, snowflakes, IceCube   |
-| Spring                          | Mar 20 – Jun 20             | Grass and buds, blossoms                  |
-| Summer                          | Jun 21 – Sep 21             | Warm horizon, fireflies, a meteor         |
-| Autumn (built)                  | Sep 22 – Dec 20             | Fallen leaves, drifting leaves, an acorn  |
-| Women and Girls in Science      | Feb 11                      | Physicists' portraits                     |
-| Pi Day, Einstein's birthday     | Mar 14                      | π, E = mc²                                |
-| April Fools'                    | Apr 1 (that day only)       | Something silly                           |
-| International Day of Light      | May 16                      | A laser across the banner, a prism        |
-| Neutrino oscillations           | Jun 5 (Super-K, 1998)       | A neutrino changing colour                |
-| Neutrinos detected              | Jun 14 (Cowan–Reines, 1956) | A reactor and its antineutrinos           |
-| Asteroid Day                    | Jun 30                      | Asteroids drifting past                   |
-| Higgs boson discovery           | Jul 4 (2012)                | A collision event                         |
-| Perseids                        | Aug 12                      | Night sky and meteors                     |
-| Nobel Prize in Physics          | Early October (a Tuesday)   | A medal                                   |
-| Dark Matter Day (built)         | Oct 31                      | A halo strip, WIMPs, a galaxy in its halo |
-| Pauli's neutrino letter (built) | Dec 4 (1930)                | Neutrinos slipping through everything     |
+| Theme                               | Dates                       | Motif                                       |
+| ----------------------------------- | --------------------------- | ------------------------------------------- |
+| Winter (built)                      | Dec 21 – Mar 19             | Snow on the banner, snowflakes, IceCube     |
+| Spring (built)                      | Mar 20 – Jun 20             | Grass and buds, blossoms                    |
+| Summer                              | Jun 21 – Sep 21             | Warm horizon, fireflies, a meteor           |
+| Autumn (built)                      | Sep 22 – Dec 20             | Fallen leaves, drifting leaves, an acorn    |
+| Women and Girls in Science (built)  | Feb 11                      | Symbols of physicists' work, named on hover |
+| Pi Day, Einstein's birthday (built) | Mar 14                      | π, E = mc²                                  |
+| April Fools'                        | Apr 1 (that day only)       | Something silly                             |
+| International Day of Light          | May 16                      | A laser across the banner, a prism          |
+| Neutrino oscillations               | Jun 5 (Super-K, 1998)       | A neutrino changing colour                  |
+| Neutrinos detected                  | Jun 14 (Cowan–Reines, 1956) | A reactor and its antineutrinos             |
+| Asteroid Day                        | Jun 30                      | Asteroids drifting past                     |
+| Higgs boson discovery               | Jul 4 (2012)                | A collision event                           |
+| Perseids                            | Aug 12                      | Night sky and meteors                       |
+| Nobel Prize in Physics              | Early October (a Tuesday)   | A medal                                     |
+| Dark Matter Day (built)             | Oct 31                      | A halo strip, WIMPs, a galaxy in its halo   |
+| Pauli's neutrino letter (built)     | Dec 4 (1930)                | Neutrinos slipping through everything       |
 
 To add a theme: draw its strip, corner piece and sprites in `themes.js` (the comment at the top
 lists the parts), add it to `CONFIG.seasons` (`base` for

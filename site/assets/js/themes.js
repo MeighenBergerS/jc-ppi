@@ -295,10 +295,232 @@ const PAULI = {
   },
 };
 
+// ── Women and Girls in Science (Feb 11) ───────────────────────
+// Symbols of their work, not portraits; each is named on hover.
+
+const NOETHER = {
+  label: 'Emmy Noether: every symmetry gives a conservation law',
+  rows: [
+    '.....m.....',
+    '..a..m..a..',
+    '.aa..m..aa.',
+    'aaaa.m.aaaa',
+    '.aa..m..aa.',
+    '..a..m..a..',
+    '.....m.....',
+    '...........',
+    '..eeeeeee..',
+    '...........',
+    '..eeeeeee..',
+  ],
+  palette: { m: '#94a3b8', a: '#a78bfa', e: '#facc15' },
+};
+const WU = {
+  label: 'Chien-Shiung Wu: parity violation, seen in cobalt-60 decay',
+  rows: [
+    '....s....',
+    '...sss...',
+    '..s.s.s..',
+    '....s....',
+    '..nnnnn..',
+    '.nnNnNnn.',
+    '.nnnnnnn.',
+    '..nnnnn..',
+    '....e....',
+    '..eeeee..',
+    '...eee...',
+    '....e....',
+  ],
+  palette: { s: '#38bdf8', n: '#f97316', N: '#9a3412', e: '#facc15' },
+};
+const MEITNER = {
+  label: 'Lise Meitner: nuclear fission',
+  rows: [
+    '..nnn.....nnn..',
+    '.nnNnn...nnNnn.',
+    '.nNnnn.f.nnnNn.',
+    '.nnNnn...nnNnn.',
+    '..nnn.....nnn..',
+  ],
+  palette: { n: '#f97316', N: '#9a3412', f: '#fde68a' },
+};
+const CURIE = {
+  label: 'Marie Curie: radioactivity; polonium and radium',
+  rows: [
+    '...ooo...',
+    '...ogo...',
+    '...ogo...',
+    '..oggGo..',
+    '.ogggggo.',
+    'ogGgggGgo',
+    'oggggggGo',
+    '.ooooooo.',
+  ],
+  palette: { o: '#94a3b8', g: '#86efac', G: '#22c55e' },
+};
+const BELL_BURNELL = {
+  label: 'Jocelyn Bell Burnell: pulsars',
+  rows: ['..p.....p.....', '..p.....p.....', '.ppp...ppp....', 'llplllllplllll'],
+  palette: { p: '#38bdf8', l: '#64748b' },
+};
+const RUBIN = { ...GALAXY, label: 'Vera Rubin: galaxy rotation, evidence for dark matter' };
+const SPARKLE = {
+  rows: ['.s.', 'sws', '.s.'],
+  palette: { s: '#c084fc', w: '#ffffff' },
+  motion: 'twinkle',
+};
+const PIONEERS = [NOETHER, WU, MEITNER, CURIE, BELL_BURNELL, RUBIN];
+
+const WOMEN_IN_SCIENCE = {
+  // A row of atoms
+  strip: {
+    rows: [
+      '.....a..........',
+      '..aa.a.aa.......',
+      '.a..aaa..a......',
+      'a..a.n.a..a.....',
+      '.a..aaa..a......',
+      '..aa.a.aa.......',
+      '.....a..........',
+    ],
+    palette: { a: '#c084fc', n: '#facc15' },
+  },
+  stripScale: 4,
+  banner: {
+    sprites: [...PIONEERS, SPARKLE, SPARKLE, SPARKLE],
+    count: 14,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: { sprites: PIONEERS, count: 6, motion: 'float', scales: [3, 4] },
+};
+
+// ── Pi Day and Einstein's birthday (Mar 14) ───────────────────
+
+const PI_ROWS = ['ppppppp', '.p..p..', '.p..p..', '.p..p..', '.p..p.p', 'p...pp.'];
+const PIE_ROWS = ['..ccccc..', '.cCcCcCc.', 'cCcCcCcCc', 'ttttttttt', '.ttttttt.'];
+const PIE = { rows: PIE_ROWS, palette: { c: '#f59e0b', C: '#b45309', t: '#94a3b8' } };
+
+// E = mc², in a small pixel font
+const GLYPHS = {
+  E: ['EEE', 'E..', 'EE.', 'E..', 'EEE'],
+  '=': ['...', 'EEE', '...', 'EEE', '...'],
+  m: ['.....', 'EEEE.', 'E.E.E', 'E.E.E', 'E.E.E'],
+  c: ['...', '.EE', 'E..', 'E..', '.EE'],
+  '²': ['EE.', '..E', '.E.', 'EEE', '...'],
+};
+const EMC2_ROWS = [0, 1, 2, 3, 4].map((y) =>
+  ['E', '=', 'm', 'c', '²'].map((ch) => GLYPHS[ch][y]).join('.')
+);
+const emc2 = (colour) => ({
+  label: 'E = mc²: Einstein was born on March 14, 1879',
+  rows: EMC2_ROWS,
+  palette: { E: colour },
+});
+
+const PI_DAY = {
+  // π and pie
+  strip: {
+    rows: [
+      'ppppppp...........',
+      '.p..p......ccccc..',
+      '.p..p.....cCcCcCc.',
+      '.p..p....cCcCcCcCc',
+      '.p..p.p..ttttttttt',
+      'p...pp....ttttttt.',
+    ],
+    palette: { p: '#fde68a', c: '#f59e0b', C: '#b45309', t: '#94a3b8' },
+  },
+  stripScale: 4,
+  banner: {
+    sprites: [{ rows: PI_ROWS, palette: { p: '#fde68a' } }, PIE, emc2('#fde68a')],
+    count: 14,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: {
+    sprites: [{ rows: PI_ROWS, palette: { p: '#b45309' } }, PIE, emc2('#b45309')],
+    count: 8,
+    motion: 'float',
+    scales: [3, 4],
+  },
+};
+
+// ── Spring ────────────────────────────────────────────────────
+
+const FLOWER = {
+  rows: ['.p.p.', 'ppppp', '.pyp.', 'ppppp', '.p.p.'],
+  palette: { p: '#f9a8d4', y: '#facc15' },
+};
+const PETAL = { rows: ['pp.', '.pp'], palette: { p: '#fbcfe8' } };
+const BLUEBIRD = {
+  rows: [
+    '....ooo...',
+    '...obbbo..',
+    '..obbbkbo.',
+    'oobbbbbbyo',
+    '.obbbbbbo.',
+    '..oowwoo..',
+    '....o.o...',
+  ],
+  palette: { o: '#1e3a5f', b: '#38bdf8', k: '#0f172a', y: '#f59e0b', w: '#fde68a' },
+  motion: 'float',
+};
+
+const SPRING = {
+  // Grass with buds and flowers
+  strip: {
+    rows: [
+      '....p..........y..........p.....',
+      '...ppp........yyy........ppp....',
+      '....p..g.......y....g.....p..g..',
+      '.g..g.gg..g..g.g..g.gg.g..g.gg..',
+      'gGgggGgggGgggGgggGgggGgggGgggGgg',
+      'GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG',
+    ],
+    palette: { p: '#f9a8d4', y: '#facc15', g: '#4ade80', G: '#15803d' },
+  },
+  stripScale: 4,
+  // A blossoming branch, reaching in from the corner
+  corners: {
+    sprite: {
+      rows: [
+        'bbbbbbbbbbbbbbbbbbbbbbbb........',
+        'bbbbbbbbbbbbbbbbbbbbbbbbbbbb....',
+        '..bbb....bbb......bbb....bbbbb..',
+        '.p.p.....p.p......p.p.....p.p...',
+        'ppppp...ppppp....ppppp...ppppp..',
+        '.pyp.....pyp......pyp.....pyp...',
+        'ppppp...ppppp....ppppp...ppppp..',
+        '.p.p.....p.p......p.p.....p.p...',
+      ],
+      palette: { b: '#5a3412', p: '#f9a8d4', y: '#facc15' },
+    },
+    scale: 4,
+  },
+  banner: {
+    sprites: [PETAL, PETAL, FLOWER],
+    count: 18,
+    motion: 'fall',
+    scales: [2, 3],
+    seconds: [12, 20],
+  },
+  margin: {
+    sprites: [PETAL, FLOWER, FLOWER, BLUEBIRD],
+    count: 10,
+    motion: 'fall',
+    scales: [3, 4],
+    seconds: [18, 30],
+  },
+};
+
 /** The themes by name, as used in CONFIG.seasons. */
 export const THEMES = {
   autumn: AUTUMN,
   'dark-matter': DARK_MATTER,
   winter: WINTER,
   pauli: PAULI,
+  'women-in-science': WOMEN_IN_SCIENCE,
+  'pi-day': PI_DAY,
+  spring: SPRING,
 };

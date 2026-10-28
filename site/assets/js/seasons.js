@@ -86,13 +86,20 @@ function _shuffled(sprites, n) {
   return out.slice(0, n);
 }
 
-/** An <img> of a sprite, hidden from screen readers. */
+/**
+ * An <img> of a sprite, hidden from screen readers. A sprite with a
+ * `label` shows it as a tooltip on hover.
+ */
 function _img(sprite, scale, className) {
   const img = document.createElement('img');
   img.className = className;
   img.src = spriteDataUrl(sprite, scale);
   img.alt = '';
   img.setAttribute('aria-hidden', 'true');
+  if (sprite.label) {
+    img.title = sprite.label;
+    img.classList.add('season-labelled');
+  }
   return img;
 }
 
@@ -127,15 +134,19 @@ function _clearZones(header) {
   return zones;
 }
 
-/** A random x in the zones, the wider zones more likely. */
-function _inZones(zones) {
-  const total = zones.reduce((sum, [a, b]) => sum + (b - a), 0);
+/**
+ * A random x in the zones for something `width` px wide, so all of it stays
+ * inside (the wider zones more likely), or null when it fits in none.
+ */
+function _inZones(zones, width) {
+  const fits = zones.map(([a, b]) => [a, b - width]).filter(([a, b]) => b > a);
+  const total = fits.reduce((sum, [a, b]) => sum + (b - a), 0);
   let x = Math.random() * total;
-  for (const [a, b] of zones) {
+  for (const [a, b] of fits) {
     if (x <= b - a) return a + x;
     x -= b - a;
   }
-  return zones[0][0];
+  return null;
 }
 
 function _decorate(name) {
@@ -178,9 +189,11 @@ function _decorate(name) {
       const n = Math.max(3, Math.round(count * Math.min(1, header.clientWidth / 1200)));
       const zones = _clearZones(header);
       for (const sprite of _shuffled(sprites, n)) {
-        const img = _img(sprite, pick(scales), 'season-banner');
-        if (zones.length) {
-          img.style.left = `${Math.round(_inZones(zones))}px`;
+        const scale = pick(scales);
+        const img = _img(sprite, scale, 'season-banner');
+        const x = _inZones(zones, spriteSize(sprite).width * scale);
+        if (x !== null) {
+          img.style.left = `${Math.round(x)}px`;
         } else {
           img.style.left = `${rand(1, 95).toFixed(1)}%`;
           img.classList.add('season-banner--faint'); // no clear space: keep the text readable
