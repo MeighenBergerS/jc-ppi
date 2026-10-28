@@ -75,6 +75,19 @@ describe('themeFor', () => {
     assert.equal(themeFor(on(2027, 3, 17)), 'winter');
     assert.equal(themeFor(on(2027, 3, 20)), 'spring');
     assert.equal(themeFor(on(2027, 6, 20)), 'spring');
+    assert.equal(themeFor(on(2027, 4, 1)), 'april-fools');
+    assert.equal(themeFor(on(2027, 3, 31)), 'spring');
+    assert.equal(themeFor(on(2027, 4, 2)), 'spring');
+    assert.equal(themeFor(on(2027, 5, 18)), 'day-of-light');
+    assert.equal(themeFor(on(2027, 6, 7)), 'oscillations');
+    assert.equal(themeFor(on(2027, 6, 9)), 'spring');
+    assert.equal(themeFor(on(2027, 6, 12)), 'neutrinos-detected');
+  });
+
+  it("lets a day's own window replace dayWindow", () => {
+    const one = { ...SEASONS, days: [{ theme: 'x', date: '04-01', window: 0 }] };
+    assert.equal(themeFor(on(2027, 4, 1), one), 'x');
+    assert.equal(themeFor(on(2027, 4, 2), one), null);
   });
 });
 

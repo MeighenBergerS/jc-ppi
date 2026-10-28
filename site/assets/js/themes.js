@@ -13,7 +13,9 @@
                  window's side margins, on wide screens
      tagline     optional: replaces the tagline while the theme shows
    motion is 'fall', 'zip' (fast and straight), 'float', 'twinkle'
-   or 'still' (a sprite's own motion wins); all of it stops for
+   or 'still' (a sprite's own motion wins). A sprite with once: true
+   (or 'still') shows at most once per scene; one with a label shows
+   it on hover; all of it stops for
    reduced motion. A scene's optional seconds: [min, max] is how
    long one pass of 'fall' or 'zip' takes. scales are picked at
    random per sprite, for a little depth. Sprites are rows of
@@ -514,6 +516,224 @@ const SPRING = {
   },
 };
 
+// ── April Fools' (Apr 1, that day only) ──────────────────────
+
+// Schrödinger's cat: peeking out, and the closed box. Both twinkle in
+// and out, a superposition until someone looks.
+const CAT_IN_BOX = {
+  label: "Schrödinger's cat: alive",
+  rows: [
+    '...k....k...',
+    '...kk..kk...',
+    '...kkkkkk...',
+    '...kgkkgk...',
+    '...kkknkk...',
+    'bbbbbbbbbbbb',
+    'bBBBBBBBBBBb',
+    'bBBBBBBBBBBb',
+    'bBBBBBBBBBBb',
+    'bbbbbbbbbbbb',
+  ],
+  palette: { k: '#9ca3af', g: '#22c55e', n: '#f472b6', b: '#78350f', B: '#d97706' },
+  motion: 'twinkle',
+};
+const CLOSED_BOX = {
+  label: "Schrödinger's cat: who knows?",
+  rows: [
+    'bbbbbbbbbbbb',
+    'bBBBBqqBBBBb',
+    'bBBBBBBqBBBb',
+    'bBBBBBqBBBBb',
+    'bBBBBBBBBBBb',
+    'bBBBBBqBBBBb',
+    'bbbbbbbbbbbb',
+  ],
+  palette: { b: '#78350f', B: '#d97706', q: '#fef3c7' },
+  motion: 'twinkle',
+};
+const DUCK = {
+  label: 'A rubber duck, for debugging',
+  rows: ['...yyy...', '..yykyy..', '..yyyyyoo', '.yyyyyyy.', 'yyyyyyyyy', 'yYyyyyyYy', '.YYYYYYY.'],
+  palette: { y: '#facc15', Y: '#ca8a04', k: '#111827', o: '#f97316' },
+};
+
+const APRIL_FOOLS = {
+  // Rubber ducks swimming
+  strip: {
+    rows: [
+      '...yy...........',
+      '..ykyo..........',
+      'yyyyy...........',
+      '.yyyy...........',
+      'wwwWwwwwWwwwwWww',
+      'WWWWWWWWWWWWWWWW',
+    ],
+    palette: { y: '#facc15', k: '#111827', o: '#f97316', w: '#38bdf8', W: '#0369a1' },
+  },
+  stripScale: 4,
+  tagline: 'From argument to arXiv — every week.',
+  banner: {
+    sprites: [DUCK, DUCK, CAT_IN_BOX, CLOSED_BOX],
+    count: 12,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: { sprites: [DUCK, CAT_IN_BOX, CLOSED_BOX], count: 8, motion: 'float', scales: [3, 4] },
+};
+
+// ── International Day of Light (May 16) ───────────────────────
+
+const SPECTRUM = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#8b5cf6'];
+// White light into a prism, a spectrum out
+const PRISM = {
+  label: 'A prism: white light is every colour',
+  rows: [
+    '.......t............',
+    '......tct...........',
+    '.....tccct.rrrrrrrrr',
+    'wwwwwtccccyyyyyyyyyy',
+    '....tcccccgggggggggg',
+    '...tccccccccbbbbbbbb',
+    '..ttttttttttvvvvvvvv',
+  ],
+  palette: {
+    t: '#e2e8f0',
+    c: '#64748b',
+    w: '#ffffff',
+    r: SPECTRUM[0],
+    y: SPECTRUM[2],
+    g: SPECTRUM[3],
+    b: SPECTRUM[4],
+    v: SPECTRUM[5],
+  },
+};
+const LASER = {
+  label: 'The first laser shone on May 16, 1960',
+  rows: ['ggggg.........', 'gGGGgRRRRRRRRR', 'ggggg.........'],
+  palette: { g: '#334155', G: '#94a3b8', R: '#ef4444' },
+};
+const PHOTON = {
+  rows: ['.y.', 'ywy', '.y.'],
+  palette: { y: '#fde68a', w: '#ffffff' },
+  motion: 'twinkle',
+};
+
+const DAY_OF_LIGHT = {
+  // A spectrum along the banner
+  strip: {
+    rows: [
+      '0000000000000000',
+      '1111111111111111',
+      '2222222222222222',
+      '3333333333333333',
+      '4444444444444444',
+      '5555555555555555',
+    ],
+    palette: Object.fromEntries(SPECTRUM.map((c, i) => [String(i), c])),
+  },
+  stripScale: 2,
+  banner: {
+    sprites: [PRISM, LASER, PHOTON, PHOTON, PHOTON],
+    count: 16,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: { sprites: [PRISM, LASER, PHOTON], count: 8, motion: 'float', scales: [3, 4] },
+};
+
+// ── Neutrino oscillations (Jun 5, 1998) ───────────────────────
+
+// One period of a wave per flavour: e (blue), μ (green), τ (pink)
+const WAVE_HEIGHTS = [2, 1, 0, 0, 1, 2, 3, 4, 4, 3];
+const OSCILLATION_ROWS = [0, 1, 2, 3, 4].map((y) =>
+  ['e', 'm', 't'].map((f) => WAVE_HEIGHTS.map((h) => (h === y ? f : '.')).join('')).join('')
+);
+const SUPER_K = {
+  label: 'Super-Kamiokande: neutrinos change flavour (June 5, 1998)',
+  rows: [
+    '.oooooooooooo.',
+    'oyyyyyyyyyyyyo',
+    'oywwwwwwwwwwyo',
+    'oywwwwwwwwwwyo',
+    'oywwwwwwwwwwyo',
+    'oywwwwcwwwwwyo',
+    'oywwwcwcwwwwyo',
+    'oywwwwcwwwwwyo',
+    'oywwwwwwwwwwyo',
+    'oyyyyyyyyyyyyo',
+    '.oooooooooooo.',
+  ],
+  palette: { o: '#475569', y: '#facc15', w: '#1e3a8a', c: '#e0f2fe' },
+  motion: 'still',
+  once: true,
+};
+
+const OSCILLATIONS = {
+  strip: { rows: OSCILLATION_ROWS, palette: { e: '#60a5fa', m: '#4ade80', t: '#f472b6' } },
+  stripScale: 4,
+  banner: { sprites: [...NEUTRINOS, SUPER_K], count: 18, motion: 'float', scales: [2, 3] },
+  margin: {
+    sprites: [...NEUTRINOS, ...NEUTRINOS, SUPER_K],
+    count: 9,
+    motion: 'float',
+    scales: [3, 4],
+  },
+};
+
+// ── Neutrinos detected (Jun 14, 1956) ─────────────────────────
+
+// An electron antineutrino (the bar on top), as from a reactor
+const ANTINEUTRINO = {
+  rows: ['aaaaa', '.....', '..a..', '.aAa.', 'aAwAa', '.aAa.'],
+  palette: { a: '#93c5fd', A: '#3b82f6', w: '#ffffff' },
+};
+const TELEGRAM = {
+  label: 'Telegram to Pauli, June 14, 1956: neutrinos detected',
+  rows: [
+    'oooooooooooo',
+    'oPPPPPPPPPPo',
+    'oPlllllllPPo',
+    'oPPPPPPPPPPo',
+    'oPllllllPPPo',
+    'oPPPPPPPPPPo',
+    'oPllllllllPo',
+    'oPPPPPPPPPPo',
+    'oooooooooooo',
+  ],
+  palette: { o: '#57534e', P: '#fef3c7', l: '#78716c' },
+  motion: 'float',
+  once: true,
+};
+
+const NEUTRINOS_DETECTED = {
+  // Reactor cooling towers, steaming
+  strip: {
+    rows: [
+      '...sss......',
+      '.sssssss....',
+      '.ccccccC....',
+      '..ccccC.....',
+      '...ccC......',
+      '...ccC......',
+      '..ccccC.....',
+      '.cccccCC....',
+      'cccccccCC...',
+      'gggggggggggg',
+    ],
+    palette: { s: '#6b7280', c: '#e5e7eb', C: '#9ca3af', g: '#4b5563' },
+  },
+  stripScale: 3,
+  tagline: 'We have definitely detected neutrinos',
+  banner: { sprites: [ANTINEUTRINO], count: 20, motion: 'zip', scales: [2, 3], seconds: [2.5, 5] },
+  margin: {
+    sprites: [ANTINEUTRINO, ANTINEUTRINO, ANTINEUTRINO, TELEGRAM],
+    count: 9,
+    motion: 'zip',
+    scales: [3, 4],
+    seconds: [4, 8],
+  },
+};
+
 /** The themes by name, as used in CONFIG.seasons. */
 export const THEMES = {
   autumn: AUTUMN,
@@ -523,4 +743,8 @@ export const THEMES = {
   'women-in-science': WOMEN_IN_SCIENCE,
   'pi-day': PI_DAY,
   spring: SPRING,
+  'april-fools': APRIL_FOOLS,
+  'day-of-light': DAY_OF_LIGHT,
+  oscillations: OSCILLATIONS,
+  'neutrinos-detected': NEUTRINOS_DETECTED,
 };

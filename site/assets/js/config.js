@@ -148,7 +148,7 @@ export const CONFIG = {
   // or ?season=none for none. `enabled: false` turns it all off.
   seasons: {
     enabled: true,
-    dayWindow: 2, // days before and after a physics day
+    dayWindow: 2, // days before and after a physics day; a day's own `window` wins
     base: [
       { theme: 'autumn', from: '09-22', to: '12-20' },
       { theme: 'winter', from: '12-21', to: '03-19' },
@@ -159,6 +159,10 @@ export const CONFIG = {
       { theme: 'pauli', label: "Pauli's neutrino letter", date: '12-04' },
       { theme: 'women-in-science', label: 'Women and Girls in Science', date: '02-11' },
       { theme: 'pi-day', label: "Pi Day and Einstein's birthday", date: '03-14' },
+      { theme: 'april-fools', label: "April Fools' Day", date: '04-01', window: 0 },
+      { theme: 'day-of-light', label: 'International Day of Light', date: '05-16' },
+      { theme: 'oscillations', label: 'Neutrino oscillations (Super-K, 1998)', date: '06-05' },
+      { theme: 'neutrinos-detected', label: 'Neutrinos detected (1956)', date: '06-14' },
     ],
   },
 
