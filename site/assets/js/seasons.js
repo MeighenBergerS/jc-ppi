@@ -18,6 +18,7 @@
 import { CONFIG } from './config.js';
 import { THEMES } from './themes.js';
 import { spriteDataUrl, spriteSize, mirrorSprite } from './pixelart.js';
+import { weekdayIndex } from './utils.js';
 
 const DAY_MS = 86400000;
 
@@ -34,15 +35,33 @@ function inRange(date, from, to) {
   return a <= b ? md >= a && md <= b : md >= a || md <= b;
 }
 
-/** Days from `date` to the nearest occurrence of 'MM-DD', in either direction. */
-function daysFrom(date, md) {
-  const [m, d] = monthDay(md);
+/**
+ * A physics day's date in a year: its override for that year, its fixed
+ * 'MM-DD' date, or its rule, e.g. { month: 10, weekday: 'Tuesday',
+ * onOrAfter: 2 } for the first Tuesday on or after October 2.
+ * @param {{date?: string, overrides?: Record<string, string>, rule?: object}} day
+ * @param {number} year
+ * @returns {Date}
+ */
+export function dayDate(day, year) {
+  const md = day.overrides?.[year] ?? day.date;
+  if (md) {
+    const [m, d] = monthDay(md);
+    return new Date(year, m - 1, d);
+  }
+  const { month, weekday, onOrAfter = 1 } = day.rule;
+  const date = new Date(year, month - 1, onOrAfter);
+  const want = (weekdayIndex(weekday) + 1) % 7; // weekdayIndex counts from Monday
+  date.setDate(date.getDate() + ((want - date.getDay() + 7) % 7));
+  return date;
+}
+
+/** Days from `date` to the day's nearest occurrence, in either direction. */
+function daysFrom(date, day) {
   const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const y = date.getFullYear();
   return Math.min(
-    ...[y - 1, y, y + 1].map((year) =>
-      Math.abs(Math.round((new Date(year, m - 1, d) - today) / DAY_MS))
-    )
+    ...[y - 1, y, y + 1].map((year) => Math.abs(Math.round((dayDate(day, year) - today) / DAY_MS)))
   );
 }
 
@@ -56,7 +75,7 @@ function daysFrom(date, md) {
 export function themeFor(date, seasons = CONFIG.seasons) {
   if (!seasons?.enabled) return null;
   const day = (seasons.days ?? []).find(
-    (d) => daysFrom(date, d.date) <= (d.window ?? seasons.dayWindow)
+    (d) => daysFrom(date, d) <= (d.window ?? seasons.dayWindow)
   );
   if (day) return day.theme;
   return (seasons.base ?? []).find((s) => inRange(date, s.from, s.to))?.theme ?? null;

@@ -7,7 +7,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { CONFIG } from '../site/assets/js/config.js';
-import { themeFor, previewTheme } from '../site/assets/js/seasons.js';
+import { themeFor, previewTheme, dayDate } from '../site/assets/js/seasons.js';
 import { THEMES } from '../site/assets/js/themes.js';
 import {
   spriteProblems,
@@ -82,6 +82,15 @@ describe('themeFor', () => {
     assert.equal(themeFor(on(2027, 6, 7)), 'oscillations');
     assert.equal(themeFor(on(2027, 6, 9)), 'spring');
     assert.equal(themeFor(on(2027, 6, 12)), 'neutrinos-detected');
+    assert.equal(themeFor(on(2027, 6, 21)), 'summer');
+    assert.equal(themeFor(on(2027, 6, 29)), 'asteroid-day');
+    assert.equal(themeFor(on(2027, 7, 1)), 'asteroid-day');
+    assert.equal(themeFor(on(2027, 7, 2)), 'higgs');
+    assert.equal(themeFor(on(2027, 8, 12)), 'perseids');
+    assert.equal(themeFor(on(2027, 9, 21)), 'summer');
+    assert.equal(themeFor(on(2026, 10, 6)), 'nobel');
+    assert.equal(themeFor(on(2026, 10, 4)), 'nobel');
+    assert.equal(themeFor(on(2026, 10, 9)), 'autumn');
   });
 
   it("lets a day's own window replace dayWindow", () => {
@@ -178,5 +187,37 @@ describe('pixelart', () => {
     assert.match(svg, /shape-rendering="crispEdges"/);
     assert.equal(svg.match(/<rect /g).length, 3);
     assert.throws(() => spriteDataUrl({ rows: ['a'], palette: { a: 'x"/><script>' } }));
+  });
+});
+
+describe('dayDate', () => {
+  const nobel = CONFIG.seasons.days.find((d) => d.theme === 'nobel');
+  const ymd = (d) => [d.getFullYear(), d.getMonth() + 1, d.getDate()];
+
+  it('the Nobel rule gives the real announcement days, 2018–2025', () => {
+    const announced = {
+      2018: 2,
+      2019: 8,
+      2020: 6,
+      2021: 5,
+      2022: 4,
+      2023: 3,
+      2024: 8,
+      2025: 7,
+    };
+    for (const [year, day] of Object.entries(announced)) {
+      assert.deepEqual(ymd(dayDate(nobel, Number(year))), [Number(year), 10, day], year);
+      assert.equal(dayDate(nobel, Number(year)).getDay(), 2, `${year} is a Tuesday`);
+    }
+  });
+
+  it('a per-year override wins over the rule', () => {
+    const day = { ...nobel, overrides: { 2031: '10-14' } };
+    assert.deepEqual(ymd(dayDate(day, 2031)), [2031, 10, 14]);
+    assert.deepEqual(ymd(dayDate(day, 2030)), ymd(dayDate(nobel, 2030)));
+  });
+
+  it('a fixed date is just that date', () => {
+    assert.deepEqual(ymd(dayDate({ date: '10-31' }, 2026)), [2026, 10, 31]);
   });
 });
