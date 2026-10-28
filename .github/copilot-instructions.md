@@ -23,31 +23,32 @@ MkDocs (`mkdocs.yml`, readthedocs theme) at deploy time.
 
 ## Key source files
 
-| File                                  | Purpose                                                                        |
-| ------------------------------------- | ------------------------------------------------------------------------------ |
-| `site/assets/js/config.js`            | **All club settings** (repo, time zone, meeting, reminder, trending), columns  |
-| `site/assets/js/app.js`               | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending |
-| `site/assets/js/inspire.js`           | INSPIRE-HEP API client with localStorage cache                                 |
-| `site/assets/js/table.js`             | Archive `<table>` from CSV rows + metadata; pieces shared with the cards       |
-| `site/assets/js/topics.js`            | Club topics of a paper (`CONFIG.topics`): pills, Archive filter, Stats grid    |
-| `site/assets/js/mathtext.js`          | MathML / `$…$` LaTeX in INSPIRE text → safe DOM (whitelist; never innerHTML)   |
-| `site/assets/js/cards.js`             | This Week paper cards (vote leader, discussed highlight, first names)          |
-| `site/assets/js/utils.js`             | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`        |
-| `site/assets/js/trending.js`          | Trending section renderer                                                      |
-| `site/assets/js/stats.js`             | Stats page charts                                                              |
-| `scripts/papers/lib.js`               | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client   |
-| `scripts/papers/enrich.js`            | The paper bot (`.github/workflows/papers.yml`)                                 |
-| `scripts/papers/build-csv.js`         | Writes `site/data/papers.csv` and `trending.csv` (`deploy-pages.yml`)          |
-| `scripts/papers/trending.js`          | Trending papers from INSPIRE; the Trending issue body                          |
-| `scripts/papers/email_submissions.py` | Emailed papers → paper issues (Python stdlib; `email-submissions.yml`)         |
-| `scripts/papers/trending-issue.js`    | Opens the twice-weekly Trending issue (`trending.yml`)                         |
-| `scripts/papers/slack.js`             | The weekly Slack reminder message                                              |
-| `scripts/papers/slack-reminder.js`    | Posts it (`slack-reminder.yml`)                                                |
-| `scripts/papers/roundup.js`           | A member's private monthly roundup: papers, streak, milestones, email text     |
-| `scripts/papers/roundup-html.js`      | The roundup as an HTML email (tables, inline styles; escapes INSPIRE text)     |
-| `scripts/papers/roundup-preview.js`   | Prints one member's roundup (`npm run roundup`)                                |
-| `scripts/papers/roundup-email.js`     | Emails the roundups from the club Gmail (`roundup.yml`); logs counts only      |
-| `scripts/papers/smtp.js`              | Minimal SMTP client (Gmail, TLS) for the roundup emails                        |
+| File                                  | Purpose                                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------- |
+| `site/assets/js/config.js`            | **All club settings** (repo, time zone, meeting, reminder, trending), columns     |
+| `site/assets/js/app.js`               | Entry point; fetches `data/papers.csv`, renders This Week / Archive / Trending    |
+| `site/assets/js/inspire.js`           | INSPIRE-HEP API client with localStorage cache                                    |
+| `site/assets/js/table.js`             | Archive `<table>` from CSV rows + metadata; pieces shared with the cards          |
+| `site/assets/js/topics.js`            | Club topics of a paper (`CONFIG.topics`): pills, Archive filter, Stats grid       |
+| `site/assets/js/mathtext.js`          | MathML / `$…$` LaTeX in INSPIRE text → safe DOM (whitelist; never innerHTML)      |
+| `site/assets/js/seasons.js`           | Seasonal decorations by date (`CONFIG.seasons`); art in `themes.js`/`pixelart.js` |
+| `site/assets/js/cards.js`             | This Week paper cards (vote leader, discussed highlight, first names)             |
+| `site/assets/js/utils.js`             | Pure helpers: week math, CSV parser, arXiv IDs, meeting text and `.ics`           |
+| `site/assets/js/trending.js`          | Trending section renderer                                                         |
+| `site/assets/js/stats.js`             | Stats page charts                                                                 |
+| `scripts/papers/lib.js`               | Issue-form parsing, labels, weeks, names, site data rows, GitHub REST client      |
+| `scripts/papers/enrich.js`            | The paper bot (`.github/workflows/papers.yml`)                                    |
+| `scripts/papers/build-csv.js`         | Writes `site/data/papers.csv` and `trending.csv` (`deploy-pages.yml`)             |
+| `scripts/papers/trending.js`          | Trending papers from INSPIRE; the Trending issue body                             |
+| `scripts/papers/email_submissions.py` | Emailed papers → paper issues (Python stdlib; `email-submissions.yml`)            |
+| `scripts/papers/trending-issue.js`    | Opens the twice-weekly Trending issue (`trending.yml`)                            |
+| `scripts/papers/slack.js`             | The weekly Slack reminder message                                                 |
+| `scripts/papers/slack-reminder.js`    | Posts it (`slack-reminder.yml`)                                                   |
+| `scripts/papers/roundup.js`           | A member's private monthly roundup: papers, streak, milestones, email text        |
+| `scripts/papers/roundup-html.js`      | The roundup as an HTML email (tables, inline styles; escapes INSPIRE text)        |
+| `scripts/papers/roundup-preview.js`   | Prints one member's roundup (`npm run roundup`)                                   |
+| `scripts/papers/roundup-email.js`     | Emails the roundups from the club Gmail (`roundup.yml`); logs counts only         |
+| `scripts/papers/smtp.js`              | Minimal SMTP client (Gmail, TLS) for the roundup emails                           |
 
 ---
 
