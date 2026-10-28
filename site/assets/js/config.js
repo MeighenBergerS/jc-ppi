@@ -152,10 +152,13 @@ export const CONFIG = {
     base: [
       { theme: 'autumn', from: '09-22', to: '12-20' },
       { theme: 'winter', from: '12-21', to: '03-19' },
+      { theme: 'spring', from: '03-20', to: '06-20' },
     ],
     days: [
       { theme: 'dark-matter', label: 'Dark Matter Day', date: '10-31' },
       { theme: 'pauli', label: "Pauli's neutrino letter", date: '12-04' },
+      { theme: 'women-in-science', label: 'Women and Girls in Science', date: '02-11' },
+      { theme: 'pi-day', label: "Pi Day and Einstein's birthday", date: '03-14' },
     ],
   },
 
