@@ -47,15 +47,17 @@ function daysFrom(date, md) {
 }
 
 /**
- * The theme for a date: a physics day's theme within `dayWindow` days of
- * it, else the season's, else null.
+ * The theme for a date: a physics day's theme within its `window` (or
+ * `dayWindow`) days of it, else the season's, else null.
  * @param {Date} date - In the visitor's local time.
  * @param {object} [seasons] - CONFIG.seasons.
  * @returns {string|null}
  */
 export function themeFor(date, seasons = CONFIG.seasons) {
   if (!seasons?.enabled) return null;
-  const day = (seasons.days ?? []).find((d) => daysFrom(date, d.date) <= seasons.dayWindow);
+  const day = (seasons.days ?? []).find(
+    (d) => daysFrom(date, d.date) <= (d.window ?? seasons.dayWindow)
+  );
   if (day) return day.theme;
   return (seasons.base ?? []).find((s) => inRange(date, s.from, s.to))?.theme ?? null;
 }
@@ -79,11 +81,23 @@ const GUTTER_MIN = 90; // margin sprites only where the side margin is this wide
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
-/** `n` sprites, each one once (shuffled) before any repeats. */
-function _shuffled(sprites, n) {
+/**
+ * `n` sprites for a scene, each one once (shuffled) before any repeats.
+ * One-of-a-kind sprites (`once`, or 'still' ones, like a building) appear
+ * at most once; their repeats become other sprites.
+ */
+function _picks(sprites, n, motion) {
+  const single = (s) => s.once || (s.motion ?? motion) === 'still';
+  const others = sprites.filter((s) => !single(s));
+  const seen = new Set();
   const out = [];
   while (out.length < n) out.push(...[...sprites].sort(() => Math.random() - 0.5));
-  return out.slice(0, n);
+  return out.slice(0, n).map((s) => {
+    if (!single(s)) return s;
+    if (seen.has(s) && others.length) return pick(others);
+    seen.add(s);
+    return s;
+  });
 }
 
 /**
@@ -188,7 +202,7 @@ function _decorate(name) {
       const { sprites, count, motion, scales } = theme.banner;
       const n = Math.max(3, Math.round(count * Math.min(1, header.clientWidth / 1200)));
       const zones = _clearZones(header);
-      for (const sprite of _shuffled(sprites, n)) {
+      for (const sprite of _picks(sprites, n, motion)) {
         const scale = pick(scales);
         const img = _img(sprite, scale, 'season-banner');
         const x = _inZones(zones, spriteSize(sprite).width * scale);
@@ -211,16 +225,7 @@ function _decorate(name) {
   const gutter = (document.documentElement.clientWidth - CONTENT_WIDTH) / 2;
   if (gutter < GUTTER_MIN || !theme.margin) return;
   const { sprites, count, motion, scales, seconds = [14, 26] } = theme.margin;
-  // Still sprites (a building) appear once; their repeats become moving ones
-  const moving = sprites.filter((s) => (s.motion ?? motion) !== 'still');
-  const seen = new Set();
-  const picks = _shuffled(sprites, count).map((s) => {
-    if ((s.motion ?? motion) !== 'still') return s;
-    if (seen.has(s) && moving.length) return pick(moving);
-    seen.add(s);
-    return s;
-  });
-  picks.forEach((sprite, i) => {
+  _picks(sprites, count, motion).forEach((sprite, i) => {
     const scale = pick(scales);
     const { width } = spriteSize(sprite);
     const img = _img(sprite, scale, 'season-sprite');
