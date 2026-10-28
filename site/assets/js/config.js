@@ -142,7 +142,8 @@ export const CONFIG = {
 
   // Seasonal decorations (seasons.js, pixel art in themes.js): the site wears a
   // theme for the season, or for a few days around a physics day, decided by
-  // the visitor's date. Northern-hemisphere seasons. Dates are 'MM-DD'. Only
+  // the visitor's date. Northern-hemisphere seasons. Dates are 'MM-DD'; a day
+  // can instead give a rule (see the Nobel Prize) and per-year overrides. Only
   // themes with art in themes.js are listed; the planned calendar is in
   // docs/MAINTAINING.md. Preview any theme with ?season=<theme> on a page URL,
   // or ?season=none for none. `enabled: false` turns it all off.
@@ -153,6 +154,7 @@ export const CONFIG = {
       { theme: 'autumn', from: '09-22', to: '12-20' },
       { theme: 'winter', from: '12-21', to: '03-19' },
       { theme: 'spring', from: '03-20', to: '06-20' },
+      { theme: 'summer', from: '06-21', to: '09-21' },
     ],
     days: [
       { theme: 'dark-matter', label: 'Dark Matter Day', date: '10-31' },
@@ -163,6 +165,18 @@ export const CONFIG = {
       { theme: 'day-of-light', label: 'International Day of Light', date: '05-16' },
       { theme: 'oscillations', label: 'Neutrino oscillations (Super-K, 1998)', date: '06-05' },
       { theme: 'neutrinos-detected', label: 'Neutrinos detected (1956)', date: '06-14' },
+      { theme: 'asteroid-day', label: 'Asteroid Day', date: '06-30', window: 1 },
+      { theme: 'higgs', label: 'Higgs boson discovery (2012)', date: '07-04' },
+      { theme: 'perseids', label: 'Perseids', date: '08-12' },
+      // The physics prize is announced on the Tuesday of Nobel week: the first
+      // Tuesday on or after Oct 2 (every year 2018–2025). If a year differs,
+      // add it to overrides, e.g. { 2031: '10-14' }.
+      {
+        theme: 'nobel',
+        label: 'Nobel Prize in Physics',
+        rule: { month: 10, weekday: 'Tuesday', onOrAfter: 2 },
+        overrides: {},
+      },
     ],
   },
 

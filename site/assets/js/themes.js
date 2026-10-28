@@ -734,6 +734,239 @@ const NEUTRINOS_DETECTED = {
   },
 };
 
+// ── Summer ────────────────────────────────────────────────────
+
+const FIREFLY = {
+  rows: ['.f.', 'fFf', '.f.'],
+  palette: { f: '#fef08a', F: '#facc15' },
+  motion: 'twinkle',
+};
+const DAY_FIREFLY = {
+  rows: ['.f.', 'fFf', '.f.'],
+  palette: { f: '#facc15', F: '#ca8a04' },
+  motion: 'twinkle',
+};
+// A meteor: head at the bottom left, as it moves down and to the left
+const METEOR = {
+  rows: [
+    '.......o',
+    '......o.',
+    '.....y..',
+    '....y...',
+    '...W....',
+    '..W.....',
+    '.w......',
+    'w.......',
+  ],
+  palette: { w: '#ffffff', W: '#e0f2fe', y: '#fde68a', o: '#f97316' },
+  motion: 'zip',
+};
+const SUN = {
+  rows: [
+    '.....y.....',
+    '..y..y..y..',
+    '...yyyyy...',
+    '..yYYYYYy..',
+    'yyyYYYYYyyy',
+    '..yYYYYYy..',
+    '...yyyyy...',
+    '..y..y..y..',
+    '.....y.....',
+  ],
+  palette: { y: '#facc15', Y: '#f59e0b' },
+  motion: 'float',
+  once: true,
+};
+
+const SUMMER = {
+  // A meadow at night, with fireflies
+  strip: {
+    rows: [
+      '....f...........f.......f.......',
+      '..........f.........f...........',
+      '...hhh..........hhhh............',
+      '.hhhhhhh......hhhhhhhh.....hhh..',
+      'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh',
+      'HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',
+    ],
+    palette: { f: '#fde047', h: '#166534', H: '#14532d' },
+  },
+  stripScale: 4,
+  banner: {
+    sprites: [FIREFLY, FIREFLY, FIREFLY, FIREFLY, METEOR],
+    count: 22,
+    motion: 'twinkle',
+    scales: [2, 3],
+    seconds: [3, 6],
+  },
+  margin: { sprites: [SUN, DAY_FIREFLY, DAY_FIREFLY], count: 8, motion: 'twinkle', scales: [3, 4] },
+};
+
+// ── Asteroid Day (Jun 30) ─────────────────────────────────────
+
+const ROCK = { o: '#57534e', g: '#a8a29e', G: '#d6d3d1' };
+const ASTEROIDS = [
+  { rows: ['.ooo..', 'oGgGo.', 'oggggo', '.oGgo.', '..oo..'], palette: ROCK },
+  { rows: ['.oo.', 'oggo', 'ogGo', '.oo.'], palette: ROCK },
+  {
+    rows: ['..oooo..', '.oggGgo.', 'oggggGgo', 'ogGggggo', '.oggggo.', '..oooo..'],
+    palette: ROCK,
+  },
+];
+const EARTH = {
+  label: 'Asteroid Day: the Tunguska impact, June 30, 1908',
+  rows: [
+    '...ooo...',
+    '.oobbgoo.',
+    '.obggbbo.',
+    'obbbggbbo',
+    'obgggbbbo',
+    'obbgbbggo',
+    '.obbbgbo.',
+    '.oobbboo.',
+    '...ooo...',
+  ],
+  palette: { o: '#1e3a8a', b: '#3b82f6', g: '#22c55e' },
+  motion: 'float',
+  once: true,
+};
+
+const ASTEROID_DAY = {
+  // A belt of rocks
+  strip: {
+    rows: [
+      '..oo..........o.......ooo.......',
+      '.oGgo...oo...ogo.....oGggo..o...',
+      '.oggo..ogGo...o......ogggo.ogo..',
+      '..oo....oo............ooo...o...',
+    ],
+    palette: ROCK,
+  },
+  stripScale: 4,
+  banner: {
+    sprites: [...ASTEROIDS, ...ASTEROIDS, EARTH],
+    count: 14,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: { sprites: [...ASTEROIDS, EARTH], count: 8, motion: 'float', scales: [3, 4] },
+};
+
+// ── Higgs boson discovery (Jul 4, 2012) ───────────────────────
+
+// An event display: a detector ring, two tracks and two photons (H → γγ)
+const HIGGS_EVENT = {
+  label: 'The Higgs boson, discovered July 4, 2012 (ATLAS and CMS)',
+  rows: [
+    '....ooooo....',
+    '..oo.....oo..',
+    '.oy.......po.',
+    '.o.y.....p.o.',
+    'o...y...p...o',
+    'o....y.p....o',
+    'o.....c.....o',
+    'o....p.y....o',
+    'o...p...y...o',
+    '.o.p.....y.o.',
+    '.op.......yo.',
+    '..oo.....oo..',
+    '....ooooo....',
+  ],
+  palette: { o: '#64748b', y: '#facc15', p: '#4ade80', c: '#ffffff' },
+  motion: 'float',
+  once: true,
+};
+const SPARK = {
+  rows: ['.s.', 'sws', '.s.'],
+  palette: { s: '#fde68a', w: '#ffffff' },
+  motion: 'twinkle',
+};
+
+const HIGGS = {
+  // Detector layers: muon chambers, calorimeters, tracker
+  strip: {
+    rows: [
+      'bbbb.bbbb.bbbb.b',
+      '................',
+      'rrrrrrrrrrrrrrrr',
+      'gggggggggggggggg',
+      '................',
+      'y.y.y.y.y.y.y.y.',
+    ],
+    palette: { b: '#3b82f6', r: '#ef4444', g: '#22c55e', y: '#facc15' },
+  },
+  stripScale: 3,
+  banner: {
+    sprites: [HIGGS_EVENT, SPARK, SPARK, SPARK, SPARK],
+    count: 14,
+    motion: 'twinkle',
+    scales: [2, 3],
+  },
+  margin: { sprites: [HIGGS_EVENT, SPARK, SPARK], count: 6, motion: 'twinkle', scales: [3, 4] },
+};
+
+// ── Perseids (Aug 12) ─────────────────────────────────────────
+
+const NIGHT_STAR = {
+  rows: ['.s.', 'sws', '.s.'],
+  palette: { s: '#c7d2fe', w: '#ffffff' },
+  motion: 'twinkle',
+};
+const DAY_METEOR = {
+  ...METEOR,
+  palette: { w: '#1e3a8a', W: '#3b82f6', y: '#f59e0b', o: '#fdba74' },
+};
+
+const PERSEIDS = {
+  // Stars over dark hills
+  strip: {
+    rows: [
+      '...s..........s.........s.......',
+      '.........s..........s........s..',
+      '....nnn..........nnnn...........',
+      '..nnnnnnn.....nnnnnnnnn....nnn..',
+      'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn',
+    ],
+    palette: { s: '#e0e7ff', n: '#1e293b' },
+  },
+  stripScale: 4,
+  banner: {
+    sprites: [METEOR, METEOR, NIGHT_STAR, NIGHT_STAR],
+    count: 20,
+    motion: 'zip',
+    scales: [2, 3],
+    seconds: [2, 4],
+  },
+  margin: { sprites: [DAY_METEOR], count: 6, motion: 'zip', scales: [3, 4], seconds: [3, 6] },
+};
+
+// ── Nobel Prize in Physics (early October) ────────────────────
+
+const MEDAL = {
+  label: 'The Nobel Prize in Physics is announced this week',
+  rows: ['.r...r.', '..r.r..', '...r...', '..ggg..', '.gGGGg.', '.gGgGg.', '.gGGGg.', '..ggg..'],
+  palette: { r: '#2563eb', g: '#ca8a04', G: '#facc15' },
+  motion: 'float',
+};
+const GOLD_SPARK = {
+  rows: ['.s.', 'sws', '.s.'],
+  palette: { s: '#facc15', w: '#fef9c3' },
+  motion: 'twinkle',
+};
+
+const NOBEL = {
+  // A row of medals
+  strip: { rows: MEDAL.rows.map((r) => `${r}.`), palette: MEDAL.palette },
+  stripScale: 3,
+  banner: {
+    sprites: [MEDAL, GOLD_SPARK, GOLD_SPARK, GOLD_SPARK],
+    count: 16,
+    motion: 'float',
+    scales: [2, 3],
+  },
+  margin: { sprites: [MEDAL, GOLD_SPARK], count: 6, motion: 'float', scales: [3, 4] },
+};
+
 /** The themes by name, as used in CONFIG.seasons. */
 export const THEMES = {
   autumn: AUTUMN,
@@ -747,4 +980,9 @@ export const THEMES = {
   'day-of-light': DAY_OF_LIGHT,
   oscillations: OSCILLATIONS,
   'neutrinos-detected': NEUTRINOS_DETECTED,
+  summer: SUMMER,
+  'asteroid-day': ASTEROID_DAY,
+  higgs: HIGGS,
+  perseids: PERSEIDS,
+  nobel: NOBEL,
 };
