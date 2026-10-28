@@ -123,6 +123,8 @@ site/                          ← everything GitHub Pages serves
       cards.js                 ← This Week paper cards
       mathtext.js              ← MathML and LaTeX in titles and abstracts
       topics.js                ← Which club topics (CONFIG.topics) a paper is about
+      seasons.js               ← Seasonal decorations: today's theme
+      themes.js, pixelart.js   ← The themes' pixel art, and drawing it
       app.js                   ← This Week / Archive renderers and entry point
       stats.js                 ← Stats page
       iowa.js                  ← Iowa Research page

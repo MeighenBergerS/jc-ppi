@@ -57,7 +57,7 @@ Google Sheet history; keep `parseImported()` and the Sheet timestamp handling wo
 
 ## Settings
 
-Club settings (repository, time zone, meeting, Slack reminder, roundup, Trending, Iowa page) live in
+Club settings (repository, time zone, meeting, Slack reminder, roundup, Trending, topics, seasons, Iowa page) live in
 `CONFIG` in `site/assets/js/config.js`. It sits under `site/` because only `site/` is deployed;
 the scripts import it from there. Read settings from `CONFIG` and derive text from them (see the
 meeting helpers in `utils.js`); never repeat a value in another file. The static `#meeting-when`
