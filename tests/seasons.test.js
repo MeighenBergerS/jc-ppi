@@ -14,6 +14,7 @@ import {
   spriteRuns,
   spriteSize,
   spriteDataUrl,
+  mirrorSprite,
 } from '../site/assets/js/pixelart.js';
 
 const on = (y, m, d) => new Date(y, m - 1, d, 12);
@@ -87,13 +88,27 @@ describe('themes', () => {
     for (const name of named) assert.ok(THEMES[name], `${name} has no entry in themes.js`);
   });
 
-  it('every sprite is valid, and each theme has a strip and sprites', () => {
+  it('every sprite is valid, and the scenes are well formed', () => {
     for (const [name, theme] of Object.entries(THEMES)) {
       assert.deepEqual(spriteProblems(`${name}.strip`, theme.strip), []);
-      assert.ok(theme.sprites.length > 0, name);
-      theme.sprites.forEach((s, i) => assert.deepEqual(spriteProblems(`${name}[${i}]`, s), []));
-      assert.ok(['sway', 'float'].includes(theme.motion), name);
-      assert.ok(theme.count > 0, name);
+      if (theme.corners)
+        assert.deepEqual(spriteProblems(`${name}.corners`, theme.corners.sprite), []);
+      for (const part of ['banner', 'margin']) {
+        const scene = theme[part];
+        if (!scene) continue;
+        assert.ok(scene.sprites.length > 0 && scene.count > 0, `${name}.${part}`);
+        assert.ok(
+          scene.scales.every((k) => Number.isInteger(k) && k > 0),
+          `${name}.${part} scales`
+        );
+        for (const [i, sprite] of scene.sprites.entries()) {
+          assert.deepEqual(spriteProblems(`${name}.${part}[${i}]`, sprite), []);
+          assert.ok(
+            ['fall', 'float', 'twinkle'].includes(sprite.motion ?? scene.motion),
+            `${name}.${part}[${i}] motion`
+          );
+        }
+      }
     }
   });
 });
@@ -122,6 +137,11 @@ describe('pixelart', () => {
       { x: 0, y: 1, w: 2, colour: '#445566' },
     ]);
     assert.deepEqual(spriteSize(sprite), { width: 3, height: 2 });
+  });
+
+  it('mirrors left to right', () => {
+    assert.deepEqual(mirrorSprite(sprite).rows, ['ba.', '.bb']);
+    assert.equal(mirrorSprite(sprite).palette, sprite.palette);
   });
 
   it('draws an SVG data URL at the scale, and refuses invalid sprites', () => {

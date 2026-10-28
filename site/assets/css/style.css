@@ -1831,8 +1831,59 @@ footer p + p {
 
 /* ── Seasonal decorations (seasons.js, themes.js) ────────── */
 
+/* The header holds a scene behind its text */
+[data-season] header {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-season] .header-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.season-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.season-scene img,
+.season-sprite {
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+}
+
+.season-corner {
+  position: absolute;
+  top: 0;
+}
+
+.season-corner--left {
+  left: 0;
+}
+
+.season-corner--right {
+  right: 0;
+}
+
+.season-banner {
+  position: absolute;
+  opacity: 0.85;
+}
+
+/* No clear space beside the title (phones): faint, so the text stays readable */
+.season-banner--faint {
+  opacity: 0.3;
+}
+
 /* A pixel strip along the bottom of the black header */
 .season-strip {
+  position: relative;
+  z-index: 1;
   max-width: var(--max-width);
   margin: 0.6rem auto 0;
   background-repeat: repeat-x;
@@ -1841,30 +1892,64 @@ footer p + p {
   pointer-events: none;
 }
 
-/* Small sprites pinned in the window's side margins, behind nothing */
+/* Sprites in the window's side margins, never over the content */
 .season-sprite {
   position: fixed;
   z-index: 0;
-  image-rendering: pixelated;
-  pointer-events: none;
-  user-select: none;
   opacity: 0.9;
 }
 
-.season-sprite--sway {
-  animation: season-sway 6s ease-in-out infinite alternate;
+/* Motions; --season-duration and the delay are set per sprite */
+.season--fall {
+  animation: season-fall var(--season-duration, 18s) linear infinite;
 }
 
-.season-sprite--float {
-  animation: season-float 5s ease-in-out infinite alternate;
+.season-banner.season--fall {
+  top: -40px !important;
+  animation-name: season-fall-banner;
 }
 
-@keyframes season-sway {
-  from {
-    transform: rotate(-8deg) translateY(-3px);
+.season--float {
+  animation: season-float var(--season-duration, 5s) ease-in-out infinite alternate;
+}
+
+.season--twinkle {
+  animation: season-twinkle var(--season-duration, 5s) ease-in-out infinite alternate;
+}
+
+@keyframes season-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
   }
-  to {
-    transform: rotate(8deg) translateY(3px);
+  25% {
+    transform: translate(16px, 28vh) rotate(70deg);
+  }
+  50% {
+    transform: translate(-10px, 56vh) rotate(-25deg);
+  }
+  75% {
+    transform: translate(14px, 84vh) rotate(50deg);
+  }
+  100% {
+    transform: translate(0, 115vh) rotate(-10deg);
+  }
+}
+
+@keyframes season-fall-banner {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(14px, 110px) rotate(70deg);
+  }
+  50% {
+    transform: translate(-10px, 220px) rotate(-25deg);
+  }
+  75% {
+    transform: translate(12px, 330px) rotate(50deg);
+  }
+  100% {
+    transform: translate(0, 460px) rotate(-10deg);
   }
 }
 
@@ -1877,6 +1962,15 @@ footer p + p {
   }
 }
 
+@keyframes season-twinkle {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* The content is 860px wide; below this there is no room in the margins */
 @media (max-width: 1060px) {
   .season-sprite {
@@ -1884,9 +1978,17 @@ footer p + p {
   }
 }
 
+/* Reduced motion: everything rests where it would be */
 @media (prefers-reduced-motion: reduce) {
-  .season-sprite {
+  .season--fall,
+  .season--float,
+  .season--twinkle {
     animation: none;
+  }
+
+  .season-sprite.season--fall,
+  .season-banner.season--fall {
+    top: var(--season-rest) !important;
   }
 }
 

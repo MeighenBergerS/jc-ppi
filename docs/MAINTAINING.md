@@ -64,9 +64,10 @@ picks them up on the next deploy.
 
 ## Seasonal decorations
 
-The site wears a small pixel-art theme for the season, or for a few days around a physics day: a
-strip along the bottom of the black header, and a few sprites in the window's side margins on wide
-screens. The visitor's date picks the theme; the data, charts and colours keep their meaning.
+The site wears a pixel-art theme for the season, or for a few days around a physics day: a strip
+along the bottom of the black header, a scene in the header beside the title (corner pieces;
+sprites falling, floating or twinkling), and sprites in the window's side margins on wide screens.
+Nothing sits behind the title or over the content. The visitor's date picks the theme; the data, charts and colours keep their meaning.
 Settings are `seasons` in `CONFIG`; the art is in `site/assets/js/themes.js`, as rows of
 characters with a palette (`pixelart.js`), like the generalquest project's sprites.
 
@@ -95,7 +96,8 @@ wins over the season. Built so far: Autumn and Dark Matter Day.
 | Dark Matter Day (built)     | Oct 31                      | A halo strip, WIMPs, a galaxy in its halo |
 | Pauli's neutrino letter     | Dec 4 (1930)                | Neutrinos slipping through everything     |
 
-To add a theme: draw its strip and sprites in `themes.js`, add it to `CONFIG.seasons` (`base` for
+To add a theme: draw its strip, corner piece and sprites in `themes.js` (the comment at the top
+lists the parts), add it to `CONFIG.seasons` (`base` for
 a season, `days` for a day), and check it with `?season=`. `tests/seasons.test.js` checks every
 sprite and that every theme in `CONFIG` has art.
 

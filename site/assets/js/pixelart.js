@@ -46,6 +46,14 @@ export function spriteSize(sprite) {
 }
 
 /**
+ * The sprite flipped left to right.
+ * @param {{rows: string[], palette: Record<string, string>}} sprite
+ */
+export function mirrorSprite(sprite) {
+  return { ...sprite, rows: sprite.rows.map((row) => [...row].reverse().join('')) };
+}
+
+/**
  * Each row's runs of one colour: [{ x, y, w, colour }].
  * @param {{rows: string[], palette: Record<string, string>}} sprite
  */
