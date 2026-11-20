@@ -42,7 +42,7 @@ jobs:
        !contains(github.event.issue.labels.*.name, 'imported'))
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy1.outputs.page_url || steps.deploy2.outputs.page_url || steps.deploy3.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -77,6 +77,35 @@ jobs:
           # Upload only the site/ subfolder — GitHub Pages serves from here
           path: "site"
 
+      # GitHub sometimes can't find the artifact it has just stored ("No artifacts
+      # named github-pages": it shows up seconds later), or its Pages API answers
+      # 502. So give it a moment first, then up to three tries; only the last one
+      # can fail the run. Votes reach the site through these deploys, so a failed
+      # one held them back an hour. To redo a failed deploy, start a new run
+      # (Run workflow): "Re-run" finds the first attempt's artifact too and stops.
+      - name: Let GitHub catch up with the upload
+        run: sleep 15
+
       - name: Deploy
-        id: deployment
+        id: deploy1
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Wait before trying again
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Deploy (second try)
+        id: deploy2
+        if: steps.deploy1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Wait longer before the last try
+        if: steps.deploy2.outcome == 'failure'
+        run: sleep 90
+
+      - name: Deploy (last try)
+        id: deploy3
+        if: steps.deploy2.outcome == 'failure'
         uses: actions/deploy-pages@v5
