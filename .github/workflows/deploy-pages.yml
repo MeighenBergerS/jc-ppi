@@ -78,10 +78,14 @@ jobs:
           path: "site"
 
       # GitHub sometimes can't find the artifact it has just stored ("No artifacts
-      # named github-pages"), or its Pages API answers 502. Both clear within
-      # seconds, so wait and try again, up to three tries; only the last one can
-      # fail the run. Votes reach the site through these deploys, so a failed one
-      # held them back an hour.
+      # named github-pages": it shows up seconds later), or its Pages API answers
+      # 502. So give it a moment first, then up to three tries; only the last one
+      # can fail the run. Votes reach the site through these deploys, so a failed
+      # one held them back an hour. To redo a failed deploy, start a new run
+      # (Run workflow): "Re-run" finds the first attempt's artifact too and stops.
+      - name: Let GitHub catch up with the upload
+        run: sleep 15
+
       - name: Deploy
         id: deploy1
         continue-on-error: true
